@@ -19,15 +19,21 @@ const Hero = () => {
           Borrow Against Your<br />LiteVM Holdings.
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-balance text-base text-muted-foreground sm:text-lg">
-          Mint FnUSD with zkLTC collateral.
+          Mint $FnUSD with $zkLTC collateral.
         </p>
 
-        <div className="mt-10 flex items-center justify-center">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#"
             className="rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
           >
             Launch App
+          </a>
+          <a
+            href="#"
+            className="rounded-full border border-border px-7 py-3.5 text-sm font-medium text-foreground transition hover:bg-foreground/5"
+          >
+            Docs
           </a>
         </div>
       </div>
