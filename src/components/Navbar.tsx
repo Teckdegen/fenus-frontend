@@ -2,7 +2,7 @@ import logo from "@/assets/fenus-logo.png";
 
 const Navbar = () => {
   return (
-    <header className="fixed top-4 left-1/2 z-50 w-[min(92%,780px)] -translate-x-1/2">
+    <header className="fixed top-4 left-1/2 z-50 w-[min(88%,520px)] -translate-x-1/2">
       <nav className="nav-pill flex items-center justify-between rounded-full px-4 py-2 sm:px-5">
         <a href="#" className="flex items-center gap-2">
           <img src={logo} alt="FENUS" className="h-7 w-7" />
