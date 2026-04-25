@@ -47,16 +47,11 @@ const Navbar = () => {
                 <a
                   href={`#${s.id}`}
                   aria-current={isActive ? "true" : undefined}
-                  className={`relative transition ${
+                  className={`transition ${
                     isActive ? "text-foreground" : "hover:text-foreground"
                   }`}
                 >
                   {s.label}
-                  <span
-                    className={`pointer-events-none absolute -bottom-1 left-1/2 h-[2px] -translate-x-1/2 rounded-full bg-foreground transition-all duration-300 ${
-                      isActive ? "w-4 opacity-100" : "w-0 opacity-0"
-                    }`}
-                  />
                 </a>
               </li>
             );
