@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 import logo from "@/assets/fenus-logo.png";
 
 const sections = [
@@ -8,6 +9,7 @@ const sections = [
 
 const Navbar = () => {
   const [active, setActive] = useState<string>("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const ids = sections.map((s) => s.id);
@@ -58,13 +60,50 @@ const Navbar = () => {
           })}
         </ul>
 
-        <a
-          href="#"
-          className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-medium text-primary-foreground transition hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-xs"
-        >
-          Launch App
-        </a>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <a
+            href="#"
+            className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-medium text-primary-foreground transition hover:opacity-90 sm:px-3 sm:py-1.5 sm:text-xs"
+          >
+            Launch App
+          </a>
+          <button
+            type="button"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:border-foreground hover:text-foreground md:hidden"
+          >
+            {open ? <X className="h-3.5 w-3.5" /> : <Menu className="h-3.5 w-3.5" />}
+          </button>
+        </div>
       </nav>
+
+      {open && (
+        <div className="nav-pill mt-2 rounded-2xl px-3 py-2 md:hidden">
+          <ul className="flex flex-col text-sm text-muted-foreground">
+            {sections.map((s) => {
+              const isActive = active === s.id;
+              return (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    onClick={() => setOpen(false)}
+                    aria-current={isActive ? "true" : undefined}
+                    className={`block rounded-lg px-3 py-2 transition ${
+                      isActive
+                        ? "bg-foreground/5 text-foreground"
+                        : "hover:bg-foreground/5 hover:text-foreground"
+                    }`}
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
     </header>
   );
 };
