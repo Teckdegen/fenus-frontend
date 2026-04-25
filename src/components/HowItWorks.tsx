@@ -20,7 +20,7 @@ const HowItWorks = () => {
   return (
     <section id="how" className="relative bg-background py-28 sm:py-36">
       <div className="mx-auto max-w-6xl px-6 text-center">
-        <p className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
+        <p className="font-display text-sm font-bold uppercase tracking-[0.3em] text-foreground">
           How it works
         </p>
 
