@@ -23,7 +23,7 @@ const Footer = () => {
 
         <div className="flex items-center gap-2">
           <a
-            href="https://x.com"
+            href="https://x.com/fenusprotocol"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="FENUS on X"
@@ -32,9 +32,7 @@ const Footer = () => {
             <XIcon />
           </a>
           <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#"
             aria-label="FENUS on GitHub"
             className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:border-foreground hover:text-foreground"
           >
