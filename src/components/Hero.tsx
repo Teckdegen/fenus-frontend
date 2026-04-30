@@ -27,6 +27,12 @@ const Hero = () => {
             href="#"
             className="rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
           >
+            Launch App
+          </a>
+          <a
+            href="#"
+            className="rounded-full border border-border bg-card/40 px-7 py-3.5 text-sm font-medium text-foreground/90 backdrop-blur transition hover:border-foreground/40"
+          >
             Docs
           </a>
         </div>

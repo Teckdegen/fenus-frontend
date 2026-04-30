@@ -1,77 +1,95 @@
-import { ArrowDownToLine, ArrowUpRight, Repeat, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ActionPill,
-  Card,
-  Row,
-  SectionLabel,
-  TokenRow,
-} from "@/components/app/Shared";
+import { Wallet } from "lucide-react";
+import { Card, Row, SectionLabel } from "@/components/app/Shared";
 
 const Dashboard = () => {
+  const [connected, setConnected] = useState(false);
+  const address = "0xA13b…f9C2";
+  const hasTrove = false;
+
   return (
-    <div className="space-y-6">
-      {/* Balance hero */}
-      <Card className="overflow-hidden p-6 text-center">
+    <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-2">
+      {/* Balance + wallet */}
+      <Card className="overflow-hidden p-8 text-center lg:col-span-2">
         <p className="font-display text-[10px] uppercase tracking-[0.35em] text-muted-foreground">
-          Net Worth
+          Balance
         </p>
-        <p className="mt-3 bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text font-display text-5xl font-semibold tracking-tight text-transparent">
+        <p className="mt-3 bg-gradient-to-b from-foreground to-foreground/50 bg-clip-text font-display text-6xl font-semibold tracking-tight text-transparent sm:text-7xl">
           $0.00
         </p>
         <p className="mt-2 font-mono text-xs text-muted-foreground">+0.00% · 24h</p>
+
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={() => setConnected((v) => !v)}
+            className="group flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-2 text-xs transition hover:border-foreground/40"
+          >
+            {connected ? (
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                <span className="font-mono text-foreground/90">{address}</span>
+              </>
+            ) : (
+              <>
+                <Wallet className="h-3.5 w-3.5 text-muted-foreground transition group-hover:text-foreground" />
+                <span className="font-medium">Connect Wallet</span>
+              </>
+            )}
+          </button>
+        </div>
       </Card>
 
-      {/* Quick actions */}
-      <div className="flex gap-2.5">
-        <Link to="/app/trove" className="flex-1">
-          <ActionPill label="Borrow" icon={ArrowDownToLine} />
-        </Link>
-        <Link to="/app/redeem" className="flex-1">
-          <ActionPill label="Swap" icon={Repeat} />
-        </Link>
-        <Link to="/app/stability" className="flex-1">
-          <ActionPill label="Earn" icon={Sparkles} />
-        </Link>
-        <ActionPill label="Send" icon={ArrowUpRight} />
-      </div>
-
-      {/* Tokens */}
-      <div>
-        <SectionLabel>Tokens</SectionLabel>
-        <Card className="p-2">
-          <TokenRow symbol="zkLTC" name="LiteVM Litecoin" amount="0.0000" value="$0.00" />
-          <TokenRow symbol="FnUSD" name="Fenus Dollar" amount="0.00" value="$0.00" />
-        </Card>
-      </div>
-
-      {/* Trove summary */}
+      {/* Trove */}
       <div>
         <SectionLabel>Your Trove</SectionLabel>
-        <Card className="p-5">
-          <Row label="Collateral" value="0.0000 zkLTC" />
-          <Row label="Debt" value="0.00 FnUSD" />
-          <Row label="Coll. Ratio" value="—" hint="Min 110%" />
-          <Row label="Liq. Price" value="—" />
-          <div className="mt-4">
-            <Link
-              to="/app/trove"
-              className="block w-full rounded-full bg-primary px-5 py-3 text-center text-sm font-semibold text-primary-foreground transition hover:opacity-90"
-            >
-              Manage Trove
-            </Link>
-          </div>
+        <Card className="p-6">
+          {hasTrove ? (
+            <>
+              <Row label="Collateral" value="0.0000 zkLTC" hint="≈ $0.00" />
+              <Row label="Debt" value="0.00 FnUSD" />
+              <Row label="Collateral Ratio" value="—" hint="Min 110%" />
+              <Row label="Liquidation Price" value="—" hint="per zkLTC" />
+              <Row label="Interest Rate" value="0.00% APR" />
+              <div className="mt-5">
+                <Link
+                  to="/app/trove"
+                  className="block w-full rounded-full bg-primary px-5 py-3 text-center text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                >
+                  Manage Trove
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <p className="max-w-xs text-sm text-muted-foreground">
+                You don't have a Trove yet. Open one to start borrowing FnUSD against your zkLTC.
+              </p>
+              <Link
+                to="/app/trove"
+                className="mt-5 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+              >
+                Open Trove
+              </Link>
+            </div>
+          )}
         </Card>
       </div>
 
-      {/* Protocol */}
+      {/* Stability Pool Deposit */}
       <div>
-        <SectionLabel>Protocol</SectionLabel>
-        <Card className="p-5">
-          <Row label="TVL" value="$0" />
-          <Row label="FnUSD Minted" value="$0" />
-          <Row label="Stability APY" value="0.00%" />
-          <Row label="Redemption Fee" value="0.50%" />
+        <SectionLabel>Your Stability Pool Deposit</SectionLabel>
+        <Card className="p-6">
+          <Row label="Deposited" value="0.00 FnUSD" />
+          <Row label="Earned" value="0.0000 zkLTC" />
+          <div className="mt-5">
+            <Link
+              to="/app/stability"
+              className="block w-full rounded-full border border-border bg-card/60 px-5 py-3 text-center text-sm font-medium transition hover:border-foreground/40"
+            >
+              Manage Deposit
+            </Link>
+          </div>
         </Card>
       </div>
     </div>

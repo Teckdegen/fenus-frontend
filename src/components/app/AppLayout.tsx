@@ -1,6 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { useState } from "react";
-import { Copy, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import logo from "@/assets/fenus-logo.png";
 
 const nav = [
@@ -19,15 +18,6 @@ const tabCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 const AppLayout = () => {
-  const [copied, setCopied] = useState(false);
-  const address = "0xA13b…f9C2";
-
-  const copy = () => {
-    navigator.clipboard?.writeText("0xA13b000000000000000000000000000000000f9C2");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1200);
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Ambient background */}
@@ -38,20 +28,11 @@ const AppLayout = () => {
 
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-md items-center justify-between px-5 py-3.5">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3.5 sm:px-8">
           <NavLink to="/" className="flex items-center gap-2">
             <img src={logo} alt="FENUS" className="h-6 w-6" />
             <span className="font-display text-sm font-semibold tracking-tight">FENUS</span>
           </NavLink>
-
-          <button
-            onClick={copy}
-            className="group flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs transition hover:border-foreground/40"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span className="font-mono text-foreground/90">{copied ? "Copied" : address}</span>
-            <Copy className="h-3 w-3 text-muted-foreground transition group-hover:text-foreground" />
-          </button>
 
           <button
             aria-label="Settings"
@@ -63,12 +44,12 @@ const AppLayout = () => {
       </header>
 
       {/* Content */}
-      <main className="mx-auto max-w-md px-5 pb-32 pt-6 sm:pb-10">
+      <main className="mx-auto w-full max-w-6xl px-5 pb-32 pt-6 sm:px-8 sm:pb-24 sm:pt-10">
         <Outlet />
       </main>
 
-      {/* Bottom tab nav (mobile) / floating (desktop) */}
-      <nav className="fixed bottom-4 left-1/2 z-40 w-[min(calc(100%-1.5rem),28rem)] -translate-x-1/2">
+      {/* Bottom tab nav */}
+      <nav className="fixed bottom-4 left-1/2 z-40 w-[min(calc(100%-1.5rem),36rem)] -translate-x-1/2">
         <div className="flex items-center gap-1 rounded-full border border-border bg-card/80 p-1 shadow-2xl shadow-black/40 backdrop-blur-xl">
           {nav.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={tabCls}>
