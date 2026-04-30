@@ -1,96 +1,82 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useState } from "react";
+import { Copy, Settings } from "lucide-react";
 import logo from "@/assets/fenus-logo.png";
 
 const nav = [
-  { to: "/app", end: true, label: "Dashboard" },
+  { to: "/app", end: true, label: "Home" },
   { to: "/app/trove", label: "Trove" },
-  { to: "/app/stability", label: "Stability Pool" },
-  { to: "/app/redeem", label: "Redeem" },
-  { to: "/app/pools", label: "Liquidity Pools" },
+  { to: "/app/stability", label: "Earn" },
+  { to: "/app/redeem", label: "Swap" },
+  { to: "/app/pools", label: "Pools" },
 ];
 
-const linkCls = ({ isActive }: { isActive: boolean }) =>
-  `relative block rounded-lg px-3 py-2.5 text-sm transition ${
+const tabCls = ({ isActive }: { isActive: boolean }) =>
+  `flex flex-1 items-center justify-center rounded-full px-4 py-2 text-xs font-medium transition ${
     isActive
-      ? "bg-foreground/[0.06] text-foreground"
-      : "text-muted-foreground hover:bg-foreground/[0.03] hover:text-foreground"
+      ? "bg-foreground text-background"
+      : "text-muted-foreground hover:text-foreground"
   }`;
 
 const AppLayout = () => {
-  const [open, setOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const address = "0xA13b…f9C2";
+
+  const copy = () => {
+    navigator.clipboard?.writeText("0xA13b000000000000000000000000000000000f9C2");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1200);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-background/80 px-4 py-3 backdrop-blur md:hidden">
-        <NavLink to="/app" className="flex items-center gap-2">
-          <img src={logo} alt="FENUS" className="h-6 w-6" />
-          <span className="font-display text-sm font-semibold">FENUS</span>
-        </NavLink>
-        <button
-          aria-label="Toggle menu"
-          onClick={() => setOpen((v) => !v)}
-          className="rounded-full border border-border px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
-        >
-          {open ? "Close" : "Menu"}
-        </button>
-      </header>
+      {/* Ambient background */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,hsl(0_0%_12%)_0%,hsl(0_0%_0%)_60%)]"
+      />
 
-      <div className="flex">
-        <aside
-          className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-border bg-background p-5 transition-transform md:sticky md:top-0 md:h-screen md:translate-x-0 ${
-            open ? "translate-x-0" : "-translate-x-full"
-          }`}
-        >
-          <NavLink to="/" className="mb-10 hidden items-center gap-2 md:flex">
-            <img src={logo} alt="FENUS" className="h-7 w-7" />
-            <span className="font-display text-base font-semibold tracking-tight">FENUS</span>
+      {/* Top bar */}
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-md items-center justify-between px-5 py-3.5">
+          <NavLink to="/" className="flex items-center gap-2">
+            <img src={logo} alt="FENUS" className="h-6 w-6" />
+            <span className="font-display text-sm font-semibold tracking-tight">FENUS</span>
           </NavLink>
 
-          <p className="mb-3 px-3 font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            Protocol
-          </p>
-          <nav className="flex flex-col gap-0.5">
-            {nav.map((n) => (
-              <NavLink
-                key={n.to}
-                to={n.to}
-                end={n.end}
-                onClick={() => setOpen(false)}
-                className={linkCls}
-              >
-                {n.label}
-              </NavLink>
-            ))}
-          </nav>
+          <button
+            onClick={copy}
+            className="group flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs transition hover:border-foreground/40"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="font-mono text-foreground/90">{copied ? "Copied" : address}</span>
+            <Copy className="h-3 w-3 text-muted-foreground transition group-hover:text-foreground" />
+          </button>
 
-          <div className="mt-auto rounded-xl border border-border p-4">
-            <div className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
-              <p className="font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-                Wallet
-              </p>
-            </div>
-            <p className="mt-2 font-mono text-xs text-muted-foreground">0x0000…0000</p>
-            <button className="mt-3 w-full rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground transition hover:opacity-90">
-              Connect Wallet
-            </button>
-          </div>
-        </aside>
+          <button
+            aria-label="Settings"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card/60 text-muted-foreground transition hover:text-foreground"
+          >
+            <Settings className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </header>
 
-        {open && (
-          <div
-            className="fixed inset-0 z-20 bg-background/60 backdrop-blur md:hidden"
-            onClick={() => setOpen(false)}
-          />
-        )}
+      {/* Content */}
+      <main className="mx-auto max-w-md px-5 pb-32 pt-6 sm:pb-10">
+        <Outlet />
+      </main>
 
-        <main className="min-h-screen flex-1 px-5 py-10 sm:px-10 sm:py-14 md:px-14">
-          <div className="mx-auto max-w-6xl">
-            <Outlet />
-          </div>
-        </main>
-      </div>
+      {/* Bottom tab nav (mobile) / floating (desktop) */}
+      <nav className="fixed bottom-4 left-1/2 z-40 w-[min(calc(100%-1.5rem),28rem)] -translate-x-1/2">
+        <div className="flex items-center gap-1 rounded-full border border-border bg-card/80 p-1 shadow-2xl shadow-black/40 backdrop-blur-xl">
+          {nav.map((n) => (
+            <NavLink key={n.to} to={n.to} end={n.end} className={tabCls}>
+              {n.label}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 };
