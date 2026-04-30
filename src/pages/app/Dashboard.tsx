@@ -12,7 +12,7 @@ const Dashboard = () => {
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Your Trove and Stability Pool position at a glance.
+          Your Trove position and pending redistribution gains at a glance.
         </p>
       </div>
 
@@ -25,7 +25,7 @@ const Dashboard = () => {
               <>
                 <Row label="Collateral" value="0.0000 zkLTC" hint="≈ $0.00" />
                 <Row label="Debt" value="0.00 FnUSD" />
-                <Row label="Collateral Ratio" value="—" hint="Min 110%" />
+                <Row label="Collateral Ratio" value="—" hint="Min 130%" />
                 <Row label="Liquidation Price" value="—" hint="per zkLTC" />
                 <Row label="Interest Rate" value="0.00% APR" />
                 <div className="mt-4 flex justify-end">
@@ -47,16 +47,17 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Stability Pool Deposit */}
+        {/* Redistribution gains */}
         <div>
-          <SectionLabel>Your Stability Pool Deposit</SectionLabel>
+          <SectionLabel>Pending Redistribution Gains</SectionLabel>
           <Card className="p-5">
-            <Row label="Deposited" value="0.00 FnUSD" />
-            <Row label="Earned" value="0.0000 zkLTC" />
-            <Row label="Pool Share" value="0.00%" />
+            <Row label="Pending Coll. Gain" value="0.0000 zkLTC" hint="From liquidated Troves" />
+            <Row label="Pending Debt Absorbed" value="0.00 FnUSD" />
+            <Row label="Default Pool Coll." value="0.0000 zkLTC" />
+            <Row label="Default Pool Debt" value="0.00 FnUSD" />
             <div className="mt-4 flex justify-end">
-              <Link to="/app/stability" className={whiteBtn}>
-                Manage Deposit
+              <Link to="/app/pools" className={whiteBtn}>
+                View Pools
               </Link>
             </div>
           </Card>

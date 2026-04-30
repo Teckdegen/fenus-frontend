@@ -30,7 +30,7 @@ contract ActivePool is IActivePool {
                 && msg.sender != a.troveManager
                 && msg.sender != a.defaultPool
                 && msg.sender != a.redemptionHelper
-                && msg.sender != a.stabilityPool
+                && msg.sender != a.collSurplusPool
         ) revert NotAuthorized();
         _;
     }

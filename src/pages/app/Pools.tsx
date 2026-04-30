@@ -1,8 +1,22 @@
+import { ExternalLink } from "lucide-react";
 import { Card, Row, SectionLabel } from "@/components/app/Shared";
 
+// Liquidity pools on Addax — your DEX.
 const pools = [
-  { pair: "FnUSD / zkLTC", venue: "LiteSwap", tvl: "$0", apr: "0.00%", url: "#" },
-  { pair: "FnUSD / USDC", venue: "LiteSwap", tvl: "$0", apr: "0.00%", url: "#" },
+  {
+    pair: "FnUSD / zkLTC",
+    venue: "Addax",
+    tvl: "$0",
+    apr: "0.00%",
+    url: "https://addax.io/pool/fnusd-zklitecoin",
+  },
+  {
+    pair: "FnUSD / USDC",
+    venue: "Addax",
+    tvl: "$0",
+    apr: "0.00%",
+    url: "https://addax.io/pool/fnusd-usdc",
+  },
 ];
 
 const Pools = () => {
@@ -11,7 +25,7 @@ const Pools = () => {
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Pools</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Provide liquidity on LitVM DEXs and earn fees.
+          Provide liquidity on Addax and earn trading fees.
         </p>
       </div>
 
@@ -42,12 +56,34 @@ const Pools = () => {
                   <p className="text-[11px] text-muted-foreground">{p.venue}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-display text-sm tabular-nums">{p.apr} APR</p>
-                <p className="text-[11px] tabular-nums text-muted-foreground">TVL {p.tvl}</p>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="font-display text-sm tabular-nums">{p.apr} APR</p>
+                  <p className="text-[11px] tabular-nums text-muted-foreground">TVL {p.tvl}</p>
+                </div>
+                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
               </div>
             </a>
           ))}
+        </Card>
+      </div>
+
+      {/* Redistribution */}
+      <div>
+        <SectionLabel>Liquidation Redistribution</SectionLabel>
+        <Card className="p-5">
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            When a Trove is liquidated, its debt and collateral are spread proportionally
+            across all remaining active Troves based on their collateral stake. The Default
+            Pool acts as the protocol-level buffer — it holds the redistributed assets until
+            each active Trove absorbs its share on its next interaction.
+          </p>
+          <div className="mt-4 space-y-0">
+            <Row label="Default Pool Collateral" value="0.0000 zkLTC" />
+            <Row label="Default Pool Debt" value="0.00 FnUSD" />
+            <Row label="Your Pending Coll. Gain" value="0.0000 zkLTC" />
+            <Row label="Your Pending Debt Absorbed" value="0.00 FnUSD" />
+          </div>
         </Card>
       </div>
     </div>

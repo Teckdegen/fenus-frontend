@@ -43,11 +43,15 @@ export const TokenInput = ({
   symbol,
   balance,
   placeholder = "0.00",
+  value,
+  onChange,
 }: {
   label: string;
   symbol: string;
   balance?: string;
   placeholder?: string;
+  value?: string;
+  onChange?: (v: string) => void;
 }) => (
   <div className="rounded-2xl border border-border bg-background/40 p-4 transition focus-within:border-foreground/40">
     <div className="mb-2 flex items-center justify-between">
@@ -65,6 +69,8 @@ export const TokenInput = ({
       <input
         inputMode="decimal"
         placeholder={placeholder}
+        value={value}
+        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         className="w-full bg-transparent font-display text-3xl font-semibold tabular-nums outline-none placeholder:text-muted-foreground/30"
       />
       <div className="flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5">

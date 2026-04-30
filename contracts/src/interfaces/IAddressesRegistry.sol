@@ -8,12 +8,12 @@ interface IAddressesRegistry {
         address priceFeed;
         address borrowerOperations;
         address troveManager;
-        address stabilityPool;
         address sortedTroves;
         address activePool;
-        address defaultPool;
+        address defaultPool;         // holds redistributed debt/coll from liquidated Troves
         address collSurplusPool;
         address gasPool;
+        address treasury;
         address redemptionHelper;
         address hintHelpers;
         address collateralRegistry;

@@ -27,7 +27,6 @@ contract FnUSD is ERC20, IFnUSD {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         return caller == a.borrowerOperations
             || caller == a.troveManager
-            || caller == a.stabilityPool
             || caller == a.gasPool
             || caller == a.redemptionHelper;
     }

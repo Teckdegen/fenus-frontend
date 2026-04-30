@@ -6,7 +6,7 @@ import logo from "@/assets/fenus-logo.png";
 const nav = [
   { to: "/app", end: true, label: "Home" },
   { to: "/app/trove", label: "Trove" },
-  { to: "/app/stability", label: "Earn" },
+  { to: "/app/redeem", label: "Redeem" },
   { to: "/app/pools", label: "Pools" },
 ];
 
