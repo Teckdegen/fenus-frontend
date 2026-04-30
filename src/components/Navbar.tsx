@@ -62,7 +62,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <a
-            href="#"
+            href="/app"
             className="hidden rounded-full bg-primary px-2.5 py-1 text-[10px] font-medium text-primary-foreground transition hover:opacity-90 md:inline-flex sm:px-3 sm:py-1.5 sm:text-xs"
           >
             Launch App
@@ -103,7 +103,7 @@ const Navbar = () => {
             })}
           </ul>
           <a
-            href="#"
+            href="/app"
             onClick={() => setOpen(false)}
             className="mt-2 block rounded-full bg-primary px-3 py-2 text-center text-xs font-medium text-primary-foreground transition hover:opacity-90"
           >
