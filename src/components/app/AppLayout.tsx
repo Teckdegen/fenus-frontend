@@ -3,11 +3,11 @@ import { useState } from "react";
 import logo from "@/assets/fenus-logo.png";
 
 const nav = [
-  { to: "/app/_preview", end: true, label: "Dashboard" },
-  { to: "/app/_preview/trove", label: "Trove" },
-  { to: "/app/_preview/stability", label: "Stability Pool" },
-  { to: "/app/_preview/redeem", label: "Redeem" },
-  { to: "/app/_preview/pools", label: "Liquidity Pools" },
+  { to: "/app", end: true, label: "Dashboard" },
+  { to: "/app/trove", label: "Trove" },
+  { to: "/app/stability", label: "Stability Pool" },
+  { to: "/app/redeem", label: "Redeem" },
+  { to: "/app/pools", label: "Liquidity Pools" },
 ];
 
 const linkCls = ({ isActive }: { isActive: boolean }) =>
@@ -23,7 +23,7 @@ const AppLayout = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border bg-background/80 px-4 py-3 backdrop-blur md:hidden">
-        <NavLink to="/app/_preview" className="flex items-center gap-2">
+        <NavLink to="/app" className="flex items-center gap-2">
           <img src={logo} alt="FENUS" className="h-6 w-6" />
           <span className="font-display text-sm font-semibold">FENUS</span>
         </NavLink>
