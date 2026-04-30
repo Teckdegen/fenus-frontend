@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ComingSoon from "./pages/ComingSoon.tsx";
 import AppLayout from "./components/app/AppLayout.tsx";
 import Dashboard from "./pages/app/Dashboard.tsx";
 import Trove from "./pages/app/Trove.tsx";
@@ -22,7 +23,9 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/app" element={<AppLayout />}>
+          <Route path="/app" element={<ComingSoon />} />
+          {/* Internal preview only — not linked from UI */}
+          <Route path="/app/_preview" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="trove" element={<Trove />} />
             <Route path="stability" element={<Stability />} />
