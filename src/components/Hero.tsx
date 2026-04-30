@@ -16,7 +16,7 @@ const Hero = () => {
           FENUS
         </p>
         <h1 className="font-display text-balance text-5xl font-semibold leading-[1.05] sm:text-6xl md:text-7xl">
-          Borrow Against Your<br />LiteVM Holdings.
+          Borrow Against Your<br />LitVM Holdings.
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-balance text-base text-muted-foreground sm:text-lg">
           Mint $FnUSD with $zkLTC collateral.

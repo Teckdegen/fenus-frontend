@@ -11,7 +11,7 @@ const Pools = () => {
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Pools</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Provide liquidity on LiteVM DEXs and earn fees.
+          Provide liquidity on LitVM DEXs and earn fees.
         </p>
       </div>
 
