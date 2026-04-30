@@ -18,9 +18,8 @@ library Constants {
     // Debt floor (18-dec internal). Liquidators must be able to profitably clear this.
     uint256 internal constant MIN_NET_DEBT = 500e18; // 500 FnUSD
 
-    // Per-Trove user-set interest rate bounds.
-    uint256 internal constant INTEREST_RATE_MIN = 5e15;   // 0.5%
-    uint256 internal constant INTEREST_RATE_MAX = 25e17;  // 250%
+    // Fixed annual interest rate — all Troves pay 1%. Not user-configurable.
+    uint256 internal constant ANNUAL_INTEREST_RATE = 1e16; // 1%
 
     // Liquidation collateral distribution.
     // When a Trove is liquidated:
@@ -40,9 +39,6 @@ library Constants {
     uint256 internal constant REDEMPTION_FEE_FLOOR = 5e15; // 0.5%
     uint256 internal constant MINUTE_DECAY_FACTOR = 999037758833783000; // half-life ~12h
     uint256 internal constant BETA = 2; // baseRate sensitivity to redemption volume
-
-    // Per-Trove cooldown on changing the annual interest rate.
-    uint256 internal constant MIN_INTEREST_RATE_ADJUSTMENT_TIME = 7 days;
 
     // Oracle freshness windows.
     uint256 internal constant PRICE_STALENESS_THRESHOLD = 1 hours;

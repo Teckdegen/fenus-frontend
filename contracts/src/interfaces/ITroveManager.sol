@@ -22,11 +22,10 @@ interface ITroveManager {
     function getEntireDebtAndColl(address owner)
         external view returns (uint256 debt, uint256 coll, uint256 pendingInterest);
 
-    // BorrowerOperations callbacks.
-    function openTrove(address owner, uint256 coll, uint256 debt, uint256 annualRate) external;
+    // BorrowerOperations callbacks. Interest rate is fixed at 1% — not passed in.
+    function openTrove(address owner, uint256 coll, uint256 debt) external;
     function adjustTrove(address owner, int256 collDelta, int256 debtDelta) external;
     function closeTrove(address owner) external;
-    function setAnnualInterestRate(address owner, uint256 newRate) external;
 
     // Liquidation / redemption.
     function liquidate(address owner) external;

@@ -12,9 +12,7 @@ const tabs = ["Open", "Adjust", "Close"] as const;
 
 const Trove = () => {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Open");
-  const [rate, setRate] = useState(5.0);
 
-  // Position preview — computed from inputs (placeholder math until connected)
   const collateral = 0;
   const debt = 0;
   const price = 0;
@@ -60,25 +58,6 @@ const Trove = () => {
             <div className="mt-4 space-y-3">
               <TokenInput label="Deposit" symbol="zkLTC" balance="0.00" />
               <TokenInput label="Mint" symbol="FnUSD" balance="0.00" />
-              <div className="rounded-2xl border border-border bg-background/40 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-muted-foreground">Interest rate</span>
-                  <span className="font-display text-sm tabular-nums">{rate.toFixed(2)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="250"
-                  value={rate}
-                  step="0.1"
-                  onChange={(e) => setRate(parseFloat(e.target.value))}
-                  className="mt-3 w-full accent-foreground"
-                />
-                <div className="mt-1 flex justify-between text-[10px] text-muted-foreground/60">
-                  <span>0.5% min</span>
-                  <span>250% max</span>
-                </div>
-              </div>
               <div className="flex justify-end pt-1">
                 <PrimaryButton>{tab === "Open" ? "Open Trove" : "Update Trove"}</PrimaryButton>
               </div>
@@ -99,10 +78,11 @@ const Trove = () => {
         <div>
           <SectionLabel>Position Preview</SectionLabel>
           <Card className="p-5">
-            <Row label="Collateral Ratio" value={collRatio} hint="Min 130%" />
-            <Row label="Liquidation Price" value={liqPrice} hint="per zkLTC" />
-            <Row label="Origination Fee" value="0.50%" hint="One-time, added to debt" />
-            <Row label="Min Debt" value="500 FnUSD" />
+            <Row label="Collateral Ratio"  value={collRatio} hint="Min 130%" />
+            <Row label="Liquidation Price" value={liqPrice}  hint="per zkLTC" />
+            <Row label="Interest Rate"     value="1.00% APR" hint="Fixed — accrues to treasury" />
+            <Row label="Origination Fee"   value="0.50%"     hint="One-time, added to debt" />
+            <Row label="Min Debt"          value="500 FnUSD" />
           </Card>
         </div>
       </div>
