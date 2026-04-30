@@ -1,7 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import { Card, Row, SectionLabel } from "@/components/app/Shared";
 
-// Liquidity pools on Addax — your DEX.
 const pools = [
   {
     pair: "FnUSD / zkLTC",
@@ -30,8 +29,8 @@ const Pools = () => {
       </div>
 
       <Card className="p-5">
-        <Row label="Total LP TVL" value="$0" />
-        <Row label="24h Volume" value="$0" />
+        <Row label="Total LP TVL"  value="$0" />
+        <Row label="24h Volume"    value="$0" />
         <Row label="Your LP Value" value="$0" />
       </Card>
 
@@ -68,20 +67,25 @@ const Pools = () => {
         </Card>
       </div>
 
-      {/* Redistribution */}
+      {/* Liquidation redistribution */}
       <div>
         <SectionLabel>Liquidation Redistribution</SectionLabel>
         <Card className="p-5">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            When a Trove is liquidated, its debt and collateral are spread proportionally
-            across all remaining active Troves based on their collateral stake. The Default
-            Pool acts as the protocol-level buffer — it holds the redistributed assets until
-            each active Trove absorbs its share on its next interaction.
+            When a Trove is liquidated the protocol cancels the user's debt and
+            distributes the seized collateral as follows: the debt amount is split
+            50/50 between FnUSD and zkLTC and sent to Addax liquidity pools to
+            maintain the peg. Of the remaining surplus collateral, 60% goes to the
+            protocol treasury and 40% is shared proportionally among all active
+            Trove holders based on their collateral stake.
           </p>
           <div className="mt-4 space-y-0">
-            <Row label="Default Pool Collateral" value="0.0000 zkLTC" />
-            <Row label="Default Pool Debt" value="0.00 FnUSD" />
-            <Row label="Your Pending Coll. Gain" value="0.0000 zkLTC" />
+            <Row label="Debt repaid to liquidity" value="50% FnUSD + 50% zkLTC" hint="Sent to Addax pools" />
+            <Row label="Surplus to treasury"       value="60%"                   hint="Protocol revenue" />
+            <Row label="Surplus to Trove holders"  value="40%"                   hint="Proportional to stake" />
+            <Row label="Default Pool Collateral"   value="0.0000 zkLTC" />
+            <Row label="Default Pool Debt"         value="0.00 FnUSD" />
+            <Row label="Your Pending Coll. Gain"   value="0.0000 zkLTC" />
             <Row label="Your Pending Debt Absorbed" value="0.00 FnUSD" />
           </div>
         </Card>

@@ -3,7 +3,7 @@ import MuxVideo from "./MuxVideo";
 const stats = [
   { label: "TVL", value: "$0" },
   { label: "FnUSD Minted", value: "$0" },
-  { label: "Stability Pool APY", value: "0%" },
+  { label: "FnUSD Holders", value: "0" },
 ];
 
 const Stats = () => {

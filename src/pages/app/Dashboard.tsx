@@ -25,8 +25,8 @@ const Dashboard = () => {
               <>
                 <Row label="Collateral" value="0.0000 zkLTC" hint="≈ $0.00" />
                 <Row label="Debt" value="0.00 FnUSD" />
-                <Row label="Collateral Ratio" value="—" hint="Min 130%" />
-                <Row label="Liquidation Price" value="—" hint="per zkLTC" />
+                <Row label="Collateral Ratio" value="N/A" hint="Min 130%" />
+                <Row label="Liquidation Price" value="N/A" hint="per zkLTC" />
                 <Row label="Interest Rate" value="0.00% APR" />
                 <div className="mt-4 flex justify-end">
                   <Link to="/app/trove" className={whiteBtn}>

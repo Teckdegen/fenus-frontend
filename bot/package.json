@@ -1,0 +1,15 @@
+{
+  "name": "fenus-liquidation-bot",
+  "version": "1.0.0",
+  "description": "24/7 liquidation bot for the FENUS protocol",
+  "type": "module",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "node --watch bot.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.2"
+  }
+}

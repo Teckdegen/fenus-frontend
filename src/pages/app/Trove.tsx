@@ -12,6 +12,22 @@ const tabs = ["Open", "Adjust", "Close"] as const;
 
 const Trove = () => {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Open");
+  const [rate, setRate] = useState(5.0);
+
+  // Position preview — computed from inputs (placeholder math until connected)
+  const collateral = 0;
+  const debt = 0;
+  const price = 0;
+
+  const collRatio =
+    debt > 0 && price > 0
+      ? `${((collateral * price) / debt * 100).toFixed(1)}%`
+      : "N/A";
+
+  const liqPrice =
+    collateral > 0
+      ? `$${((debt * 1.3) / collateral).toFixed(4)}`
+      : "N/A";
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
@@ -47,16 +63,21 @@ const Trove = () => {
               <div className="rounded-2xl border border-border bg-background/40 p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] text-muted-foreground">Interest rate</span>
-                  <span className="font-display text-sm tabular-nums">5.00%</span>
+                  <span className="font-display text-sm tabular-nums">{rate.toFixed(2)}%</span>
                 </div>
                 <input
                   type="range"
                   min="0.5"
-                  max="50"
-                  defaultValue="5"
+                  max="250"
+                  value={rate}
                   step="0.1"
+                  onChange={(e) => setRate(parseFloat(e.target.value))}
                   className="mt-3 w-full accent-foreground"
                 />
+                <div className="mt-1 flex justify-between text-[10px] text-muted-foreground/60">
+                  <span>0.5% min</span>
+                  <span>250% max</span>
+                </div>
               </div>
               <div className="flex justify-end pt-1">
                 <PrimaryButton>{tab === "Open" ? "Open Trove" : "Update Trove"}</PrimaryButton>
@@ -78,10 +99,10 @@ const Trove = () => {
         <div>
           <SectionLabel>Position Preview</SectionLabel>
           <Card className="p-5">
-            <Row label="New Coll. Ratio" value="—" />
-            <Row label="New Liq. Price" value="—" />
-            <Row label="Borrow Fee" value="0.50%" />
-            <Row label="Min Debt" value="200 FnUSD" />
+            <Row label="Collateral Ratio" value={collRatio} hint="Min 130%" />
+            <Row label="Liquidation Price" value={liqPrice} hint="per zkLTC" />
+            <Row label="Origination Fee" value="0.50%" hint="One-time, added to debt" />
+            <Row label="Min Debt" value="500 FnUSD" />
           </Card>
         </div>
       </div>

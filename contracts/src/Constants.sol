@@ -22,9 +22,16 @@ library Constants {
     uint256 internal constant INTEREST_RATE_MIN = 5e15;   // 0.5%
     uint256 internal constant INTEREST_RATE_MAX = 25e17;  // 250%
 
-    // Liquidator bonus: liquidator pays the trove debt and receives debt * (1 + bonus)
-    // worth of collateral. Trove owner gets any residual coll as surplus.
-    uint256 internal constant LIQUIDATION_BONUS = 10e16; // 10%
+    // Liquidation collateral distribution.
+    // When a Trove is liquidated:
+    //   1. The debt amount is cancelled and an equivalent value of collateral
+    //      is split 50/50 into FnUSD and zkLTC and sent to Addax liquidity pools.
+    //   2. The remaining surplus collateral (coll - debt value) is split:
+    //      60% → protocol treasury
+    //      40% → redistributed proportionally to all active Trove holders
+    uint256 internal constant LIQUIDATION_LIQUIDITY_SPLIT  = 50e16; // 50% each side to LP
+    uint256 internal constant LIQUIDATION_TREASURY_SHARE   = 60e16; // 60% of surplus → treasury
+    uint256 internal constant LIQUIDATION_HOLDER_SHARE     = 40e16; // 40% of surplus → Trove holders
 
     // One-time origination fee added to trove debt at openTrove. Routes to Treasury on close.
     uint256 internal constant ORIGINATION_FEE = 5e15; // 0.5%
