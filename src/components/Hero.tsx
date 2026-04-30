@@ -24,7 +24,7 @@ const Hero = () => {
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <a
-            href="#"
+            href="/app"
             className="rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
           >
             Launch App
