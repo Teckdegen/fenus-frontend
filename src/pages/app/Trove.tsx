@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Card, Field, GhostButton, PageHeader, PrimaryButton, Stat } from "@/components/app/Shared";
+import {
+  Card,
+  Field,
+  GhostButton,
+  PageHeader,
+  PrimaryButton,
+  Row,
+  SectionLabel,
+} from "@/components/app/Shared";
 
 const tabs = ["Open", "Adjust", "Close"] as const;
 
@@ -15,7 +23,7 @@ const Trove = () => {
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
-        <Card>
+        <Card className="p-8">
           <div className="mb-6 inline-flex rounded-full border border-border p-1">
             {tabs.map((t) => (
               <button
@@ -34,8 +42,8 @@ const Trove = () => {
 
           {tab !== "Close" ? (
             <div className="space-y-4">
-              <Field label="Collateral" suffix="zkLTC" />
-              <Field label="Mint" suffix="FnUSD" />
+              <Field label="Collateral" suffix="zkLTC" balance="0.00" />
+              <Field label="Mint" suffix="FnUSD" balance="0.00" />
               <Field label="Interest Rate" suffix="%" placeholder="5.00" />
               <div className="pt-2">
                 <PrimaryButton>{tab === "Open" ? "Open Trove" : "Update Trove"}</PrimaryButton>
@@ -46,21 +54,19 @@ const Trove = () => {
               <p className="text-sm text-muted-foreground">
                 Repay all outstanding FnUSD debt to close your Trove and withdraw your zkLTC.
               </p>
-              <Field label="Repay" suffix="FnUSD" />
+              <Field label="Repay" suffix="FnUSD" balance="0.00" />
               <GhostButton>Close Trove</GhostButton>
             </div>
           )}
         </Card>
 
-        <Card>
-          <p className="mb-5 font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            Position Preview
-          </p>
-          <div className="space-y-5">
-            <Stat label="New Coll. Ratio" value="—" />
-            <Stat label="New Liq. Price" value="—" />
-            <Stat label="Borrow Fee" value="0.50%" />
-          </div>
+        <Card className="p-6">
+          <SectionLabel>Position Preview</SectionLabel>
+          <Row label="New Coll. Ratio" value="—" />
+          <Row label="New Liq. Price" value="—" />
+          <Row label="Borrow Fee" value="0.50%" />
+          <Row label="Interest" value="5.00%" />
+          <Row label="Min Debt" value="200 FnUSD" />
         </Card>
       </div>
     </div>

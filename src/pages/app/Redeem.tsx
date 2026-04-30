@@ -1,5 +1,10 @@
-import { ArrowDown } from "lucide-react";
-import { Card, PageHeader, PrimaryButton, Stat } from "@/components/app/Shared";
+import {
+  Card,
+  PageHeader,
+  PrimaryButton,
+  Row,
+  SectionLabel,
+} from "@/components/app/Shared";
 
 const Redeem = () => {
   return (
@@ -11,35 +16,42 @@ const Redeem = () => {
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
-        <Card>
-          <div className="rounded-xl border border-border bg-background/60 p-5">
-            <p className="font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-              You pay
-            </p>
-            <div className="mt-2 flex items-center gap-2">
+        <Card className="p-8">
+          <div className="rounded-xl border border-border bg-background/60 p-5 transition focus-within:border-foreground/40">
+            <div className="flex items-center justify-between">
+              <p className="font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                You pay
+              </p>
+              <span className="font-mono text-[10px] text-muted-foreground">Balance: 0.00</span>
+            </div>
+            <div className="mt-3 flex items-center gap-2">
               <input
-                placeholder="0.0"
-                className="flex-1 bg-transparent font-display text-3xl outline-none placeholder:text-muted-foreground/40"
+                placeholder="0.00"
+                className="flex-1 bg-transparent font-display text-3xl tabular-nums outline-none placeholder:text-muted-foreground/30"
               />
-              <span className="font-display text-sm uppercase tracking-widest text-muted-foreground">
+              <span className="rounded-full border border-border px-3 py-1.5 font-display text-xs uppercase tracking-widest text-muted-foreground">
                 FnUSD
               </span>
             </div>
           </div>
 
-          <div className="my-3 flex justify-center">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card">
-              <ArrowDown className="h-4 w-4 text-muted-foreground" />
-            </div>
+          <div className="my-2 flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              Swap
+            </span>
+            <div className="h-px flex-1 bg-border" />
           </div>
 
           <div className="rounded-xl border border-border bg-background/60 p-5">
             <p className="font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               You receive
             </p>
-            <div className="mt-2 flex items-center gap-2">
-              <span className="flex-1 font-display text-3xl text-muted-foreground/60">0.0</span>
-              <span className="font-display text-sm uppercase tracking-widest text-muted-foreground">
+            <div className="mt-3 flex items-center gap-2">
+              <span className="flex-1 font-display text-3xl tabular-nums text-muted-foreground/50">
+                0.00
+              </span>
+              <span className="rounded-full border border-border px-3 py-1.5 font-display text-xs uppercase tracking-widest text-muted-foreground">
                 zkLTC
               </span>
             </div>
@@ -50,15 +62,12 @@ const Redeem = () => {
           </div>
         </Card>
 
-        <Card>
-          <p className="mb-5 font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-            Rate
-          </p>
-          <div className="space-y-5">
-            <Stat label="zkLTC Price" value="$0.00" />
-            <Stat label="Redemption Fee" value="0.50%" />
-            <Stat label="You Receive" value="0.00 zkLTC" />
-          </div>
+        <Card className="p-6">
+          <SectionLabel>Rate</SectionLabel>
+          <Row label="zkLTC Price" value="$0.00" />
+          <Row label="Redemption Fee" value="0.50%" />
+          <Row label="Slippage" value="0.10%" />
+          <Row label="Min Received" value="0.00 zkLTC" />
         </Card>
       </div>
     </div>
