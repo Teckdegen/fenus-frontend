@@ -9,7 +9,6 @@ import AppLayout from "./components/app/AppLayout.tsx";
 import Dashboard from "./pages/app/Dashboard.tsx";
 import Trove from "./pages/app/Trove.tsx";
 import Stability from "./pages/app/Stability.tsx";
-import Redeem from "./pages/app/Redeem.tsx";
 import Pools from "./pages/app/Pools.tsx";
 
 const queryClient = new QueryClient();
@@ -26,7 +25,6 @@ const App = () => (
             <Route index element={<Dashboard />} />
             <Route path="trove" element={<Trove />} />
             <Route path="stability" element={<Stability />} />
-            <Route path="redeem" element={<Redeem />} />
             <Route path="pools" element={<Pools />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
