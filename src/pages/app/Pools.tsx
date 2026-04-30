@@ -7,7 +7,7 @@ const pools = [
 
 const Pools = () => {
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-3xl space-y-6">
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Pools</h1>
         <p className="mt-1 text-sm text-muted-foreground">

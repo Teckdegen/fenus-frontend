@@ -14,7 +14,7 @@ const Trove = () => {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Open");
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-3xl space-y-6">
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Trove</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -22,7 +22,7 @@ const Trove = () => {
         </p>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_22rem]">
+      <div className="space-y-5">
         <Card className="p-4">
           <div className="flex rounded-full bg-background/60 p-1">
             {tabs.map((t) => (

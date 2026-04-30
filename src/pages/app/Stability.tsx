@@ -14,7 +14,7 @@ const Stability = () => {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Deposit");
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-3xl space-y-6">
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Earn</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -33,7 +33,7 @@ const Stability = () => {
         <p className="mt-2 text-xs text-muted-foreground">Variable · paid in zkLTC + fees</p>
       </Card>
 
-      <div className="grid gap-5 lg:grid-cols-[1fr_22rem]">
+      <div className="space-y-5">
         <Card className="p-4">
           <div className="flex rounded-full bg-background/60 p-1">
             {tabs.map((t) => (

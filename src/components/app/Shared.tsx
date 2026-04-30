@@ -82,7 +82,7 @@ export const PrimaryButton = ({
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     {...props}
-    className={`inline-flex items-center justify-center rounded-full bg-foreground px-5 py-2 text-xs font-semibold text-background transition hover:opacity-90 active:scale-[0.99] disabled:opacity-50 ${className}`}
+    className={`inline-flex items-center justify-center rounded-full bg-foreground px-10 py-3.5 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.99] disabled:opacity-50 ${className}`}
   >
     {children}
   </button>
@@ -95,7 +95,7 @@ export const GhostButton = ({
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     {...props}
-    className={`inline-flex items-center justify-center rounded-full bg-foreground px-5 py-2 text-xs font-semibold text-background transition hover:opacity-90 active:scale-[0.99] ${className}`}
+    className={`inline-flex items-center justify-center rounded-full bg-foreground px-10 py-3.5 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.99] ${className}`}
   >
     {children}
   </button>
