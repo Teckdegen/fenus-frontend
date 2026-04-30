@@ -23,9 +23,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/app" element={<ComingSoon />} />
-          {/* Internal preview only — not linked from UI */}
-          <Route path="/app/_preview" element={<AppLayout />}>
+          <Route path="/app" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="trove" element={<Trove />} />
             <Route path="stability" element={<Stability />} />
