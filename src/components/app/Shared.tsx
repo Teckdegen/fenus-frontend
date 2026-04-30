@@ -82,7 +82,7 @@ export const PrimaryButton = ({
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     {...props}
-    className={`w-full rounded-full bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.99] disabled:opacity-50 ${className}`}
+    className={`w-full rounded-full bg-foreground px-5 py-3.5 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.99] disabled:opacity-50 ${className}`}
   >
     {children}
   </button>

@@ -1,5 +1,4 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { Settings } from "lucide-react";
 import logo from "@/assets/fenus-logo.png";
 
 const nav = [
@@ -28,18 +27,11 @@ const AppLayout = () => {
 
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3.5 sm:px-8">
+        <div className="mx-auto flex w-full max-w-6xl items-center px-5 py-3.5 sm:px-8">
           <NavLink to="/" className="flex items-center gap-2">
             <img src={logo} alt="FENUS" className="h-6 w-6" />
             <span className="font-display text-sm font-semibold tracking-tight">FENUS</span>
           </NavLink>
-
-          <button
-            aria-label="Settings"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card/60 text-muted-foreground transition hover:text-foreground"
-          >
-            <Settings className="h-3.5 w-3.5" />
-          </button>
         </div>
       </header>
 

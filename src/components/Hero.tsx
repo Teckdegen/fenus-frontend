@@ -25,13 +25,13 @@ const Hero = () => {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#"
-            className="rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+            className="rounded-full bg-foreground px-7 py-3.5 text-sm font-semibold text-background transition hover:opacity-90"
           >
             Launch App
           </a>
           <a
             href="#"
-            className="rounded-full border border-border bg-card/40 px-7 py-3.5 text-sm font-medium text-foreground/90 backdrop-blur transition hover:border-foreground/40"
+            className="rounded-full bg-foreground px-7 py-3.5 text-sm font-semibold text-background transition hover:opacity-90"
           >
             Docs
           </a>
