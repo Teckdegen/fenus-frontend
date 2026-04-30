@@ -1,32 +1,5 @@
 import { ReactNode } from "react";
 
-export const PageHeader = ({
-  eyebrow,
-  title,
-  description,
-  right,
-}: {
-  eyebrow: string;
-  title: string;
-  description?: string;
-  right?: ReactNode;
-}) => (
-  <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
-    <div className="max-w-2xl">
-      <p className="font-display text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground">
-        {eyebrow}
-      </p>
-      <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight sm:text-4xl">
-        {title}
-      </h1>
-      {description && (
-        <p className="mt-3 text-balance text-sm text-muted-foreground">{description}</p>
-      )}
-    </div>
-    {right}
-  </div>
-);
-
 export const Card = ({
   children,
   className = "",
@@ -35,82 +8,71 @@ export const Card = ({
   className?: string;
 }) => (
   <div
-    className={`rounded-2xl border border-border bg-card/40 backdrop-blur transition hover:border-foreground/20 ${className}`}
+    className={`rounded-3xl border border-border bg-card/60 backdrop-blur-xl ${className}`}
   >
     {children}
   </div>
 );
 
 export const SectionLabel = ({ children }: { children: ReactNode }) => (
-  <p className="mb-4 font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+  <p className="mb-3 px-1 font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
     {children}
   </p>
 );
 
-export const Stat = ({
+export const Row = ({
   label,
   value,
   hint,
-  accent,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   hint?: string;
-  accent?: boolean;
 }) => (
-  <div>
-    <p className="font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-      {label}
-    </p>
-    <p
-      className={`mt-2 font-display tabular-nums tracking-tight ${
-        accent
-          ? "bg-gradient-to-b from-foreground to-foreground/60 bg-clip-text text-3xl font-semibold text-transparent sm:text-4xl"
-          : "text-2xl font-semibold sm:text-[28px]"
-      }`}
-    >
-      {value}
-    </p>
-    {hint && <p className="mt-1.5 text-xs text-muted-foreground">{hint}</p>}
+  <div className="flex items-center justify-between border-b border-border/40 py-3 last:border-b-0">
+    <div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      {hint && <p className="text-[11px] text-muted-foreground/60">{hint}</p>}
+    </div>
+    <span className="font-display text-sm tabular-nums text-foreground">{value}</span>
   </div>
 );
 
-export const Field = ({
+export const TokenInput = ({
   label,
-  suffix,
-  placeholder = "0.00",
+  symbol,
   balance,
+  placeholder = "0.00",
 }: {
   label: string;
-  suffix?: string;
-  placeholder?: string;
+  symbol: string;
   balance?: string;
+  placeholder?: string;
 }) => (
-  <label className="block">
+  <div className="rounded-2xl border border-border bg-background/40 p-4 transition focus-within:border-foreground/40">
     <div className="mb-2 flex items-center justify-between">
-      <span className="font-display text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-        {label}
-      </span>
+      <span className="text-[11px] text-muted-foreground">{label}</span>
       {balance && (
-        <span className="font-mono text-[10px] text-muted-foreground">
+        <button
+          type="button"
+          className="font-mono text-[11px] text-muted-foreground transition hover:text-foreground"
+        >
           Balance: {balance}
-        </span>
+        </button>
       )}
     </div>
-    <div className="flex items-center gap-2 rounded-xl border border-border bg-background/60 px-4 py-3.5 transition focus-within:border-foreground/40">
+    <div className="flex items-center gap-3">
       <input
-        type="text"
         inputMode="decimal"
         placeholder={placeholder}
-        className="flex-1 bg-transparent font-display text-xl tabular-nums outline-none placeholder:text-muted-foreground/40"
+        className="w-full bg-transparent font-display text-3xl font-semibold tabular-nums outline-none placeholder:text-muted-foreground/30"
       />
-      {suffix && (
-        <span className="rounded-full border border-border px-2.5 py-1 font-display text-[10px] uppercase tracking-widest text-muted-foreground">
-          {suffix}
-        </span>
-      )}
+      <div className="flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5">
+        <span className="h-5 w-5 rounded-full bg-gradient-to-br from-foreground/80 to-foreground/30" />
+        <span className="font-display text-xs font-medium tracking-wide">{symbol}</span>
+      </div>
     </div>
-  </label>
+  </div>
 );
 
 export const PrimaryButton = ({
@@ -120,7 +82,7 @@ export const PrimaryButton = ({
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     {...props}
-    className={`w-full rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50 ${className}`}
+    className={`w-full rounded-full bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.99] disabled:opacity-50 ${className}`}
   >
     {children}
   </button>
@@ -133,21 +95,56 @@ export const GhostButton = ({
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     {...props}
-    className={`w-full rounded-full border border-border px-5 py-3 text-sm font-medium text-foreground transition hover:bg-foreground/5 ${className}`}
+    className={`w-full rounded-full border border-border bg-card/60 px-5 py-3.5 text-sm font-medium text-foreground transition hover:bg-foreground/5 active:scale-[0.99] ${className}`}
   >
     {children}
   </button>
 );
 
-export const Row = ({
+export const ActionPill = ({
   label,
-  value,
+  icon: Icon,
+  onClick,
 }: {
   label: string;
-  value: ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
 }) => (
-  <div className="flex items-center justify-between border-b border-border/60 py-3 last:border-b-0">
-    <span className="text-xs text-muted-foreground">{label}</span>
-    <span className="font-display text-sm tabular-nums">{value}</span>
+  <button
+    onClick={onClick}
+    className="flex flex-1 flex-col items-center gap-2 rounded-2xl border border-border bg-card/60 px-3 py-3.5 text-xs font-medium transition hover:border-foreground/40 hover:bg-foreground/5 active:scale-[0.98]"
+  >
+    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-background">
+      <Icon className="h-4 w-4" />
+    </span>
+    {label}
+  </button>
+);
+
+export const TokenRow = ({
+  symbol,
+  name,
+  amount,
+  value,
+}: {
+  symbol: string;
+  name: string;
+  amount: string;
+  value: string;
+}) => (
+  <div className="flex items-center justify-between rounded-2xl px-2 py-3 transition hover:bg-foreground/[0.03]">
+    <div className="flex items-center gap-3">
+      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-foreground/80 to-foreground/20 font-display text-xs font-semibold text-background">
+        {symbol.slice(0, 2)}
+      </span>
+      <div>
+        <p className="font-display text-sm font-medium">{symbol}</p>
+        <p className="text-[11px] text-muted-foreground">{name}</p>
+      </div>
+    </div>
+    <div className="text-right">
+      <p className="font-display text-sm tabular-nums">{amount}</p>
+      <p className="text-[11px] tabular-nums text-muted-foreground">{value}</p>
+    </div>
   </div>
 );
