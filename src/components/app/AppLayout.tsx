@@ -1,4 +1,6 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { useState } from "react";
+import { Wallet } from "lucide-react";
 import logo from "@/assets/fenus-logo.png";
 
 const nav = [
@@ -17,6 +19,9 @@ const tabCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 const AppLayout = () => {
+  const [connected, setConnected] = useState(false);
+  const address = "0xA13b…f9C2";
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Ambient background */}
@@ -27,11 +32,28 @@ const AppLayout = () => {
 
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-6xl items-center px-5 py-3.5 sm:px-8">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
           <NavLink to="/" className="flex items-center gap-2">
             <img src={logo} alt="FENUS" className="h-6 w-6" />
             <span className="font-display text-sm font-semibold tracking-tight">FENUS</span>
           </NavLink>
+
+          <button
+            onClick={() => setConnected((v) => !v)}
+            className="flex items-center gap-2 rounded-full bg-foreground px-3.5 py-1.5 text-[11px] font-semibold text-background transition hover:opacity-90"
+          >
+            {connected ? (
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span className="font-mono">{address}</span>
+              </>
+            ) : (
+              <>
+                <Wallet className="h-3 w-3" />
+                <span>Connect</span>
+              </>
+            )}
+          </button>
         </div>
       </header>
 
