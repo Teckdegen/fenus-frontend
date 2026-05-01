@@ -11,7 +11,6 @@ import AppLayout from "./components/app/AppLayout.tsx";
 import Dashboard from "./pages/app/Dashboard.tsx";
 import Trove from "./pages/app/Trove.tsx";
 import Pools from "./pages/app/Pools.tsx";
-import Redeem from "./pages/app/Redeem.tsx";
 import Faucet from "./pages/app/Faucet.tsx";
 
 const queryClient = new QueryClient();
@@ -29,7 +28,6 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="trove" element={<Trove />} />
               <Route path="pools" element={<Pools />} />
-              <Route path="redeem" element={<Redeem />} />
               <Route path="faucet" element={<Faucet />} />
             </Route>
             <Route path="*" element={<NotFound />} />

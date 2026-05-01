@@ -8,7 +8,6 @@ const nav = [
   { to: "/app",         end: true,  label: "Home"   },
   { to: "/app/faucet",  end: false, label: "Faucet" },
   { to: "/app/trove",   end: false, label: "Trove"  },
-  { to: "/app/redeem",  end: false, label: "Redeem" },
   { to: "/app/pools",   end: false, label: "Pools"  },
 ];
 
