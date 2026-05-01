@@ -67,9 +67,6 @@ const Stats = () => {
   const tvlUSD     = priceUSD > 0 ? collNum * priceUSD : 0;
   const fnUSDMinted = totalSupply ? parseFloat(formatUnits(totalSupply, 6)) : 0;
 
-  // FnUSD holders — approximated from supply (non-zero balances can't be
-  // counted on-chain without an indexer; show supply as the primary metric)
-  // We show "FnUSD Supply" instead of holders since supply is accurate on-chain
   const stats = [
     {
       label: "TVL",
@@ -78,10 +75,6 @@ const Stats = () => {
     {
       label: "FnUSD Minted",
       value: fnUSDMinted > 0 ? compact(fnUSDMinted) : "0",
-    },
-    {
-      label: "LTC Price",
-      value: priceUSD > 0 ? `$${priceUSD.toFixed(2)}` : "$0",
     },
   ];
 
@@ -93,7 +86,7 @@ const Stats = () => {
       />
       <div className="absolute inset-0 bg-background/50" />
 
-      <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 sm:grid-cols-3 sm:gap-8">
+      <div className="relative z-10 mx-auto grid max-w-4xl grid-cols-1 gap-16 px-6 sm:grid-cols-2 sm:gap-8">
         {stats.map((s) => (
           <div key={s.label} className="text-center">
             <p className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
