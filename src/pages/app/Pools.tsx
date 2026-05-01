@@ -1,4 +1,3 @@
-import { ExternalLink } from "lucide-react";
 import { Card, Row, SectionLabel } from "@/components/app/Shared";
 
 const pools = [
@@ -55,12 +54,9 @@ const Pools = () => {
                   <p className="text-[11px] text-muted-foreground">{p.venue}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="font-display text-sm tabular-nums">{p.apr} APR</p>
-                  <p className="text-[11px] tabular-nums text-muted-foreground">TVL {p.tvl}</p>
-                </div>
-                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+              <div className="text-right">
+                <p className="font-display text-sm tabular-nums">{p.apr} APR</p>
+                <p className="text-[11px] tabular-nums text-muted-foreground">TVL {p.tvl}</p>
               </div>
             </a>
           ))}
