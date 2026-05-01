@@ -44,7 +44,6 @@ const AppLayout = () => {
               onClick={() => open({ view: "Account" })}
               className="flex items-center gap-2 rounded-full bg-foreground px-3.5 py-1.5 text-[11px] font-semibold text-background transition hover:opacity-90"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               <span className="font-mono">{shorten(address)}</span>
             </button>
           ) : (
