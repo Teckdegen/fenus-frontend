@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {ITroveManager} from "./interfaces/ITroveManager.sol";
 import {IAddressesRegistry} from "./interfaces/IAddressesRegistry.sol";
-import {IActivePool, IDefaultPool, ICollSurplusPool, IGasPool} from "./interfaces/IPools.sol";
+import {IActivePool, IDefaultPool, ICollSurplusPool} from "./interfaces/IPools.sol";
 import {IFnUSD} from "./interfaces/IFnUSD.sol";
 import {IPriceFeed} from "./interfaces/IPriceFeed.sol";
 import {ISortedTroves} from "./interfaces/ISortedTroves.sol";
@@ -266,6 +266,7 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
  uint256 collForTreasury;
  uint256 collForHolders;
 
+<<<<<<< HEAD
  if (debtValueInColl <= coll) {
  surplusColl = coll - debtValueInColl;
  collForLP = debtValueInColl;
@@ -278,6 +279,23 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
  collForHolders = 0;
  surplusColl = 0;
  }
+=======
+            if (debtValueInColl <= coll) {
+                surplusColl     = coll - debtValueInColl;
+                // Debt-equivalent coll → Addax LP as FnUSD supply (not burned)
+                collForLP       = debtValueInColl;
+                // Surplus: 80% treasury, 20% Trove holders
+                collForTreasury = (surplusColl * Constants.LIQUIDATION_TREASURY_SHARE)
+                                  / Constants.DECIMAL_PRECISION;
+                collForHolders  = surplusColl - collForTreasury;
+            } else {
+                // Deep underwater — all coll goes to LP
+                collForLP       = coll;
+                collForTreasury = 0;
+                collForHolders  = 0;
+                surplusColl     = 0;
+            }
+>>>>>>> 93a6f9d (jejej)
 
  // Remove Trove O(1) FIX [2]
  totalStakes -= t.stake;
@@ -285,16 +303,23 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
  t.status = Status.ClosedByLiquidation;
  _removeTroveOwner(owner);
 
+<<<<<<< HEAD
  // FIX [4]: redistribute only the holder share of collateral,
  // and only the proportional debt that corresponds to that collateral.
  // debtForHolders = debt × (collForHolders / coll)
  if (collForHolders > 0 && totalStakes > 0) {
  uint256 debtForHolders = (debt * collForHolders) / coll;
+=======
+            // Redistribute 20% holder share via DefaultPool
+            if (collForHolders > 0 && totalStakes > 0) {
+                uint256 debtForHolders = (debt * collForHolders) / coll;
+>>>>>>> 93a6f9d (jejej)
 
  IActivePool(a.activePool).sendCollateral(a.defaultPool, collForHolders);
  IDefaultPool(a.defaultPool).creditCollateral(collForHolders);
  IDefaultPool(a.defaultPool).increaseDebt(debtForHolders);
 
+<<<<<<< HEAD
  L_coll += (collForHolders * Constants.DECIMAL_PRECISION) / totalStakes;
  L_debt += (debtForHolders * Constants.DECIMAL_PRECISION) / totalStakes;
  }
@@ -310,6 +335,22 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
 
  // Pay gas compensation to bot
  IGasPool(a.gasPool).payLiquidator(msg.sender, GasPool(a.gasPool).GAS_COMPENSATION());
+=======
+                L_coll += (collForHolders * Constants.DECIMAL_PRECISION) / totalStakes;
+                L_debt += (debtForHolders * Constants.DECIMAL_PRECISION) / totalStakes;
+            }
+
+            // LP portion + 80% treasury surplus → treasury
+            // Treasury routes LP portion to Addax as FnUSD liquidity supply
+            uint256 toTreasury = collForLP + collForTreasury;
+            if (toTreasury > 0) {
+                IActivePool(a.activePool).sendCollateral(a.treasury, toTreasury);
+            }
+
+            // No burn — FnUSD debt is absorbed by the LP supply sent to Addax.
+            // No bot payment — liquidation caller receives no compensation.
+            // The protocol keeps everything.
+>>>>>>> 93a6f9d (jejej)
 
  totalLiquidatedDebt += debt;
  totalLiquidatedColl += coll;
@@ -424,7 +465,12 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
  }
 }
 
+<<<<<<< HEAD
 // Minimal interface to read GAS_COMPENSATION from GasPool
 interface GasPool {
  function GAS_COMPENSATION() external view returns (uint256);
 }
+=======
+// Minimal interface to read GAS_COMPENSATION from GasPool — unused, kept for reference
+// interface GasPool { function GAS_COMPENSATION() external view returns (uint256); }
+>>>>>>> 93a6f9d (jejej)

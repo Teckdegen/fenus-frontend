@@ -5,6 +5,7 @@ import type { AppKitNetwork } from "@reown/appkit/networks";
 // TODO: replace with your Project ID from https://cloud.reown.com
 export const projectId = "YOUR_REOWN_PROJECT_ID";
 
+<<<<<<< HEAD
 // Litecoin zkEVM (update RPC / chainId if your network specs differ)
 export const litecoinZkEvm = {
  id: 8888888,
@@ -17,9 +18,29 @@ export const litecoinZkEvm = {
  default: { name: "LiteScan", url: "https://litescan.xyz" },
  },
  testnet: false,
+=======
+// LitVM LiteForge — Chain ID 4441
+export const litVMLiteForge = {
+  id: 4441,
+  name: "LitVM LiteForge",
+  nativeCurrency: { name: "zkLitecoin", symbol: "zkLTC", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://liteforge.rpc.caldera.xyz/http"],
+      webSocket: ["wss://liteforge.rpc.caldera.xyz/ws"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "LiteForge Explorer",
+      url: "https://liteforge.explorer.caldera.xyz",
+    },
+  },
+  testnet: true,
+>>>>>>> 93a6f9d (jejej)
 } as const satisfies AppKitNetwork;
 
-export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [litecoinZkEvm];
+export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [litVMLiteForge];
 
 export const wagmiAdapter = new WagmiAdapter({
  networks,

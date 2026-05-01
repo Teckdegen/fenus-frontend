@@ -1,46 +1,44 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-// Constants.sol All protocol parameters in one place.
+// Constants.sol — All protocol parameters in one place.
 library Constants {
- uint256 internal constant DECIMAL_PRECISION = 1e18;
- uint256 internal constant ONE_HUNDRED_PCT = 1e18;
- uint256 internal constant SECONDS_PER_YEAR = 365 days;
+    uint256 internal constant DECIMAL_PRECISION = 1e18;
+    uint256 internal constant ONE_HUNDRED_PCT = 1e18;
+    uint256 internal constant SECONDS_PER_YEAR = 365 days;
 
- // FnUSD: 6 decimals at the ERC20 surface, 18 decimals internally.
- uint256 internal constant FNUSD_EXTERNAL_DECIMALS = 6;
- uint256 internal constant FNUSD_INTERNAL_DECIMALS = 18;
- uint256 internal constant FNUSD_SCALE = 1e12;
+    // FnUSD: 6 decimals at the ERC20 surface, 18 decimals internally.
+    uint256 internal constant FNUSD_EXTERNAL_DECIMALS = 6;
+    uint256 internal constant FNUSD_INTERNAL_DECIMALS = 18;
+    uint256 internal constant FNUSD_SCALE = 1e12;
 
- // Collateral ratios.
- uint256 internal constant MCR = 130e16; // 130% minimum before liquidation
+    // Collateral ratios.
+    uint256 internal constant MCR = 130e16; // 130% — minimum before liquidation
 
- // Debt floor (18-dec internal). Liquidators must be able to profitably clear this.
- uint256 internal constant MIN_NET_DEBT = 500e18; // 500 FnUSD
+    // Debt floor (18-dec internal).
+    uint256 internal constant MIN_NET_DEBT = 500e18; // 500 FnUSD
 
- // Fixed annual interest rate all Troves pay 1%. Not user-configurable.
- uint256 internal constant ANNUAL_INTEREST_RATE = 1e16; // 1%
+    // Fixed annual interest rate — all Troves pay 1%. Not user-configurable.
+    uint256 internal constant ANNUAL_INTEREST_RATE = 1e16; // 1%
 
- // Liquidation collateral distribution.
- // When a Trove is liquidated:
- // 1. The debt amount is cancelled and an equivalent value of collateral
- // is split 50/50 into FnUSD and zkLTC and sent to Addax liquidity pools.
- // 2. The remaining surplus collateral (coll - debt value) is split:
- // 60% → protocol treasury
- // 40% → redistributed proportionally to all active Trove holders
- uint256 internal constant LIQUIDATION_LIQUIDITY_SPLIT = 50e16; // 50% each side to LP
- uint256 internal constant LIQUIDATION_TREASURY_SHARE = 60e16; // 60% of surplus → treasury
- uint256 internal constant LIQUIDATION_HOLDER_SHARE = 40e16; // 40% of surplus → Trove holders
+    // Liquidation collateral distribution.
+    // When a Trove is liquidated:
+    //   1. The debt-equivalent collateral goes to Addax LP as supply — not burned.
+    //   2. The surplus (coll - debt value) is split only if it exists:
+    //      80% → protocol treasury
+    //      20% → redistributed proportionally to active Trove holders
+    uint256 internal constant LIQUIDATION_TREASURY_SHARE = 80e16; // 80% of surplus
+    uint256 internal constant LIQUIDATION_HOLDER_SHARE   = 20e16; // 20% of surplus
 
- // One-time origination fee added to trove debt at openTrove. Routes to Treasury on close.
- uint256 internal constant ORIGINATION_FEE = 5e15; // 0.5%
+    // One-time origination fee added to trove debt at openTrove. Routes to Treasury.
+    uint256 internal constant ORIGINATION_FEE = 5e15; // 0.5%
 
- // Redemption: dynamic baseRate floor + decay. No upper cap.
- uint256 internal constant REDEMPTION_FEE_FLOOR = 5e15; // 0.5%
- uint256 internal constant MINUTE_DECAY_FACTOR = 999037758833783000; // half-life ~12h
- uint256 internal constant BETA = 2; // baseRate sensitivity to redemption volume
+    // Redemption: dynamic baseRate floor + decay.
+    uint256 internal constant REDEMPTION_FEE_FLOOR = 5e15; // 0.5%
+    uint256 internal constant MINUTE_DECAY_FACTOR = 999037758833783000; // half-life ~12h
+    uint256 internal constant BETA = 2;
 
- // Oracle freshness windows.
- uint256 internal constant PRICE_STALENESS_THRESHOLD = 1 hours;
- uint256 internal constant SHUTDOWN_GRACE_PERIOD = 1 hours;
+    // Oracle freshness windows.
+    uint256 internal constant PRICE_STALENESS_THRESHOLD = 1 hours;
+    uint256 internal constant SHUTDOWN_GRACE_PERIOD = 1 hours;
 }
