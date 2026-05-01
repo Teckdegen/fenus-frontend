@@ -143,7 +143,8 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         _requireActive(a);
 
         ITroveManager(a.troveManager).adjustTrove(msg.sender, -int256(collAmount), 0);
-        _requireICRAboveMCR(a);
+        // FIX: 135% buffer required after withdrawal — same as open
+        _requireICRAboveBuffer(a);
 
         IActivePool(a.activePool).sendCollateral(msg.sender, collAmount);
         _reInsert(a, upperHint, lowerHint);
@@ -167,7 +168,8 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         uint256 netNew   = amount18 + fee18;
 
         ITroveManager(a.troveManager).adjustTrove(msg.sender, 0, int256(netNew));
-        _requireICRAboveMCR(a);
+        // FIX: 135% buffer required after borrowing more — same as open
+        _requireICRAboveBuffer(a);
 
         IActivePool(a.activePool).increaseDebt(netNew);
         IFnUSD(a.fnUSD).mint(msg.sender, amount18);
@@ -251,6 +253,13 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         (uint256 price,) = IPriceFeed(a.priceFeed).fetchPrice();
         uint256 icr = ITroveManager(a.troveManager).getCurrentICR(msg.sender, price);
         if (icr < Constants.MCR) revert BelowMCR(icr, Constants.MCR);
+    }
+
+    // 135% buffer — required on open, withdraw collateral, and borrow more
+    function _requireICRAboveBuffer(IAddressesRegistry.Addresses memory a) internal view {
+        (uint256 price,) = IPriceFeed(a.priceFeed).fetchPrice();
+        uint256 icr = ITroveManager(a.troveManager).getCurrentICR(msg.sender, price);
+        if (icr < OPEN_ICR_BUFFER) revert BelowOpenICR(icr, OPEN_ICR_BUFFER);
     }
 
     function _reInsert(

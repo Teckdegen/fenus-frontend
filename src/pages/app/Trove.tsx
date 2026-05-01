@@ -10,11 +10,11 @@ import {
 } from "@/components/app/Shared";
 
 // ─── Constants (mirrors contracts/src/Constants.sol) ─────────────────────────
-const MCR            = 1.30;  // 130% minimum collateral ratio
-const OPEN_ICR       = 1.35;  // 135% required to open
+const MCR             = 1.30;  // 130% liquidation threshold (contracts only)
+const BUFFER          = 1.35;  // 135% — required for ALL user operations
 const ORIGINATION_FEE = 0.005; // 0.5%
-const ANNUAL_RATE    = 0.01;  // 1% fixed
-const MIN_DEBT       = 500;   // 500 FnUSD
+const ANNUAL_RATE     = 0.01;  // 1% fixed
+const MIN_DEBT        = 500;   // 500 FnUSD
 
 // Mock oracle price — replace with live feed once connected
 const MOCK_ZKLITECOIN_PRICE = 0; // $0 until wallet connected
@@ -25,7 +25,7 @@ const tabs = ["Open", "Adjust", "Close"] as const;
 function ratioColor(ratio: number | null): string {
   if (!ratio) return "text-muted-foreground";
   if (ratio >= 2.0)  return "text-emerald-400";
-  if (ratio >= 1.5)  return "text-yellow-400";
+  if (ratio >= 1.6)  return "text-yellow-400";
   if (ratio >= 1.35) return "text-orange-400";
   return "text-red-500";
 }
@@ -33,9 +33,9 @@ function ratioColor(ratio: number | null): string {
 function ratioLabel(ratio: number | null): string {
   if (!ratio) return "";
   if (ratio >= 2.0)  return "Safe";
-  if (ratio >= 1.5)  return "Moderate";
+  if (ratio >= 1.6)  return "Moderate";
   if (ratio >= 1.35) return "Risky";
-  return "Danger";
+  return "Below minimum";
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -71,7 +71,7 @@ const Trove = () => {
     const collUSD  = price > 0 ? coll * price : 0;
     const ratio    = totalDebt > 0 && collUSD > 0 ? collUSD / totalDebt : null;
     const liqPrice = totalDebt > 0 && coll > 0 ? (totalDebt * MCR) / coll : null;
-    const canOpen  = ratio !== null && ratio >= OPEN_ICR && totalDebt >= MIN_DEBT;
+    const canOpen  = ratio !== null && ratio >= BUFFER && totalDebt >= MIN_DEBT;
 
     // Interest projections
     const interest1y  = totalDebt * ANNUAL_RATE;
@@ -98,7 +98,7 @@ const Trove = () => {
     const collUSD  = price > 0 ? newColl * price : 0;
     const ratio    = newDebt > 0 && collUSD > 0 ? collUSD / newDebt : null;
     const liqPrice = newDebt > 0 && newColl > 0 ? (newDebt * MCR) / newColl : null;
-    const safe     = ratio !== null ? ratio >= MCR : true;
+    const safe     = ratio !== null ? ratio >= BUFFER : true;
 
     return { newColl, newDebt, collUSD, ratio, liqPrice, safe, fee };
   }, [adjCollInput, adjCollDir, adjDebtInput, adjDebtDir, existingColl, existingDebt, price]);
@@ -226,11 +226,11 @@ const Trove = () => {
                 </div>
 
                 {/* Warnings */}
-                {openCalc.ratio !== null && openCalc.ratio < OPEN_ICR && openCalc.ratio > 0 && (
+                {openCalc.ratio !== null && openCalc.ratio < BUFFER && openCalc.ratio > 0 && (
                   <div className="px-4 py-3 flex items-start gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400 mt-0.5" />
                     <p className="text-[11px] text-red-400">
-                      Ratio too low to open. Minimum 135% required. Add more collateral or borrow less.
+                      Ratio too low. Minimum 135% required for all operations. Add more collateral or borrow less.
                     </p>
                   </div>
                 )}
@@ -242,11 +242,11 @@ const Trove = () => {
                     </p>
                   </div>
                 )}
-                {openCalc.ratio !== null && openCalc.ratio >= 1.35 && openCalc.ratio < 1.5 && (
+                {openCalc.ratio !== null && openCalc.ratio >= BUFFER && openCalc.ratio < 1.6 && (
                   <div className="px-4 py-3 flex items-start gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-orange-400 mt-0.5" />
                     <p className="text-[11px] text-orange-400">
-                      Your ratio is close to the liquidation threshold. Consider adding more collateral.
+                      Your ratio is close to the 135% minimum. A small price drop could block future withdrawals.
                     </p>
                   </div>
                 )}
@@ -385,7 +385,8 @@ const Trove = () => {
                   <div className="px-4 py-3 flex items-start gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400 mt-0.5" />
                     <p className="text-[11px] text-red-400">
-                      This adjustment would put your ratio below 130%. Reduce the change or add more collateral.
+                      This adjustment would put your ratio below 135%. The contract will reject it.
+                      Reduce the change or add more collateral first.
                     </p>
                   </div>
                 )}
@@ -458,12 +459,12 @@ const Trove = () => {
       <div>
         <SectionLabel>Protocol Terms</SectionLabel>
         <Card className="p-5">
-          <Row label="Interest Rate"     value="1.00% APR"  hint="Fixed — accrues continuously to treasury" />
-          <Row label="Origination Fee"   value="0.50%"      hint="One-time on each borrow, goes to treasury" />
-          <Row label="Min Collateral Ratio" value="130%"    hint="Below this your Trove is liquidated" />
-          <Row label="Open at minimum"   value="135%"       hint="5% buffer required to open or borrow more" />
-          <Row label="Min Debt"          value="500 FnUSD"  hint="Minimum position size" />
-          <Row label="Collateral"        value="WzkLTC only" />
+          <Row label="Interest Rate"        value="1.00% APR"   hint="Fixed — accrues continuously to treasury" />
+          <Row label="Origination Fee"      value="0.50%"       hint="One-time on each borrow, goes to treasury" />
+          <Row label="Liquidation threshold" value="130%"       hint="Below this your Trove is liquidated by the bot" />
+          <Row label="Minimum ratio"        value="135%"        hint="Required for all operations — open, withdraw, borrow more" />
+          <Row label="Min Debt"             value="500 FnUSD"   hint="Minimum position size" />
+          <Row label="Collateral"           value="WzkLTC only" />
         </Card>
       </div>
     </div>
