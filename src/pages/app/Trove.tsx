@@ -397,11 +397,45 @@ const Trove = () => {
         {/* ── REPAY ────────────────────────────────────────────────────── */}
         {tab === "Repay" && (
           <div className="space-y-3">
+            {/* Current debt summary */}
+            <div className="rounded-2xl border border-border/60 bg-background/20 px-4 py-3 space-y-1.5">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Your Outstanding Debt</p>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Total debt</span>
+                <span className="tabular-nums font-medium text-foreground">{existingDebt.toFixed(2)} FnUSD</span>
+              </div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-muted-foreground">Your FnUSD balance</span>
+                <span className="tabular-nums">{fnUSDBalanceFull} FnUSD</span>
+              </div>
+              {existingDebt > 0 && (
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-muted-foreground">Remaining after full repay</span>
+                  <span className="tabular-nums">0.00 FnUSD</span>
+                </div>
+              )}
+            </div>
+
             <TokenInput label="Repay FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
               value={repayInput} onChange={(v) => { setRepayInput(v); actions.reset(); }} />
             {repayInput && <PreviewBlock {...repayCalc} safe={true} />}
             <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
-            <div className="flex justify-end pt-1">
+            <div className="flex justify-between items-center pt-1">
+              {/* Quick fill buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setRepayInput((existingDebt / 2).toFixed(6)); actions.reset(); }}
+                  className="rounded-full border border-border px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
+                >
+                  50%
+                </button>
+                <button
+                  onClick={() => { setRepayInput(existingDebt.toFixed(6)); actions.reset(); }}
+                  className="rounded-full border border-border px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
+                >
+                  Max
+                </button>
+              </div>
               <PrimaryButton disabled={!repayInput || busy}
                 onClick={() => actions.repayFnUSD(repayInput)}>
                 {busy ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Working…</> : "Repay Debt"}
