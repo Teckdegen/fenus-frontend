@@ -1,4 +1,6 @@
 // useTroveActions — all on-chain Trove operations wired to BorrowerOperations.
+// Gas limits are set explicitly to avoid estimation failures when the contract
+// calls fetchPrice() (a state-changing oracle function) during gas estimation.
 
 import { useState } from "react";
 import { useWriteContract } from "wagmi";
@@ -35,10 +37,22 @@ const ERC20_APPROVE_ABI = [
     outputs: [{ name: "", type: "bool" }] },
 ] as const;
 
-const ZERO  = "0x0000000000000000000000000000000000000000" as `0x${string}`;
-const BO    = CONTRACTS.BorrowerOperations as `0x${string}`;
-const COLL  = CONTRACTS.WzkLTC            as `0x${string}`;
-const RPC   = "https://liteforge.rpc.caldera.xyz/http";
+const ZERO = "0x0000000000000000000000000000000000000000" as `0x${string}`;
+const BO   = CONTRACTS.BorrowerOperations as `0x${string}`;
+const COLL = CONTRACTS.WzkLTC            as `0x${string}`;
+const RPC  = "https://liteforge.rpc.caldera.xyz/http";
+
+// Explicit gas limits — prevents the "tx fee exceeds cap" error that occurs
+// when the oracle's fetchPrice() (state-changing) is called during estimation.
+const GAS = {
+  openTrove:    BigInt(800_000),
+  addColl:      BigInt(400_000),
+  withdrawColl: BigInt(400_000),
+  borrowMore:   BigInt(400_000),
+  repayFnUSD:   BigInt(300_000),
+  closeTrove:   BigInt(500_000),
+  approve:      BigInt(100_000),
+};
 
 export type TxStatus = "idle" | "approving" | "pending" | "success" | "error";
 
@@ -62,7 +76,9 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       setStatus("approving");
       const hash = await writeContractAsync({
         address: COLL, abi: ERC20_APPROVE_ABI,
-        functionName: "approve", args: [BO, maxUint256],
+        functionName: "approve",
+        args: [BO, maxUint256],
+        gas: GAS.approve,
       });
       await pub.waitForTransactionReceipt({ hash });
     }
@@ -77,24 +93,28 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       await pub.waitForTransactionReceipt({ hash });
       setStatus("success");
     } catch (e: any) {
-      setError(e?.shortMessage || e?.message || "Transaction failed");
+      // Extract the most useful error message
+      const msg = e?.shortMessage || e?.details || e?.message || "Transaction failed";
+      setError(msg);
       setStatus("error");
     }
   }
 
-  // ── openTrove ───────────────────────────────────────────────────────────────
+  // WzkLTC is 8 decimals — all collateral amounts use parseUnits(str, 8)
+  // FnUSD external surface is 6 decimals — all debt amounts use parseUnits(str, 6)
+
   async function openTrove(collStr: string, fnUSDStr: string) {
     reset();
-    const collAmt  = parseUnits(collStr,  8); // WzkLTC 8 dec
-    const fnUSDAmt = parseUnits(fnUSDStr, 6); // FnUSD 6 dec
+    const collAmt  = parseUnits(collStr,  8);
+    const fnUSDAmt = parseUnits(fnUSDStr, 6);
     await ensureApproval(collAmt);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "openTrove",
       args: [collAmt, fnUSDAmt, ZERO, ZERO],
+      gas: GAS.openTrove,
     }));
   }
 
-  // ── addColl ─────────────────────────────────────────────────────────────────
   async function addColl(collStr: string) {
     reset();
     const collAmt = parseUnits(collStr, 8);
@@ -102,45 +122,46 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "addColl",
       args: [collAmt, ZERO, ZERO],
+      gas: GAS.addColl,
     }));
   }
 
-  // ── withdrawColl ────────────────────────────────────────────────────────────
   async function withdrawColl(collStr: string) {
     reset();
     const collAmt = parseUnits(collStr, 8);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "withdrawColl",
       args: [collAmt, ZERO, ZERO],
+      gas: GAS.withdrawColl,
     }));
   }
 
-  // ── borrowMore ──────────────────────────────────────────────────────────────
   async function borrowMore(fnUSDStr: string) {
     reset();
     const fnUSDAmt = parseUnits(fnUSDStr, 6);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "withdrawFnUSD",
       args: [fnUSDAmt, ZERO, ZERO],
+      gas: GAS.borrowMore,
     }));
   }
 
-  // ── repayFnUSD ──────────────────────────────────────────────────────────────
   async function repayFnUSD(fnUSDStr: string) {
     reset();
     const fnUSDAmt = parseUnits(fnUSDStr, 6);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "repayFnUSD",
       args: [fnUSDAmt, ZERO, ZERO],
+      gas: GAS.repayFnUSD,
     }));
   }
 
-  // ── closeTrove ──────────────────────────────────────────────────────────────
   async function closeTrove() {
     reset();
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "closeTrove",
       args: [],
+      gas: GAS.closeTrove,
     }));
   }
 
