@@ -1,132 +1,141 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {AggregatorV3Interface} from "./interfaces/AggregatorV3Interface.sol";
+import {IDIAOracle} from "./interfaces/IDIAOracle.sol";
 import {IPriceFeed} from "./interfaces/IPriceFeed.sol";
 import {Constants} from "./Constants.sol";
 
-// PriceFeed primary + fallback Chainlink-style oracles.
+// PriceFeed — wraps the DIA oracle at 0x45dDa5d881BD2C917976CCfde74fFd6f6412da29
+// on LitVM LiteForge (chainId 4441).
 //
-// Security hardening [6] price manipulation protection:
-// - Staleness check: rejects prices older than 1 hour
-// - Deviation check: if the new price deviates more than MAX_PRICE_DEVIATION
-// (20%) from lastGoodPrice in a single update, the update is rejected and
-// the oracle falls back. This prevents a single manipulated round from
-// instantly moving the protocol price by a large amount.
-// - Both feeds must fail for more than SHUTDOWN_GRACE_PERIOD (1 hour) before
-// the protocol enters Shutdown a brief outage does not freeze the system.
-// - No admin write path nobody can manually set a price, ever.
+// DIA returns prices with 8 decimals. This contract scales to 18 decimals
+// for internal protocol use.
+//
+// Security:
+//   - Staleness check: rejects prices older than 1 hour
+//   - Deviation check: rejects any single update that moves >20% from
+//     lastGoodPrice — blocks flash-loan oracle manipulation
+//   - Fallback: optional second DIA feed. If primary fails, tries fallback.
+//   - Grace period: both feeds must be down for 1 hour before Shutdown
+//   - No admin write path: nobody can manually set a price
+//
+// Pair key: "LTC/USD" — DIA's identifier for Litecoin/USD
 contract PriceFeed is IPriceFeed {
- AggregatorV3Interface public immutable primary;
- AggregatorV3Interface public immutable fallbackOracle;
+    IDIAOracle public immutable primary;
+    IDIAOracle public immutable fallbackOracle; // address(0) = no fallback
 
- uint256 public lastGoodPrice;
- uint256 public outageStart;
- Status public status;
+    // The DIA key for the asset pair
+    string public constant PAIR_KEY = "LTC/USD";
 
- // FIX [6]: max single-update price move 20%.
- // A flash-loan attack that moves the oracle >20% in one block is rejected.
- uint256 private constant MAX_PRICE_DEVIATION = 20e16; // 20%
+    // DIA returns 8-decimal prices — scale to 18 for protocol math
+    uint256 private constant DIA_DECIMALS    = 8;
+    uint256 private constant SCALE_TO_18     = 10 ** (18 - DIA_DECIMALS); // 1e10
 
- event PriceUpdated(uint256 price18, address source);
- event OutageStarted(uint256 timestamp);
- event ShutdownEntered(uint256 timestamp);
- event PriceDeviationRejected(uint256 newPrice, uint256 lastGoodPrice, uint256 deviation);
+    // Max single-update price deviation: 20%
+    uint256 private constant MAX_DEVIATION   = 20e16;
 
- error InvalidOracle();
- error NoLastGoodPrice();
+    uint256 public lastGoodPrice;
+    uint256 public outageStart;
+    Status  public status;
 
- constructor(address _primary, address _fallback) {
- if (_primary == address(0)) revert InvalidOracle();
- primary = AggregatorV3Interface(_primary);
- fallbackOracle = AggregatorV3Interface(_fallback);
- status = Status.Live;
- }
+    event PriceUpdated(uint256 price18, address source);
+    event OutageStarted(uint256 timestamp);
+    event ShutdownEntered(uint256 timestamp);
+    event PriceDeviationRejected(uint256 newPrice, uint256 lastGoodPrice, uint256 deviation);
 
- function getLastGoodPrice() external view override returns (uint256) {
- return lastGoodPrice;
- }
+    error InvalidOracle();
+    error NoLastGoodPrice();
 
- function fetchPrice() external override returns (uint256 price18, bool isLive) {
- if (status == Status.Shutdown) {
- if (lastGoodPrice == 0) revert NoLastGoodPrice();
- return (lastGoodPrice, false);
- }
+    constructor(address _primary, address _fallback) {
+        if (_primary == address(0)) revert InvalidOracle();
+        primary        = IDIAOracle(_primary);
+        fallbackOracle = IDIAOracle(_fallback); // zero = no fallback
+        status         = Status.Live;
+    }
 
- (uint256 p, bool ok) = _readOracle(primary);
- if (ok && _deviationAcceptable(p)) {
- lastGoodPrice = p;
- outageStart = 0;
- status = Status.Live;
- emit PriceUpdated(p, address(primary));
- return (p, true);
- }
+    function getLastGoodPrice() external view override returns (uint256) {
+        return lastGoodPrice;
+    }
 
- if (address(fallbackOracle) != address(0)) {
- (uint256 fp, bool fok) = _readOracle(fallbackOracle);
- if (fok && _deviationAcceptable(fp)) {
- lastGoodPrice = fp;
- outageStart = 0;
- status = Status.Live;
- emit PriceUpdated(fp, address(fallbackOracle));
- return (fp, true);
- }
- }
+    function fetchPrice() external override returns (uint256 price18, bool isLive) {
+        if (status == Status.Shutdown) {
+            if (lastGoodPrice == 0) revert NoLastGoodPrice();
+            return (lastGoodPrice, false);
+        }
 
- // Both feeds bad or deviated too far
- if (outageStart == 0) {
- outageStart = block.timestamp;
- status = Status.ShutdownGrace;
- emit OutageStarted(block.timestamp);
- } else if (block.timestamp - outageStart >= Constants.SHUTDOWN_GRACE_PERIOD) {
- status = Status.Shutdown;
- emit ShutdownEntered(block.timestamp);
- }
+        // Try primary DIA feed
+        (uint256 p, bool ok) = _readDIA(primary);
+        if (ok && _deviationOk(p)) {
+            lastGoodPrice = p;
+            outageStart   = 0;
+            status        = Status.Live;
+            emit PriceUpdated(p, address(primary));
+            return (p, true);
+        }
 
- if (lastGoodPrice == 0) revert NoLastGoodPrice();
- return (lastGoodPrice, false);
- }
+        // Try fallback DIA feed
+        if (address(fallbackOracle) != address(0)) {
+            (uint256 fp, bool fok) = _readDIA(fallbackOracle);
+            if (fok && _deviationOk(fp)) {
+                lastGoodPrice = fp;
+                outageStart   = 0;
+                status        = Status.Live;
+                emit PriceUpdated(fp, address(fallbackOracle));
+                return (fp, true);
+            }
+        }
 
- // ─── Internal ─────────────────────────────────────────────────────────────
+        // Both feeds bad — track outage clock
+        if (outageStart == 0) {
+            outageStart = block.timestamp;
+            status      = Status.ShutdownGrace;
+            emit OutageStarted(block.timestamp);
+        } else if (block.timestamp - outageStart >= Constants.SHUTDOWN_GRACE_PERIOD) {
+            status = Status.Shutdown;
+            emit ShutdownEntered(block.timestamp);
+        }
 
- // FIX [6]: reject price if it moves more than 20% from last known good price.
- // On first price (lastGoodPrice == 0) any price is accepted.
- function _deviationAcceptable(uint256 newPrice) internal view returns (bool) {
- if (lastGoodPrice == 0) return true;
+        if (lastGoodPrice == 0) revert NoLastGoodPrice();
+        return (lastGoodPrice, false);
+    }
 
- uint256 deviation;
- if (newPrice >= lastGoodPrice) {
- deviation = ((newPrice - lastGoodPrice) * Constants.DECIMAL_PRECISION) / lastGoodPrice;
- } else {
- deviation = ((lastGoodPrice - newPrice) * Constants.DECIMAL_PRECISION) / lastGoodPrice;
- }
+    // ─── Internal ─────────────────────────────────────────────────────────────
 
- if (deviation > MAX_PRICE_DEVIATION) {
- emit PriceDeviationRejected(newPrice, lastGoodPrice, deviation);
- return false;
- }
- return true;
- }
+    function _readDIA(IDIAOracle oracle)
+        internal
+        view
+        returns (uint256 price18, bool ok)
+    {
+        try oracle.getValue(PAIR_KEY) returns (uint128 price, uint128 timestamp) {
+            if (price == 0)     return (0, false);
+            if (timestamp == 0) return (0, false);
+            // Staleness check
+            if (block.timestamp - uint256(timestamp) > Constants.PRICE_STALENESS_THRESHOLD) {
+                return (0, false);
+            }
+            // Scale 8-dec DIA price → 18-dec internal
+            price18 = uint256(price) * SCALE_TO_18;
+            ok      = price18 > 0;
+        } catch {
+            return (0, false);
+        }
+    }
 
- function _readOracle(AggregatorV3Interface oracle)
- internal view
- returns (uint256 price18, bool ok)
- {
- try oracle.decimals() returns (uint8 dec) {
- try oracle.latestRoundData() returns (
- uint80, int256 answer, uint256, uint256 updatedAt, uint80
- ) {
- if (answer <= 0) return (0, false);
- if (updatedAt == 0) return (0, false);
- if (block.timestamp - updatedAt > Constants.PRICE_STALENESS_THRESHOLD) return (0, false);
+    // Reject if new price moves >20% from last known good in one update
+    function _deviationOk(uint256 newPrice) internal view returns (bool) {
+        if (lastGoodPrice == 0) return true; // first price — accept anything
 
- uint256 raw = uint256(answer);
- if (dec < 18) price18 = raw * (10 ** (18 - dec));
- else if (dec > 18) price18 = raw / (10 ** (dec - 18));
- else price18 = raw;
+        uint256 deviation;
+        if (newPrice >= lastGoodPrice) {
+            deviation = ((newPrice - lastGoodPrice) * Constants.DECIMAL_PRECISION) / lastGoodPrice;
+        } else {
+            deviation = ((lastGoodPrice - newPrice) * Constants.DECIMAL_PRECISION) / lastGoodPrice;
+        }
 
- ok = price18 > 0;
- } catch { return (0, false); }
- } catch { return (0, false); }
- }
+        if (deviation > MAX_DEVIATION) {
+            emit PriceDeviationRejected(newPrice, lastGoodPrice, deviation);
+            return false;
+        }
+        return true;
+    }
 }

@@ -14,15 +14,12 @@ async function main() {
   console.log(`  Balance  : ${ethers.formatEther(await ethers.provider.getBalance(deployer.address))} zkLTC`);
   console.log("══════════════════════════════════════════\n");
 
-  const primaryOracle  = process.env.PRIMARY_ORACLE  || ethers.ZeroAddress;
+  const primaryOracle  = process.env.PRIMARY_ORACLE  || "0x45dDa5d881BD2C917976CCfde74fFd6f6412da29";
   const fallbackOracle = process.env.FALLBACK_ORACLE || ethers.ZeroAddress;
   const treasury       = process.env.TREASURY        || deployer.address;
 
-  if (primaryOracle === ethers.ZeroAddress) {
-    console.warn("⚠️  PRIMARY_ORACLE not set — using zero address (PriceFeed will fail on fetchPrice)");
-  }
   console.log(`  Treasury : ${treasury}`);
-  console.log(`  Oracle   : ${primaryOracle}\n`);
+  console.log(`  DIA Feed : ${primaryOracle} (LTC/USD)\n`);
 
   // ── 1. AddressesRegistry ──────────────────────────────────────────────────
   const Registry = await ethers.getContractFactory("AddressesRegistry");
