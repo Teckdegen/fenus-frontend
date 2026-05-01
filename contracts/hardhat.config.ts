@@ -2,7 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "dotenv/config";
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x" + "0".repeat(64);
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -13,9 +13,9 @@ const config: HardhatUserConfig = {
     },
   },
   paths: {
-    sources: "./src",
-    tests:   "./test",
-    cache:   "./cache",
+    sources:   "./src",
+    tests:     "./test",
+    cache:     "./cache",
     artifacts: "./artifacts",
   },
   networks: {
@@ -23,9 +23,9 @@ const config: HardhatUserConfig = {
     liteforge: {
       url:      "https://liteforge.rpc.caldera.xyz/http",
       chainId:  4441,
-      accounts: [PRIVATE_KEY],
+      // Only include accounts if PRIVATE_KEY is set — allows compile without a key
+      ...(PRIVATE_KEY ? { accounts: [PRIVATE_KEY] } : {}),
     },
-    // Local hardhat node for testing
     localhost: {
       url: "http://127.0.0.1:8545",
     },
