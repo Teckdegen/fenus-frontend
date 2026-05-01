@@ -64,25 +64,29 @@ export const TokenInput = ({
   onChange?: (v: string) => void;
 }) => (
   <div className="rounded-2xl border border-border bg-background/40 p-4 transition focus-within:border-foreground/40">
-    <div className="mb-2 flex items-center justify-between">
-      <span className="text-[11px] text-muted-foreground">{label}</span>
+    <div className="mb-2 flex items-center justify-between gap-2">
+      <span className="text-[11px] text-muted-foreground shrink-0">{label}</span>
       {balance && (
-        <button type="button" className="font-mono text-[11px] text-muted-foreground transition hover:text-foreground">
+        <button
+          type="button"
+          className="font-mono text-[11px] text-muted-foreground transition hover:text-foreground truncate max-w-[140px] text-right"
+        >
           Balance: {balance}
         </button>
       )}
     </div>
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 min-w-0">
       <input
         inputMode="decimal"
         placeholder={placeholder}
         value={value}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-        className="w-full bg-transparent font-display text-3xl font-semibold tabular-nums outline-none placeholder:text-muted-foreground/30"
+        className="min-w-0 flex-1 bg-transparent font-display text-2xl sm:text-3xl font-semibold tabular-nums outline-none placeholder:text-muted-foreground/30"
       />
-      <div className="flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5">
-        <TokenIcon symbol={symbol} className="h-5 w-5" />
-        <span className="font-display text-xs font-medium tracking-wide">{symbol}</span>
+      {/* Token pill — fixed width so it never overflows */}
+      <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 py-1.5">
+        <TokenIcon symbol={symbol} className="h-4 w-4 shrink-0" />
+        <span className="font-display text-[11px] font-medium tracking-wide whitespace-nowrap">{symbol}</span>
       </div>
     </div>
   </div>

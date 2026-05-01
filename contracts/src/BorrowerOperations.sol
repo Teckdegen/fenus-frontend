@@ -17,31 +17,30 @@ import {Decimals} from "./libraries/Decimals.sol";
 
 // BorrowerOperations — user-facing entry point for all Trove management.
 //
-// No gas compensation — the protocol keeps all liquidation proceeds.
-// The bot is run by the protocol and needs no on-chain payment.
+// Decimal boundary:
+//   WzkLTC ERC20 surface = 8 decimals  (collAmount8  — used only for safeTransferFrom/safeTransfer)
+//   Protocol internal    = 18 decimals (collAmount18 — used for all math, TroveManager, ActivePool)
+//   FnUSD ERC20 surface  = 6 decimals  (fnUSDAmount6 — used for balanceOf checks)
+//   FnUSD internal       = 18 decimals (fnUSDAmount18 — used for mint/burn/math)
 //
-// Security:
-//   [1] ReentrancyGuard on all state-changing functions
-//   [6] New positions require ICR >= 135% (5% buffer above 130% MCR)
+//   COLL_SCALE = 1e10  converts 8-dec → 18-dec
+//   ActivePool.sendCollateral(to, amount18) — ActivePool scales back to 8-dec for the actual transfer
 contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IAddressesRegistry public immutable registry;
 
-    // 5% buffer above MCR — protects against single-block price manipulation
+    // WzkLTC is 8 decimals; protocol uses 18 internally. Scale factor = 1e10.
+    uint256 private constant COLL_SCALE    = 1e10;
     uint256 private constant OPEN_ICR_BUFFER = 135e16; // 135%
 
-    // ─── Events ───────────────────────────────────────────────────────────────
-
-    event TroveOpened(address indexed owner, uint256 coll, uint256 debt);
-    event CollateralAdded(address indexed owner, uint256 amount);
-    event CollateralWithdrawn(address indexed owner, uint256 amount);
+    event TroveOpened(address indexed owner, uint256 coll18, uint256 debt18);
+    event CollateralAdded(address indexed owner, uint256 amount18);
+    event CollateralWithdrawn(address indexed owner, uint256 amount18);
     event FnUSDBorrowed(address indexed owner, uint256 amount18);
     event FnUSDRepaid(address indexed owner, uint256 amount18);
     event TroveClosed(address indexed owner);
     event CollateralClaimed(address indexed owner, uint256 amount);
-
-    // ─── Errors ───────────────────────────────────────────────────────────────
 
     error TroveNotActive();
     error TroveAlreadyExists();
@@ -51,19 +50,17 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
     error InsufficientFnUSDBalance();
     error PriceFeedDown();
 
-    // ─── Constructor ──────────────────────────────────────────────────────────
-
     constructor(IAddressesRegistry _registry) {
         registry = _registry;
     }
 
     // ─── openTrove ────────────────────────────────────────────────────────────
 
-    // Deposit WzkLTC, mint FnUSD. Interest is fixed at 1% — no rate param.
-    // Debt = borrowed amount + 0.5% origination fee. No gas compensation added.
+    // collAmount: 8-dec WzkLTC units (what the user approves)
+    // fnUSDAmount6: 6-dec FnUSD units
     function openTrove(
-        uint256 collAmount,
-        uint256 fnUSDAmount6,
+        uint256 collAmount,   // 8-dec
+        uint256 fnUSDAmount6, // 6-dec
         address upperHint,
         address lowerHint
     ) external override nonReentrant {
@@ -77,42 +74,41 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
             revert TroveAlreadyExists();
         }
 
-        uint256 fnUSDAmount18 = Decimals.to18(fnUSDAmount6);
+        // Scale collateral to 18-dec for all internal math
+        uint256 coll18 = collAmount * COLL_SCALE;
 
-        // Origination fee (0.5%) added to debt, goes to treasury
-        uint256 fee18   = (fnUSDAmount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
-        uint256 netDebt = fnUSDAmount18 + fee18;
+        uint256 fnUSDAmount18 = Decimals.to18(fnUSDAmount6);
+        uint256 fee18         = (fnUSDAmount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
+        uint256 netDebt       = fnUSDAmount18 + fee18;
 
         (uint256 price, bool isLive) = IPriceFeed(a.priceFeed).fetchPrice();
         if (!isLive) revert PriceFeedDown();
 
-        // Must open at 135% — 5% above the 130% liquidation threshold
-        uint256 icr = LiquityMath._computeCR(collAmount, netDebt, price);
+        uint256 icr = LiquityMath._computeCR(coll18, netDebt, price);
         if (icr < OPEN_ICR_BUFFER) revert BelowOpenICR(icr, OPEN_ICR_BUFFER);
 
-        // Pull collateral into ActivePool
+        // Pull 8-dec tokens from user into ActivePool
         IERC20(a.collateralToken).safeTransferFrom(msg.sender, a.activePool, collAmount);
-        IActivePool(a.activePool).creditCollateral(collAmount);
+        // Credit 18-dec amount to ActivePool accounting
+        IActivePool(a.activePool).creditCollateral(coll18);
         IActivePool(a.activePool).increaseDebt(netDebt);
 
-        // Register Trove
-        tm.openTrove(msg.sender, collAmount, netDebt);
+        // Register Trove with 18-dec collateral
+        tm.openTrove(msg.sender, coll18, netDebt);
 
-        // Insert into SortedTroves
-        uint256 nicr = LiquityMath._computeNominalCR(collAmount, netDebt);
+        uint256 nicr = LiquityMath._computeNominalCR(coll18, netDebt);
         ISortedTroves(a.sortedTroves).insert(msg.sender, nicr, upperHint, lowerHint);
 
-        // Mint FnUSD to user, fee to treasury
         IFnUSD(a.fnUSD).mint(msg.sender, fnUSDAmount18);
         if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18);
 
-        emit TroveOpened(msg.sender, collAmount, netDebt);
+        emit TroveOpened(msg.sender, coll18, netDebt);
     }
 
     // ─── addColl ──────────────────────────────────────────────────────────────
 
     function addColl(
-        uint256 collAmount,
+        uint256 collAmount,   // 8-dec
         address upperHint,
         address lowerHint
     ) external override nonReentrant {
@@ -120,18 +116,20 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         _requireActive(a);
 
+        uint256 coll18 = collAmount * COLL_SCALE;
+
         IERC20(a.collateralToken).safeTransferFrom(msg.sender, a.activePool, collAmount);
-        IActivePool(a.activePool).creditCollateral(collAmount);
-        ITroveManager(a.troveManager).adjustTrove(msg.sender, int256(collAmount), 0);
+        IActivePool(a.activePool).creditCollateral(coll18);
+        ITroveManager(a.troveManager).adjustTrove(msg.sender, int256(coll18), 0);
         _reInsert(a, upperHint, lowerHint);
 
-        emit CollateralAdded(msg.sender, collAmount);
+        emit CollateralAdded(msg.sender, coll18);
     }
 
     // ─── withdrawColl ─────────────────────────────────────────────────────────
 
     function withdrawColl(
-        uint256 collAmount,
+        uint256 collAmount,   // 8-dec
         address upperHint,
         address lowerHint
     ) external override nonReentrant {
@@ -139,14 +137,16 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         _requireActive(a);
 
-        ITroveManager(a.troveManager).adjustTrove(msg.sender, -int256(collAmount), 0);
-        // FIX: 135% buffer required after withdrawal — same as open
+        uint256 coll18 = collAmount * COLL_SCALE;
+
+        ITroveManager(a.troveManager).adjustTrove(msg.sender, -int256(coll18), 0);
         _requireICRAboveBuffer(a);
 
-        IActivePool(a.activePool).sendCollateral(msg.sender, collAmount);
+        // ActivePool sends 18-dec internally; it scales back to 8-dec for the token transfer
+        IActivePool(a.activePool).sendCollateral(msg.sender, coll18);
         _reInsert(a, upperHint, lowerHint);
 
-        emit CollateralWithdrawn(msg.sender, collAmount);
+        emit CollateralWithdrawn(msg.sender, coll18);
     }
 
     // ─── withdrawFnUSD ────────────────────────────────────────────────────────
@@ -165,7 +165,6 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         uint256 netNew   = amount18 + fee18;
 
         ITroveManager(a.troveManager).adjustTrove(msg.sender, 0, int256(netNew));
-        // FIX: 135% buffer required after borrowing more — same as open
         _requireICRAboveBuffer(a);
 
         IActivePool(a.activePool).increaseDebt(netNew);
@@ -203,14 +202,12 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
 
     // ─── closeTrove ───────────────────────────────────────────────────────────
 
-    // User repays their full debt (borrowed + accrued interest + origination fee).
-    // No gas compensation — just repay what you owe, get your collateral back.
     function closeTrove() external override nonReentrant {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         _requireActive(a);
 
         ITroveManager tm = ITroveManager(a.troveManager);
-        (uint256 debt, uint256 coll,) = tm.getEntireDebtAndColl(msg.sender);
+        (uint256 debt, uint256 coll18,) = tm.getEntireDebtAndColl(msg.sender);
 
         uint256 repay6 = Decimals.from18(debt);
 
@@ -218,14 +215,12 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
             revert InsufficientFnUSDBalance();
         }
 
-        // Burn the full debt
         IFnUSD(a.fnUSD).burn(msg.sender, debt);
-
-        // Close Trove, remove from list, return collateral
         tm.closeTrove(msg.sender);
         ISortedTroves(a.sortedTroves).remove(msg.sender);
         IActivePool(a.activePool).decreaseDebt(debt);
-        IActivePool(a.activePool).sendCollateral(msg.sender, coll);
+        // sendCollateral uses 18-dec; ActivePool scales to 8-dec for the actual transfer
+        IActivePool(a.activePool).sendCollateral(msg.sender, coll18);
 
         emit TroveClosed(msg.sender);
     }
@@ -238,7 +233,7 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         emit CollateralClaimed(msg.sender, 0);
     }
 
-    // ─── Internal helpers ─────────────────────────────────────────────────────
+    // ─── Internal ─────────────────────────────────────────────────────────────
 
     function _requireActive(IAddressesRegistry.Addresses memory a) internal view {
         if (ITroveManager(a.troveManager).getTroveStatus(msg.sender) != ITroveManager.Status.Active) {
@@ -246,13 +241,6 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         }
     }
 
-    function _requireICRAboveMCR(IAddressesRegistry.Addresses memory a) internal {
-        (uint256 price,) = IPriceFeed(a.priceFeed).fetchPrice();
-        uint256 icr = ITroveManager(a.troveManager).getCurrentICR(msg.sender, price);
-        if (icr < Constants.MCR) revert BelowMCR(icr, Constants.MCR);
-    }
-
-    // 135% buffer — required on open, withdraw collateral, and borrow more
     function _requireICRAboveBuffer(IAddressesRegistry.Addresses memory a) internal {
         (uint256 price,) = IPriceFeed(a.priceFeed).fetchPrice();
         uint256 icr = ITroveManager(a.troveManager).getCurrentICR(msg.sender, price);

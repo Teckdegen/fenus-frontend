@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IDefaultPool} from "./interfaces/IPools.sol";
+import {IActivePool} from "./interfaces/IPools.sol";
 import {IAddressesRegistry} from "./interfaces/IAddressesRegistry.sol";
 
 // DefaultPool holds the collateral and debt that has been redistributed from
@@ -85,12 +86,15 @@ contract DefaultPool is IDefaultPool {
  }
 
  // Called by TroveManager when an active Trove absorbs its pending collateral
- // share. Transfers tokens back to ActivePool and updates bookkeeping.
+ // share. Transfers 8-dec tokens to ActivePool and credits 18-dec internally.
  function sendCollateralToActivePool(uint256 amount) external override onlyTroveManager {
  IAddressesRegistry.Addresses memory a = registry.addresses();
  collateral -= amount;
  emit DefaultPoolCollateralUpdated(collateral);
  emit CollateralSentToActivePool(amount);
- collateralToken.safeTransfer(a.activePool, amount);
+ // amount is 18-dec; scale to 8-dec for WzkLTC ERC20 transfer
+ collateralToken.safeTransfer(a.activePool, amount / 1e10);
+ // Credit 18-dec amount back to ActivePool accounting
+ IActivePool(a.activePool).creditCollateral(amount);
  }
 }
