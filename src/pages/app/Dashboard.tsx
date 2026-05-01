@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 import { Card, Row, SectionLabel } from "@/components/app/Shared";
 import { useBalances } from "@/hooks/useBalances";
 
@@ -41,6 +42,25 @@ const Dashboard = () => {
             <p className="font-display text-lg font-semibold tabular-nums mt-0.5">${ltcPriceUSD}</p>
           </div>
         </Card>
+      )}
+
+      {/* Wrap notification — shown when connected but WzkLTC balance is 0 */}
+      {isConnected && wzkLTCBalance === "0.00" && (
+        <div className="flex items-start gap-3 rounded-2xl border border-orange-500/30 bg-orange-500/10 px-4 py-3">
+          <AlertCircle className="h-4 w-4 shrink-0 text-orange-400 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-orange-300">You have no WzkLTC</p>
+            <p className="text-[11px] text-orange-300/70 mt-0.5">
+              Wrap your native zkLTC into WzkLTC to open a Trove and borrow FnUSD.
+            </p>
+          </div>
+          <Link
+            to="/app/convert"
+            className="shrink-0 rounded-full bg-orange-400 px-3 py-1.5 text-[11px] font-semibold text-black transition hover:opacity-90"
+          >
+            Wrap now
+          </Link>
+        </div>
       )}
 
       <div className="grid gap-5 lg:grid-cols-2">

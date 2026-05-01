@@ -12,6 +12,7 @@ import Dashboard from "./pages/app/Dashboard.tsx";
 import Trove from "./pages/app/Trove.tsx";
 import Pools from "./pages/app/Pools.tsx";
 import Redeem from "./pages/app/Redeem.tsx";
+import Convert from "./pages/app/Convert.tsx";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
               <Route path="trove" element={<Trove />} />
               <Route path="pools" element={<Pools />} />
               <Route path="redeem" element={<Redeem />} />
+              <Route path="convert" element={<Convert />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
