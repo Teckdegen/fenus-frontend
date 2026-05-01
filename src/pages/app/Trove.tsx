@@ -269,7 +269,25 @@ const Trove = () => {
 
         {/* ── OPEN ─────────────────────────────────────────────────────── */}
         {tab === "Open" && (
-          <div className="space-y-3">
+          hasTrove ? (
+            /* Already have a Trove — show message instead of open form */
+            <div className="rounded-2xl border border-border/60 bg-background/20 px-4 py-8 flex flex-col items-center text-center gap-3">
+              <p className="font-display text-sm font-semibold">You already have an open Trove</p>
+              <p className="text-[11px] text-muted-foreground max-w-xs">
+                One Trove per wallet. Use the Add, Borrow, Repay, or Remove tabs to manage your existing position.
+              </p>
+              <div className="flex gap-2 mt-1">
+                <button onClick={() => setTab("Add")}
+                  className="rounded-full border border-border px-4 py-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition">
+                  Add Collateral
+                </button>
+                <button onClick={() => setTab("Borrow")}
+                  className="rounded-full border border-border px-4 py-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition">
+                  Borrow More
+                </button>
+              </div>
+            </div>
+          ) : (
             <TokenInput label="Deposit WzkLTC" symbol="zkLTC" balance={wzkLTCBalanceFull}
               value={collInput} onChange={(v) => { setCollInput(v); actions.reset(); }} />
             <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
@@ -344,6 +362,7 @@ const Trove = () => {
               </PrimaryButton>
             </div>
           </div>
+          )
         )}
 
         {/* ── ADD ──────────────────────────────────────────────────────── */}
