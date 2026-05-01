@@ -37,7 +37,7 @@ const FNUSD_ADDR = CONTRACTS.FnUSD as `0x${string}`;
 
 const Redeem = () => {
   const { open } = useAppKit();
-  const { fnUSDBalance, wzkLTCBalance, priceNum, isConnected, address } = useBalances();
+  const { fnUSDBalance: fnUSDBalanceFull, wzkLTCBalance: wzkLTCBalanceFull, priceNum, isConnected, address } = useBalances();
   const { writeContractAsync } = useWriteContract();
 
   const [fnUSDAmount, setFnUSDAmount] = useState("");
@@ -142,7 +142,7 @@ const Redeem = () => {
         <TokenInput
           label="You burn"
           symbol="FnUSD"
-          balance={fnUSDBalance}
+          balance={fnUSDBalanceFull}
           value={fnUSDAmount}
           onChange={(v) => { setFnUSDAmount(v); setStatus("idle"); }}
         />
@@ -158,7 +158,7 @@ const Redeem = () => {
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[11px] text-muted-foreground">You receive</span>
             <span className="font-mono text-[11px] text-muted-foreground">
-              Balance: {wzkLTCBalance}
+              Balance: {wzkLTCBalanceFull}
             </span>
           </div>
           <div className="flex items-center gap-3">

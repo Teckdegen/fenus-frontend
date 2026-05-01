@@ -96,9 +96,9 @@ const Trove = () => {
   const { open } = useAppKit();
 
   const {
-    wzkLTCBalance, fnUSDBalance, priceNum,
+    wzkLTCBalance, wzkLTCBalanceFull, fnUSDBalance, fnUSDBalanceFull, priceNum,
     hasTrove, troveColl: existingCollStr, troveDebt: existingDebtStr,
-    isConnected, address, raw,
+    isConnected, address,
   } = useBalances();
 
   const actions = useTroveActions(address as `0x${string}` | undefined);
@@ -270,9 +270,9 @@ const Trove = () => {
         {/* ── OPEN ─────────────────────────────────────────────────────── */}
         {tab === "Open" && (
           <div className="space-y-3">
-            <TokenInput label="Deposit WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
+            <TokenInput label="Deposit WzkLTC" symbol="zkLTC" balance={wzkLTCBalanceFull}
               value={collInput} onChange={(v) => { setCollInput(v); actions.reset(); }} />
-            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalance}
+            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
               value={borrowInput} onChange={(v) => { setBorrowInput(v); actions.reset(); }} />
 
             {openCalc && (
@@ -349,7 +349,7 @@ const Trove = () => {
         {/* ── ADD ──────────────────────────────────────────────────────── */}
         {tab === "Add" && (
           <div className="space-y-3">
-            <TokenInput label="Add WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
+            <TokenInput label="Add WzkLTC" symbol="zkLTC" balance={wzkLTCBalanceFull}
               value={addInput} onChange={(v) => { setAddInput(v); actions.reset(); }} />
             {addInput && <PreviewBlock {...addCalc} safe={true} />}
             <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
@@ -365,7 +365,7 @@ const Trove = () => {
         {/* ── REMOVE ───────────────────────────────────────────────────── */}
         {tab === "Remove" && (
           <div className="space-y-3">
-            <TokenInput label="Remove WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
+            <TokenInput label="Remove WzkLTC" symbol="zkLTC" balance={wzkLTCBalanceFull}
               value={removeInput} onChange={(v) => { setRemoveInput(v); actions.reset(); }} />
             {removeInput && <PreviewBlock {...removeCalc} />}
             <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
@@ -381,7 +381,7 @@ const Trove = () => {
         {/* ── BORROW ───────────────────────────────────────────────────── */}
         {tab === "Borrow" && (
           <div className="space-y-3">
-            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalance}
+            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
               value={moreInput} onChange={(v) => { setMoreInput(v); actions.reset(); }} />
             {moreInput && <PreviewBlock {...borrowCalc} showFee />}
             <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
@@ -397,7 +397,7 @@ const Trove = () => {
         {/* ── REPAY ────────────────────────────────────────────────────── */}
         {tab === "Repay" && (
           <div className="space-y-3">
-            <TokenInput label="Repay FnUSD" symbol="FnUSD" balance={fnUSDBalance}
+            <TokenInput label="Repay FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
               value={repayInput} onChange={(v) => { setRepayInput(v); actions.reset(); }} />
             {repayInput && <PreviewBlock {...repayCalc} safe={true} />}
             <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />

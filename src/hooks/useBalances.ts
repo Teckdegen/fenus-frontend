@@ -2,8 +2,6 @@ import { useAccount, useReadContract } from "wagmi";
 import { formatUnits } from "viem";
 import { CONTRACTS } from "@/lib/contracts";
 
-// ─── ABIs ─────────────────────────────────────────────────────────────────────
-
 const ERC20_ABI = [
   { name: "balanceOf", type: "function", stateMutability: "view",
     inputs: [{ name: "account", type: "address" }],
@@ -22,8 +20,6 @@ const TROVE_MANAGER_ABI = [
     outputs: [{ name: "", type: "uint256" }] },
 ] as const;
 
-// Read directly from the DIA Chainlink adapter — same source the contract uses.
-// This gives us a live price even before fetchPrice() has been called on-chain.
 const DIA_ADAPTER_ABI = [
   { name: "latestRoundData", type: "function", stateMutability: "view",
     inputs: [],
@@ -43,10 +39,25 @@ const DEFAULT_POOL_ABI = [
     inputs: [], outputs: [{ name: "", type: "uint256" }] },
 ] as const;
 
-// DIA LTC/USD adapter on LitVM LiteForge — 18 decimal price
 const DIA_ADAPTER = "0x45dDa5d881BD2C917976CCfde74fFd6f6412da29" as const;
 
-// ─── Format helper ────────────────────────────────────────────────────────────
+// ─── Format helpers ───────────────────────────────────────────────────────────
+
+// Compact number: 1,234 -> "1.23K", 1,234,567 -> "1.23M"
+function compact(n: number, dp = 2): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(dp)}M`;
+  if (n >= 1_000)     return `${(n / 1_000).toFixed(dp)}K`;
+  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: dp });
+}
+
+// Format a bigint token amount with compact notation
+function fmtCompact(val: bigint | undefined, decimals: number): string {
+  if (val === undefined || val === null) return "0.00";
+  const n = parseFloat(formatUnits(val, decimals));
+  return compact(n);
+}
+
+// Format a bigint token amount with full precision (for inputs/rows)
 function fmt(val: bigint | undefined, decimals: number, dp = 4): string {
   if (val === undefined || val === null) return "0.00";
   return parseFloat(formatUnits(val, decimals)).toLocaleString(undefined, {
@@ -60,7 +71,6 @@ export function useBalances() {
   const { address, isConnected } = useAccount();
   const enabled = isConnected && !!address;
 
-  // WzkLTC balance — 8 decimals
   const { data: wzkLTCBal } = useReadContract({
     address: CONTRACTS.WzkLTC as `0x${string}`,
     abi: ERC20_ABI,
@@ -69,7 +79,6 @@ export function useBalances() {
     query: { enabled, refetchInterval: 10_000 },
   });
 
-  // FnUSD balance — 6 decimals
   const { data: fnUSDBal } = useReadContract({
     address: CONTRACTS.FnUSD as `0x${string}`,
     abi: ERC20_ABI,
@@ -78,8 +87,6 @@ export function useBalances() {
     query: { enabled, refetchInterval: 10_000 },
   });
 
-  // LTC/USD price — read directly from DIA adapter (18 decimals)
-  // This works immediately without needing fetchPrice() called first
   const { data: diaData } = useReadContract({
     address: DIA_ADAPTER,
     abi: DIA_ADAPTER_ABI,
@@ -87,7 +94,6 @@ export function useBalances() {
     query: { enabled: true, refetchInterval: 30_000 },
   });
 
-  // Trove state
   const { data: troveStatus } = useReadContract({
     address: CONTRACTS.TroveManager as `0x${string}`,
     abi: TROVE_MANAGER_ABI,
@@ -112,7 +118,6 @@ export function useBalances() {
     query: { enabled, refetchInterval: 10_000 },
   });
 
-  // Default pool totals
   const { data: defaultPoolColl } = useReadContract({
     address: CONTRACTS.DefaultPool as `0x${string}`,
     abi: DEFAULT_POOL_ABI,
@@ -127,14 +132,11 @@ export function useBalances() {
     query: { enabled: true, refetchInterval: 15_000 },
   });
 
-  // ─── Derived values ─────────────────────────────────────────────────────────
-
-  // DIA answer is 18-decimal — parse directly
+  // ─── Derived ──────────────────────────────────────────────────────────────
   const priceNum = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
-
   const collNum  = troveColl ? parseFloat(formatUnits(troveColl, 18)) : 0;
   const debtNum  = troveDebt ? parseFloat(formatUnits(troveDebt, 18)) : 0;
-  const hasTrove = troveStatus === 1; // Status.Active = 1
+  const hasTrove = troveStatus === 1;
 
   const collUSD  = priceNum > 0 ? collNum * priceNum : 0;
   const ratio    = debtNum > 0 && collUSD > 0 ? collUSD / debtNum : null;
@@ -146,15 +148,20 @@ export function useBalances() {
     priceNum,
     hasTrove,
 
-    // Formatted for display
-    wzkLTCBalance:   wzkLTCBal !== undefined ? fmt(wzkLTCBal, 8, 4) : "—",
-    fnUSDBalance:    fnUSDBal  !== undefined ? fmt(fnUSDBal,  6, 2) : "—",
-    ltcPriceUSD:     priceNum  > 0 ? `$${priceNum.toFixed(4)}` : "—",
+    // Compact display (K/M) for balance strips
+    wzkLTCBalance:   fmtCompact(wzkLTCBal, 8),
+    fnUSDBalance:    fmtCompact(fnUSDBal,  6),
+    // Price — no $ prefix here, callers add it if needed
+    ltcPriceUSD:     priceNum > 0 ? priceNum.toFixed(2) : "0.00",
+
+    // Full precision for inputs and rows
+    wzkLTCBalanceFull: fmt(wzkLTCBal, 8, 4),
+    fnUSDBalanceFull:  fmt(fnUSDBal,  6, 2),
 
     // Trove
-    troveColl:       fmt(troveColl,  18, 4),
-    troveDebt:       fmt(troveDebt,  18, 2),
-    troveCollUSD:    collUSD > 0 ? `$${collUSD.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : "—",
+    troveColl:       fmt(troveColl, 18, 4),
+    troveDebt:       fmt(troveDebt, 18, 2),
+    troveCollUSD:    collUSD > 0 ? `$${compact(collUSD)}` : "$0.00",
     troveRatio:      ratio    ? `${(ratio * 100).toFixed(1)}%` : "N/A",
     troveLiqPrice:   liqPrice ? `$${liqPrice.toFixed(4)}` : "N/A",
 
@@ -162,7 +169,7 @@ export function useBalances() {
     defaultPoolColl: fmt(defaultPoolColl, 18, 4),
     defaultPoolDebt: fmt(defaultPoolDebt, 18, 2),
 
-    // Raw bigints
+    // Raw bigints for contract calls
     raw: { wzkLTCBal, fnUSDBal, troveColl, troveDebt },
   };
 }
