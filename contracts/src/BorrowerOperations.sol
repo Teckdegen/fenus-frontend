@@ -246,14 +246,14 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         }
     }
 
-    function _requireICRAboveMCR(IAddressesRegistry.Addresses memory a) internal view {
+    function _requireICRAboveMCR(IAddressesRegistry.Addresses memory a) internal {
         (uint256 price,) = IPriceFeed(a.priceFeed).fetchPrice();
         uint256 icr = ITroveManager(a.troveManager).getCurrentICR(msg.sender, price);
         if (icr < Constants.MCR) revert BelowMCR(icr, Constants.MCR);
     }
 
     // 135% buffer — required on open, withdraw collateral, and borrow more
-    function _requireICRAboveBuffer(IAddressesRegistry.Addresses memory a) internal view {
+    function _requireICRAboveBuffer(IAddressesRegistry.Addresses memory a) internal {
         (uint256 price,) = IPriceFeed(a.priceFeed).fetchPrice();
         uint256 icr = ITroveManager(a.troveManager).getCurrentICR(msg.sender, price);
         if (icr < OPEN_ICR_BUFFER) revert BelowOpenICR(icr, OPEN_ICR_BUFFER);

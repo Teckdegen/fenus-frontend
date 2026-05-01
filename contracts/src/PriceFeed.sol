@@ -1,38 +1,34 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {IDIAOracle} from "./interfaces/IDIAOracle.sol";
 import {IPriceFeed} from "./interfaces/IPriceFeed.sol";
 import {Constants} from "./Constants.sol";
 
-// PriceFeed — wraps the DIA oracle at 0x45dDa5d881BD2C917976CCfde74fFd6f6412da29
-// on LitVM LiteForge (chainId 4441).
+// Chainlink AggregatorV3 adapter interface — used by DIA on LitVM
+interface IAdapter {
+    function latestRoundData() external view returns (
+        uint80  roundId,
+        int256  answer,
+        uint256 startedAt,
+        uint256 updatedAt,
+        uint80  answeredInRound
+    );
+    function decimals() external view returns (uint8);
+}
+
+// PriceFeed — wraps the DIA Chainlink-adapter oracle for LTC/USD on LitVM LiteForge.
 //
-// DIA returns prices with 8 decimals. This contract scales to 18 decimals
-// for internal protocol use.
-//
-// Security:
-//   - Staleness check: rejects prices older than 1 hour
-//   - Deviation check: rejects any single update that moves >20% from
-//     lastGoodPrice — blocks flash-loan oracle manipulation
-//   - Fallback: optional second DIA feed. If primary fails, tries fallback.
-//   - Grace period: both feeds must be down for 1 hour before Shutdown
-//   - No admin write path: nobody can manually set a price
-//
-// Pair key: "LTC/USD" — DIA's identifier for Litecoin/USD
+// Oracle address : 0x45dDa5d881BD2C917976CCfde74fFd6f6412da29
+// Interface      : Chainlink AggregatorV3 adapter (latestRoundData)
+// Decimals       : 18 (DIA LitVM adapters return 18-decimal prices)
+// Heartbeat      : 1 hour
 contract PriceFeed is IPriceFeed {
-    IDIAOracle public immutable primary;
-    IDIAOracle public immutable fallbackOracle; // address(0) = no fallback
 
-    // The DIA key for the asset pair
-    string public constant PAIR_KEY = "LTC/USD";
-
-    // DIA returns 8-decimal prices — scale to 18 for protocol math
-    uint256 private constant DIA_DECIMALS    = 8;
-    uint256 private constant SCALE_TO_18     = 10 ** (18 - DIA_DECIMALS); // 1e10
+    IAdapter public immutable primary;
+    IAdapter public immutable fallbackOracle;
 
     // Max single-update price deviation: 20%
-    uint256 private constant MAX_DEVIATION   = 20e16;
+    uint256 private constant MAX_DEVIATION = 20e16;
 
     uint256 public lastGoodPrice;
     uint256 public outageStart;
@@ -48,8 +44,8 @@ contract PriceFeed is IPriceFeed {
 
     constructor(address _primary, address _fallback) {
         if (_primary == address(0)) revert InvalidOracle();
-        primary        = IDIAOracle(_primary);
-        fallbackOracle = IDIAOracle(_fallback); // zero = no fallback
+        primary        = IAdapter(_primary);
+        fallbackOracle = IAdapter(_fallback);
         status         = Status.Live;
     }
 
@@ -63,8 +59,7 @@ contract PriceFeed is IPriceFeed {
             return (lastGoodPrice, false);
         }
 
-        // Try primary DIA feed
-        (uint256 p, bool ok) = _readDIA(primary);
+        (uint256 p, bool ok) = _readAdapter(primary);
         if (ok && _deviationOk(p)) {
             lastGoodPrice = p;
             outageStart   = 0;
@@ -73,9 +68,8 @@ contract PriceFeed is IPriceFeed {
             return (p, true);
         }
 
-        // Try fallback DIA feed
         if (address(fallbackOracle) != address(0)) {
-            (uint256 fp, bool fok) = _readDIA(fallbackOracle);
+            (uint256 fp, bool fok) = _readAdapter(fallbackOracle);
             if (fok && _deviationOk(fp)) {
                 lastGoodPrice = fp;
                 outageStart   = 0;
@@ -85,7 +79,6 @@ contract PriceFeed is IPriceFeed {
             }
         }
 
-        // Both feeds bad — track outage clock
         if (outageStart == 0) {
             outageStart = block.timestamp;
             status      = Status.ShutdownGrace;
@@ -101,29 +94,27 @@ contract PriceFeed is IPriceFeed {
 
     // ─── Internal ─────────────────────────────────────────────────────────────
 
-    function _readDIA(IDIAOracle oracle)
-        internal
-        view
+    function _readAdapter(IAdapter adapter)
+        internal view
         returns (uint256 price18, bool ok)
     {
-        try oracle.getValue(PAIR_KEY) returns (uint128 price, uint128 timestamp) {
-            if (price == 0)     return (0, false);
-            if (timestamp == 0) return (0, false);
-            // Staleness check
-            if (block.timestamp - uint256(timestamp) > Constants.PRICE_STALENESS_THRESHOLD) {
-                return (0, false);
-            }
-            // Scale 8-dec DIA price → 18-dec internal
-            price18 = uint256(price) * SCALE_TO_18;
+        try adapter.latestRoundData() returns (
+            uint80, int256 answer, uint256, uint256 updatedAt, uint80
+        ) {
+            if (answer <= 0)  return (0, false);
+            if (updatedAt == 0) return (0, false);
+            if (block.timestamp - updatedAt > Constants.PRICE_STALENESS_THRESHOLD) return (0, false);
+
+            // DIA LitVM adapters return 18-decimal prices directly
+            price18 = uint256(answer);
             ok      = price18 > 0;
         } catch {
             return (0, false);
         }
     }
 
-    // Reject if new price moves >20% from last known good in one update
-    function _deviationOk(uint256 newPrice) internal view returns (bool) {
-        if (lastGoodPrice == 0) return true; // first price — accept anything
+    function _deviationOk(uint256 newPrice) internal returns (bool) {
+        if (lastGoodPrice == 0) return true;
 
         uint256 deviation;
         if (newPrice >= lastGoodPrice) {
