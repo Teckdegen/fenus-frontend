@@ -1,19 +1,17 @@
 import { useState, useMemo } from "react";
-import { AlertTriangle, Info } from "lucide-react";
+import { AlertTriangle, Info, CheckCircle2, Loader2, Wallet } from "lucide-react";
+import { useAppKit } from "@reown/appkit/react";
 import {
-  Card,
-  GhostButton,
-  PrimaryButton,
-  Row,
-  SectionLabel,
-  TokenInput,
+  Card, GhostButton, PrimaryButton, Row, SectionLabel, TokenInput,
 } from "@/components/app/Shared";
 import { useBalances } from "@/hooks/useBalances";
+import { useTroveActions } from "@/hooks/useTroveActions";
 
 const MCR             = 1.30;
 const BUFFER          = 1.35;
 const ORIGINATION_FEE = 0.005;
 const ANNUAL_RATE     = 0.01;
+const EXPLORER        = "https://liteforge.explorer.caldera.xyz/tx/";
 
 const TABS = ["Open", "Add", "Remove", "Borrow", "Repay", "Close"] as const;
 type Tab = (typeof TABS)[number];
@@ -43,16 +41,51 @@ function RatioBar({ ratio }: { ratio: number | null }) {
   if (!ratio) return null;
   return (
     <div className="h-1.5 w-full rounded-full bg-border/40 overflow-hidden">
-      <div
-        className={`h-full rounded-full transition-all ${barColor(ratio)}`}
-        style={{ width: `${Math.min((ratio / 3) * 100, 100)}%` }}
-      />
+      <div className={`h-full rounded-full transition-all ${barColor(ratio)}`}
+        style={{ width: `${Math.min((ratio / 3) * 100, 100)}%` }} />
     </div>
   );
 }
 
+function TxStatus({ status, txHash, error }: { status: string; txHash: string; error: string }) {
+  if (status === "idle") return null;
+  if (status === "approving") return (
+    <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
+      <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+      <p className="text-[11px] text-muted-foreground">Approving WzkLTC spend…</p>
+    </div>
+  );
+  if (status === "pending") return (
+    <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
+      <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+      <p className="text-[11px] text-muted-foreground">Waiting for confirmation…</p>
+    </div>
+  );
+  if (status === "success") return (
+    <div className="flex items-start gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
+      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
+      <div>
+        <p className="text-[11px] font-medium text-emerald-300">Transaction confirmed!</p>
+        {txHash && (
+          <a href={`${EXPLORER}${txHash}`} target="_blank" rel="noopener noreferrer"
+            className="text-[10px] text-emerald-400/70 hover:text-emerald-400 underline">
+            View on explorer
+          </a>
+        )}
+      </div>
+    </div>
+  );
+  if (status === "error") return (
+    <div className="flex items-start gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3">
+      <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400 mt-0.5" />
+      <p className="text-[11px] text-red-300">{error || "Transaction failed. Try again."}</p>
+    </div>
+  );
+  return null;
+}
+
 const Trove = () => {
-  const [tab, setTab] = useState<Tab>("Open");
+  const [tab, setTab]             = useState<Tab>("Open");
   const [collInput,   setCollInput]   = useState("");
   const [borrowInput, setBorrowInput] = useState("");
   const [addInput,    setAddInput]    = useState("");
@@ -60,88 +93,80 @@ const Trove = () => {
   const [moreInput,   setMoreInput]   = useState("");
   const [repayInput,  setRepayInput]  = useState("");
 
+  const { open } = useAppKit();
+
   const {
     wzkLTCBalance, fnUSDBalance, priceNum,
     hasTrove, troveColl: existingCollStr, troveDebt: existingDebtStr,
-    isConnected, ltcPriceUSD,
+    isConnected, address, raw,
   } = useBalances();
+
+  const actions = useTroveActions(address as `0x${string}` | undefined);
 
   const existingColl = parseFloat(existingCollStr.replace(/,/g, "")) || 0;
   const existingDebt = parseFloat(existingDebtStr.replace(/,/g, "")) || 0;
   const price        = priceNum;
   const priceLoaded  = price > 0;
+  const busy         = actions.status === "approving" || actions.status === "pending";
 
-  // ── Open calculations ──────────────────────────────────────────────────────
-  // All non-price fields compute immediately from inputs.
-  // Price-dependent fields (ratio, liqPrice) show when oracle loads.
+  // ── Calculations ────────────────────────────────────────────────────────────
   const openCalc = useMemo(() => {
     const coll   = parseFloat(collInput)   || 0;
     const borrow = parseFloat(borrowInput) || 0;
     if (!coll && !borrow) return null;
-
-    const fee       = borrow * ORIGINATION_FEE;
+    const fee      = borrow * ORIGINATION_FEE;
     const totalDebt = borrow + fee;
-    const int6m     = totalDebt * ANNUAL_RATE / 2;
-    const int1y     = totalDebt * ANNUAL_RATE;
-
-    // Price-dependent
+    const int6m    = totalDebt * ANNUAL_RATE / 2;
+    const int1y    = totalDebt * ANNUAL_RATE;
     const collUSD  = priceLoaded ? coll * price : null;
     const ratio    = collUSD !== null && totalDebt > 0 ? collUSD / totalDebt : null;
     const liqPrice = totalDebt > 0 && coll > 0 ? (totalDebt * MCR) / coll : null;
-
-    // canOpen: both inputs filled + ratio ok if price available, or price not loaded yet
     const ratioOk  = ratio !== null ? ratio >= BUFFER : true;
     const canOpen  = coll > 0 && borrow > 0 && ratioOk;
-
     return { coll, borrow, fee, totalDebt, collUSD, ratio, liqPrice, canOpen, int6m, int1y };
   }, [collInput, borrowInput, price, priceLoaded]);
 
-  // ── Adjust calculations ────────────────────────────────────────────────────
   const addCalc = useMemo(() => {
-    const amt      = parseFloat(addInput) || 0;
-    const newColl  = existingColl + amt;
-    const collUSD  = priceLoaded ? newColl * price : null;
-    const ratio    = collUSD !== null && existingDebt > 0 ? collUSD / existingDebt : null;
+    const amt = parseFloat(addInput) || 0;
+    const newColl = existingColl + amt;
+    const collUSD = priceLoaded ? newColl * price : null;
+    const ratio   = collUSD !== null && existingDebt > 0 ? collUSD / existingDebt : null;
     const liqPrice = existingDebt > 0 && newColl > 0 ? (existingDebt * MCR) / newColl : null;
     return { newColl, newDebt: existingDebt, ratio, liqPrice, safe: true };
   }, [addInput, existingColl, existingDebt, price, priceLoaded]);
 
   const removeCalc = useMemo(() => {
-    const amt      = parseFloat(removeInput) || 0;
-    const newColl  = existingColl - amt;
-    const collUSD  = priceLoaded ? newColl * price : null;
-    const ratio    = collUSD !== null && existingDebt > 0 ? collUSD / existingDebt : null;
+    const amt = parseFloat(removeInput) || 0;
+    const newColl = existingColl - amt;
+    const collUSD = priceLoaded ? newColl * price : null;
+    const ratio   = collUSD !== null && existingDebt > 0 ? collUSD / existingDebt : null;
     const liqPrice = existingDebt > 0 && newColl > 0 ? (existingDebt * MCR) / newColl : null;
-    const safe     = newColl >= 0 && (ratio === null || ratio >= BUFFER);
+    const safe = newColl >= 0 && (ratio === null || ratio >= BUFFER);
     return { newColl, newDebt: existingDebt, ratio, liqPrice, safe };
   }, [removeInput, existingColl, existingDebt, price, priceLoaded]);
 
   const borrowCalc = useMemo(() => {
-    const amt      = parseFloat(moreInput) || 0;
-    const fee      = amt * ORIGINATION_FEE;
-    const newDebt  = existingDebt + amt + fee;
-    const collUSD  = priceLoaded ? existingColl * price : null;
-    const ratio    = collUSD !== null && newDebt > 0 ? collUSD / newDebt : null;
+    const amt = parseFloat(moreInput) || 0;
+    const fee = amt * ORIGINATION_FEE;
+    const newDebt = existingDebt + amt + fee;
+    const collUSD = priceLoaded ? existingColl * price : null;
+    const ratio   = collUSD !== null && newDebt > 0 ? collUSD / newDebt : null;
     const liqPrice = newDebt > 0 && existingColl > 0 ? (newDebt * MCR) / existingColl : null;
-    const safe     = ratio === null || ratio >= BUFFER;
+    const safe = ratio === null || ratio >= BUFFER;
     return { newColl: existingColl, newDebt, ratio, liqPrice, safe, fee };
   }, [moreInput, existingColl, existingDebt, price, priceLoaded]);
 
   const repayCalc = useMemo(() => {
-    const amt      = parseFloat(repayInput) || 0;
-    const newDebt  = Math.max(existingDebt - amt, 0);
-    const collUSD  = priceLoaded ? existingColl * price : null;
-    const ratio    = collUSD !== null && newDebt > 0 ? collUSD / newDebt : null;
+    const amt = parseFloat(repayInput) || 0;
+    const newDebt = Math.max(existingDebt - amt, 0);
+    const collUSD = priceLoaded ? existingColl * price : null;
+    const ratio   = collUSD !== null && newDebt > 0 ? collUSD / newDebt : null;
     const liqPrice = newDebt > 0 && existingColl > 0 ? (newDebt * MCR) / existingColl : null;
     return { newColl: existingColl, newDebt, ratio, liqPrice, safe: true };
   }, [repayInput, existingColl, existingDebt, price, priceLoaded]);
 
-  const closeDebt = existingDebt;
-
-  // ── Shared preview block ───────────────────────────────────────────────────
-  const PreviewBlock = ({
-    ratio, liqPrice, newColl, newDebt, fee, safe, showFee,
-  }: {
+  // ── Preview block ────────────────────────────────────────────────────────────
+  const PreviewBlock = ({ ratio, liqPrice, newColl, newDebt, fee, safe, showFee }: {
     ratio: number | null; liqPrice: number | null;
     newColl: number; newDebt: number;
     fee?: number; safe: boolean; showFee?: boolean;
@@ -151,7 +176,7 @@ const Trove = () => {
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] text-muted-foreground">Collateral Ratio</span>
           <span className={`font-display text-sm font-semibold tabular-nums ${ratioColor(ratio)}`}>
-            {ratio ? `${(ratio * 100).toFixed(1)}%` : priceLoaded ? "N/A" : "Loading price…"}
+            {ratio ? `${(ratio * 100).toFixed(1)}%` : priceLoaded ? "N/A" : "Loading…"}
             {ratio && <span className="ml-1.5 text-[10px] font-normal opacity-70">{ratioLabel(ratio)}</span>}
           </span>
         </div>
@@ -190,16 +215,38 @@ const Trove = () => {
     </div>
   );
 
+  // ── Connect prompt ───────────────────────────────────────────────────────────
+  if (!isConnected) {
+    return (
+      <div className="mx-auto w-full max-w-3xl space-y-6">
+        <div className="px-1">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Trove</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Deposit WzkLTC, mint FnUSD, manage your position.</p>
+        </div>
+        <Card className="p-10 flex flex-col items-center justify-center text-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/10">
+            <Wallet className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="font-display text-base font-semibold">Connect your wallet</p>
+            <p className="mt-1 text-sm text-muted-foreground max-w-xs">
+              Connect to view your Trove, open a new position, or manage an existing one.
+            </p>
+          </div>
+          <PrimaryButton onClick={() => open()}>Connect Wallet</PrimaryButton>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Trove</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Deposit WzkLTC, mint FnUSD, manage your position.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">Deposit WzkLTC, mint FnUSD, manage your position.</p>
       </div>
 
-      {/* Live price strip */}
+      {/* Live price */}
       <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background/20 px-4 py-2.5">
         <span className="text-[11px] text-muted-foreground">LTC/USD Oracle</span>
         <span className="font-display text-sm font-semibold tabular-nums">
@@ -210,14 +257,13 @@ const Trove = () => {
       </div>
 
       <Card className="p-4 space-y-4">
-        {/* Tab bar */}
+        {/* Tabs */}
         <div className="flex rounded-full bg-background/60 p-1 gap-0.5">
           {TABS.map((t) => (
-            <button key={t} onClick={() => setTab(t)}
+            <button key={t} onClick={() => { setTab(t); actions.reset(); }}
               className={`flex-1 rounded-full py-2 text-[10px] font-medium transition leading-none ${
                 tab === t ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >{t}</button>
+              }`}>{t}</button>
           ))}
         </div>
 
@@ -225,29 +271,24 @@ const Trove = () => {
         {tab === "Open" && (
           <div className="space-y-3">
             <TokenInput label="Deposit WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
-              value={collInput} onChange={setCollInput} />
+              value={collInput} onChange={(v) => { setCollInput(v); actions.reset(); }} />
             <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalance}
-              value={borrowInput} onChange={setBorrowInput} />
+              value={borrowInput} onChange={(v) => { setBorrowInput(v); actions.reset(); }} />
 
             {openCalc && (
               <div className="rounded-2xl border border-border/60 bg-background/20 divide-y divide-border/40">
-                {/* Ratio — shows when price loads */}
                 <div className="px-4 py-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] text-muted-foreground">Collateral Ratio</span>
                     <span className={`font-display text-sm font-semibold tabular-nums ${ratioColor(openCalc.ratio)}`}>
-                      {openCalc.ratio
-                        ? `${(openCalc.ratio * 100).toFixed(1)}%`
-                        : priceLoaded ? "N/A" : <span className="text-muted-foreground animate-pulse">Loading…</span>}
-                      {openCalc.ratio && (
-                        <span className="ml-1.5 text-[10px] font-normal opacity-70">{ratioLabel(openCalc.ratio)}</span>
-                      )}
+                      {openCalc.ratio ? `${(openCalc.ratio * 100).toFixed(1)}%`
+                        : priceLoaded ? "N/A"
+                        : <span className="text-muted-foreground animate-pulse">Loading…</span>}
+                      {openCalc.ratio && <span className="ml-1.5 text-[10px] font-normal opacity-70">{ratioLabel(openCalc.ratio)}</span>}
                     </span>
                   </div>
                   {openCalc.ratio && <RatioBar ratio={openCalc.ratio} />}
                 </div>
-
-                {/* Always-visible numbers — no price needed */}
                 <div className="px-4 py-3 space-y-2">
                   <div className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">Liquidation price</span>
@@ -264,12 +305,8 @@ const Trove = () => {
                     <span className="tabular-nums font-medium">{openCalc.totalDebt.toFixed(2)} FnUSD</span>
                   </div>
                 </div>
-
-                {/* Interest projections — no price needed */}
                 <div className="px-4 py-3 space-y-2">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">
-                    Interest projections (1% APR)
-                  </p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Interest projections (1% APR)</p>
                   <div className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">After 6 months</span>
                     <span className="tabular-nums">+{openCalc.int6m.toFixed(2)} FnUSD</span>
@@ -280,34 +317,31 @@ const Trove = () => {
                   </div>
                   <div className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">Debt after 1 year</span>
-                    <span className="tabular-nums font-medium">
-                      {(openCalc.totalDebt + openCalc.int1y).toFixed(2)} FnUSD
-                    </span>
+                    <span className="tabular-nums font-medium">{(openCalc.totalDebt + openCalc.int1y).toFixed(2)} FnUSD</span>
                   </div>
                 </div>
-
-                {/* Warnings */}
                 {openCalc.ratio !== null && openCalc.ratio < BUFFER && openCalc.ratio > 0 && (
                   <div className="px-4 py-3 flex items-start gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400 mt-0.5" />
-                    <p className="text-[11px] text-red-400">
-                      Ratio too low. Minimum 135% required. Add more collateral or borrow less.
-                    </p>
+                    <p className="text-[11px] text-red-400">Ratio too low. Minimum 135% required.</p>
                   </div>
                 )}
                 {openCalc.ratio !== null && openCalc.ratio >= BUFFER && openCalc.ratio < 1.6 && (
                   <div className="px-4 py-3 flex items-start gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-orange-400 mt-0.5" />
-                    <p className="text-[11px] text-orange-400">
-                      Ratio is close to the 135% minimum. Consider adding more collateral.
-                    </p>
+                    <p className="text-[11px] text-orange-400">Ratio is close to the 135% minimum.</p>
                   </div>
                 )}
               </div>
             )}
-
+            <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
             <div className="flex justify-end pt-1">
-              <PrimaryButton disabled={!openCalc?.canOpen}>Open Trove</PrimaryButton>
+              <PrimaryButton
+                disabled={!openCalc?.canOpen || busy}
+                onClick={() => openCalc && actions.openTrove(collInput, borrowInput)}
+              >
+                {busy ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Working…</> : "Open Trove"}
+              </PrimaryButton>
             </div>
           </div>
         )}
@@ -316,10 +350,14 @@ const Trove = () => {
         {tab === "Add" && (
           <div className="space-y-3">
             <TokenInput label="Add WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
-              value={addInput} onChange={setAddInput} />
+              value={addInput} onChange={(v) => { setAddInput(v); actions.reset(); }} />
             {addInput && <PreviewBlock {...addCalc} safe={true} />}
+            <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
             <div className="flex justify-end pt-1">
-              <PrimaryButton disabled={!addInput}>Add Collateral</PrimaryButton>
+              <PrimaryButton disabled={!addInput || busy}
+                onClick={() => actions.addColl(addInput)}>
+                {busy ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Working…</> : "Add Collateral"}
+              </PrimaryButton>
             </div>
           </div>
         )}
@@ -328,11 +366,13 @@ const Trove = () => {
         {tab === "Remove" && (
           <div className="space-y-3">
             <TokenInput label="Remove WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
-              value={removeInput} onChange={setRemoveInput} />
+              value={removeInput} onChange={(v) => { setRemoveInput(v); actions.reset(); }} />
             {removeInput && <PreviewBlock {...removeCalc} />}
+            <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
             <div className="flex justify-end pt-1">
-              <PrimaryButton disabled={!removeInput || !removeCalc.safe}>
-                Remove Collateral
+              <PrimaryButton disabled={!removeInput || !removeCalc.safe || busy}
+                onClick={() => actions.withdrawColl(removeInput)}>
+                {busy ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Working…</> : "Remove Collateral"}
               </PrimaryButton>
             </div>
           </div>
@@ -342,11 +382,13 @@ const Trove = () => {
         {tab === "Borrow" && (
           <div className="space-y-3">
             <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalance}
-              value={moreInput} onChange={setMoreInput} />
+              value={moreInput} onChange={(v) => { setMoreInput(v); actions.reset(); }} />
             {moreInput && <PreviewBlock {...borrowCalc} showFee />}
+            <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
             <div className="flex justify-end pt-1">
-              <PrimaryButton disabled={!moreInput || !borrowCalc.safe}>
-                Borrow More
+              <PrimaryButton disabled={!moreInput || !borrowCalc.safe || busy}
+                onClick={() => actions.borrowMore(moreInput)}>
+                {busy ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Working…</> : "Borrow More"}
               </PrimaryButton>
             </div>
           </div>
@@ -356,10 +398,14 @@ const Trove = () => {
         {tab === "Repay" && (
           <div className="space-y-3">
             <TokenInput label="Repay FnUSD" symbol="FnUSD" balance={fnUSDBalance}
-              value={repayInput} onChange={setRepayInput} />
+              value={repayInput} onChange={(v) => { setRepayInput(v); actions.reset(); }} />
             {repayInput && <PreviewBlock {...repayCalc} safe={true} />}
+            <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
             <div className="flex justify-end pt-1">
-              <PrimaryButton disabled={!repayInput}>Repay Debt</PrimaryButton>
+              <PrimaryButton disabled={!repayInput || busy}
+                onClick={() => actions.repayFnUSD(repayInput)}>
+                {busy ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Working…</> : "Repay Debt"}
+              </PrimaryButton>
             </div>
           </div>
         )}
@@ -371,7 +417,7 @@ const Trove = () => {
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">What you repay</p>
               <div className="flex justify-between text-[11px]">
                 <span className="text-muted-foreground">Outstanding debt</span>
-                <span className="tabular-nums">{closeDebt.toFixed(2)} FnUSD</span>
+                <span className="tabular-nums">{existingDebt.toFixed(2)} FnUSD</span>
               </div>
               <div className="flex justify-between text-[11px]">
                 <span className="text-muted-foreground">Accrued interest</span>
@@ -379,7 +425,7 @@ const Trove = () => {
               </div>
               <div className="border-t border-border/40 pt-2 flex justify-between text-sm font-medium">
                 <span>Total to repay</span>
-                <span className="tabular-nums">{closeDebt.toFixed(2)} FnUSD</span>
+                <span className="tabular-nums">{existingDebt.toFixed(2)} FnUSD</span>
               </div>
             </div>
             <div className="rounded-2xl border border-border/60 bg-background/20 px-4 py-4 space-y-2">
@@ -400,18 +446,19 @@ const Trove = () => {
             <div className="flex items-start gap-2 px-1">
               <Info className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 mt-0.5" />
               <p className="text-[11px] text-muted-foreground/60">
-                You need {closeDebt.toFixed(2)} FnUSD in your wallet to close.
-                If you don't have enough, buy FnUSD on Addax first.
+                You need {existingDebt.toFixed(2)} FnUSD in your wallet to close.
               </p>
             </div>
+            <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
             <div className="flex justify-end pt-1">
-              <GhostButton>Close Trove</GhostButton>
+              <GhostButton disabled={busy} onClick={() => actions.closeTrove()}>
+                {busy ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Working…</> : "Close Trove"}
+              </GhostButton>
             </div>
           </div>
         )}
       </Card>
 
-      {/* Protocol Terms */}
       <div>
         <SectionLabel>Protocol Terms</SectionLabel>
         <Card className="p-5">
