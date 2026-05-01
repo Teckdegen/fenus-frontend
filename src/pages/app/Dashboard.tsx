@@ -51,14 +51,14 @@ const Dashboard = () => {
           <div className="flex-1">
             <p className="text-sm font-medium text-orange-300">You have no WzkLTC</p>
             <p className="text-[11px] text-orange-300/70 mt-0.5">
-              Wrap your native zkLTC into WzkLTC to open a Trove and borrow FnUSD.
+              Get free WzkLTC from the faucet to open a Trove and borrow FnUSD.
             </p>
           </div>
           <Link
-            to="/app/convert"
+            to="/app/faucet"
             className="shrink-0 rounded-full bg-orange-400 px-3 py-1.5 text-[11px] font-semibold text-black transition hover:opacity-90"
           >
-            Wrap now
+            Get WzkLTC
           </Link>
         </div>
       )}

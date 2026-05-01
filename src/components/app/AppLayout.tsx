@@ -5,11 +5,11 @@ import { useAppKit } from "@reown/appkit/react";
 import logo from "@/assets/fenus-logo.png";
 
 const nav = [
-  { to: "/app",          end: true, label: "Home"    },
-  { to: "/app/convert",  end: false, label: "Convert" },
-  { to: "/app/trove",    end: false, label: "Trove"   },
-  { to: "/app/redeem",   end: false, label: "Redeem"  },
-  { to: "/app/pools",    end: false, label: "Pools"   },
+  { to: "/app",         end: true,  label: "Home"   },
+  { to: "/app/faucet",  end: false, label: "Faucet" },
+  { to: "/app/trove",   end: false, label: "Trove"  },
+  { to: "/app/redeem",  end: false, label: "Redeem" },
+  { to: "/app/pools",   end: false, label: "Pools"  },
 ];
 
 const tabCls = ({ isActive }: { isActive: boolean }) =>

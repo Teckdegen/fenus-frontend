@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Web3Provider } from "@/components/Web3Provider";
-import "@/lib/web3"; // initialize AppKit
+import "@/lib/web3";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AppLayout from "./components/app/AppLayout.tsx";
@@ -12,7 +12,7 @@ import Dashboard from "./pages/app/Dashboard.tsx";
 import Trove from "./pages/app/Trove.tsx";
 import Pools from "./pages/app/Pools.tsx";
 import Redeem from "./pages/app/Redeem.tsx";
-import Convert from "./pages/app/Convert.tsx";
+import Faucet from "./pages/app/Faucet.tsx";
 
 const queryClient = new QueryClient();
 
@@ -30,9 +30,8 @@ const App = () => (
               <Route path="trove" element={<Trove />} />
               <Route path="pools" element={<Pools />} />
               <Route path="redeem" element={<Redeem />} />
-              <Route path="convert" element={<Convert />} />
+              <Route path="faucet" element={<Faucet />} />
             </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
