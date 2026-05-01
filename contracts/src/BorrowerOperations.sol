@@ -7,7 +7,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IBorrowerOperations} from "./interfaces/IBorrowerOperations.sol";
 import {ITroveManager} from "./interfaces/ITroveManager.sol";
 import {IAddressesRegistry} from "./interfaces/IAddressesRegistry.sol";
-import {IActivePool, ICollSurplusPool, IGasPool} from "./interfaces/IPools.sol";
+import {IActivePool, ICollSurplusPool} from "./interfaces/IPools.sol";
 import {IFnUSD} from "./interfaces/IFnUSD.sol";
 import {IPriceFeed} from "./interfaces/IPriceFeed.sol";
 import {ISortedTroves} from "./interfaces/ISortedTroves.sol";
@@ -15,246 +15,250 @@ import {Constants} from "./Constants.sol";
 import {LiquityMath} from "./libraries/LiquityMath.sol";
 import {Decimals} from "./libraries/Decimals.sol";
 
-// BorrowerOperations user-facing entry point for all Trove management.
+// BorrowerOperations — user-facing entry point for all Trove management.
 //
-// Security hardening:
-// [1] ReentrancyGuard on all state-changing functions
-// [6] Price manipulation protection new positions require ICR ≥ MCR + 5% buffer
-// (135%) so a single-block price spike cannot immediately liquidate a new Trove
+// No gas compensation — the protocol keeps all liquidation proceeds.
+// The bot is run by the protocol and needs no on-chain payment.
+//
+// Security:
+//   [1] ReentrancyGuard on all state-changing functions
+//   [6] New positions require ICR >= 135% (5% buffer above 130% MCR)
 contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
- using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20;
 
- IAddressesRegistry public immutable registry;
+    IAddressesRegistry public immutable registry;
 
- // FIX [6]: opening buffer above MCR to resist single-block price manipulation
- // Users must open at 135% ICR minimum (MCR is 130%)
- uint256 private constant OPEN_ICR_BUFFER = 135e16; // 135%
+    // 5% buffer above MCR — protects against single-block price manipulation
+    uint256 private constant OPEN_ICR_BUFFER = 135e16; // 135%
 
- // ─── Events ───────────────────────────────────────────────────────────────
+    // ─── Events ───────────────────────────────────────────────────────────────
 
- event TroveOpened(address indexed owner, uint256 coll, uint256 debt);
- event CollateralAdded(address indexed owner, uint256 amount);
- event CollateralWithdrawn(address indexed owner, uint256 amount);
- event FnUSDBorrowed(address indexed owner, uint256 amount18);
- event FnUSDRepaid(address indexed owner, uint256 amount18);
- event TroveClosed(address indexed owner);
- event CollateralClaimed(address indexed owner, uint256 amount);
+    event TroveOpened(address indexed owner, uint256 coll, uint256 debt);
+    event CollateralAdded(address indexed owner, uint256 amount);
+    event CollateralWithdrawn(address indexed owner, uint256 amount);
+    event FnUSDBorrowed(address indexed owner, uint256 amount18);
+    event FnUSDRepaid(address indexed owner, uint256 amount18);
+    event TroveClosed(address indexed owner);
+    event CollateralClaimed(address indexed owner, uint256 amount);
 
- // ─── Errors ───────────────────────────────────────────────────────────────
+    // ─── Errors ───────────────────────────────────────────────────────────────
 
- error TroveNotActive();
- error TroveAlreadyExists();
- error BelowOpenICR(uint256 icr, uint256 required);
- error BelowMCR(uint256 icr, uint256 mcr);
- error BelowMinDebt(uint256 debt, uint256 minDebt);
- error ZeroAmount();
- error InsufficientFnUSDBalance();
- error PriceFeedDown();
+    error TroveNotActive();
+    error TroveAlreadyExists();
+    error BelowOpenICR(uint256 icr, uint256 required);
+    error BelowMCR(uint256 icr, uint256 mcr);
+    error BelowMinDebt(uint256 debt, uint256 minDebt);
+    error ZeroAmount();
+    error InsufficientFnUSDBalance();
+    error PriceFeedDown();
 
- // ─── Constructor ──────────────────────────────────────────────────────────
+    // ─── Constructor ──────────────────────────────────────────────────────────
 
- constructor(IAddressesRegistry _registry) {
- registry = _registry;
- }
+    constructor(IAddressesRegistry _registry) {
+        registry = _registry;
+    }
 
- // ─── openTrove ────────────────────────────────────────────────────────────
+    // ─── openTrove ────────────────────────────────────────────────────────────
 
- function openTrove(
- uint256 collAmount,
- uint256 fnUSDAmount6,
- address upperHint,
- address lowerHint
- ) external override nonReentrant {
- if (collAmount == 0) revert ZeroAmount();
- if (fnUSDAmount6 == 0) revert ZeroAmount();
+    // Deposit WzkLTC, mint FnUSD. Interest is fixed at 1% — no rate param.
+    // Debt = borrowed amount + 0.5% origination fee. No gas compensation added.
+    function openTrove(
+        uint256 collAmount,
+        uint256 fnUSDAmount6,
+        address upperHint,
+        address lowerHint
+    ) external override nonReentrant {
+        if (collAmount == 0) revert ZeroAmount();
+        if (fnUSDAmount6 == 0) revert ZeroAmount();
 
- IAddressesRegistry.Addresses memory a = registry.addresses();
- ITroveManager tm = ITroveManager(a.troveManager);
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        ITroveManager tm = ITroveManager(a.troveManager);
 
- if (tm.getTroveStatus(msg.sender) == ITroveManager.Status.Active) {
- revert TroveAlreadyExists();
- }
+        if (tm.getTroveStatus(msg.sender) == ITroveManager.Status.Active) {
+            revert TroveAlreadyExists();
+        }
 
- uint256 fnUSDAmount18 = Decimals.to18(fnUSDAmount6);
- uint256 fee18 = (fnUSDAmount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
- uint256 netDebt = fnUSDAmount18 + fee18 + GasPool(a.gasPool).GAS_COMPENSATION();
+        uint256 fnUSDAmount18 = Decimals.to18(fnUSDAmount6);
 
- if (netDebt < Constants.MIN_NET_DEBT) revert BelowMinDebt(netDebt, Constants.MIN_NET_DEBT);
+        // Origination fee (0.5%) added to debt, goes to treasury
+        uint256 fee18   = (fnUSDAmount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
+        uint256 netDebt = fnUSDAmount18 + fee18;
 
- (uint256 price, bool isLive) = IPriceFeed(a.priceFeed).fetchPrice();
- if (!isLive) revert PriceFeedDown();
+        if (netDebt < Constants.MIN_NET_DEBT) revert BelowMinDebt(netDebt, Constants.MIN_NET_DEBT);
 
- // FIX [6]: require 135% at open 5% buffer above the 130% liquidation threshold
- uint256 icr = LiquityMath._computeCR(collAmount, netDebt, price);
- if (icr < OPEN_ICR_BUFFER) revert BelowOpenICR(icr, OPEN_ICR_BUFFER);
+        (uint256 price, bool isLive) = IPriceFeed(a.priceFeed).fetchPrice();
+        if (!isLive) revert PriceFeedDown();
 
- IERC20(a.collateralToken).safeTransferFrom(msg.sender, a.activePool, collAmount);
- IActivePool(a.activePool).creditCollateral(collAmount);
- IActivePool(a.activePool).increaseDebt(netDebt);
+        // Must open at 135% — 5% above the 130% liquidation threshold
+        uint256 icr = LiquityMath._computeCR(collAmount, netDebt, price);
+        if (icr < OPEN_ICR_BUFFER) revert BelowOpenICR(icr, OPEN_ICR_BUFFER);
 
- tm.openTrove(msg.sender, collAmount, netDebt);
+        // Pull collateral into ActivePool
+        IERC20(a.collateralToken).safeTransferFrom(msg.sender, a.activePool, collAmount);
+        IActivePool(a.activePool).creditCollateral(collAmount);
+        IActivePool(a.activePool).increaseDebt(netDebt);
 
- uint256 nicr = LiquityMath._computeNominalCR(collAmount, netDebt);
- ISortedTroves(a.sortedTroves).insert(msg.sender, nicr, upperHint, lowerHint);
+        // Register Trove
+        tm.openTrove(msg.sender, collAmount, netDebt);
 
- IFnUSD(a.fnUSD).mint(msg.sender, fnUSDAmount18);
- if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18);
- IGasPool(a.gasPool).fund(GasPool(a.gasPool).GAS_COMPENSATION());
+        // Insert into SortedTroves
+        uint256 nicr = LiquityMath._computeNominalCR(collAmount, netDebt);
+        ISortedTroves(a.sortedTroves).insert(msg.sender, nicr, upperHint, lowerHint);
 
- emit TroveOpened(msg.sender, collAmount, netDebt);
- }
+        // Mint FnUSD to user, fee to treasury
+        IFnUSD(a.fnUSD).mint(msg.sender, fnUSDAmount18);
+        if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18);
 
- // ─── addColl ──────────────────────────────────────────────────────────────
+        emit TroveOpened(msg.sender, collAmount, netDebt);
+    }
 
- function addColl(
- uint256 collAmount,
- address upperHint,
- address lowerHint
- ) external override nonReentrant {
- if (collAmount == 0) revert ZeroAmount();
- IAddressesRegistry.Addresses memory a = registry.addresses();
- _requireActive(a);
+    // ─── addColl ──────────────────────────────────────────────────────────────
 
- IERC20(a.collateralToken).safeTransferFrom(msg.sender, a.activePool, collAmount);
- IActivePool(a.activePool).creditCollateral(collAmount);
- ITroveManager(a.troveManager).adjustTrove(msg.sender, int256(collAmount), 0);
- _reInsert(a, upperHint, lowerHint);
+    function addColl(
+        uint256 collAmount,
+        address upperHint,
+        address lowerHint
+    ) external override nonReentrant {
+        if (collAmount == 0) revert ZeroAmount();
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        _requireActive(a);
 
- emit CollateralAdded(msg.sender, collAmount);
- }
+        IERC20(a.collateralToken).safeTransferFrom(msg.sender, a.activePool, collAmount);
+        IActivePool(a.activePool).creditCollateral(collAmount);
+        ITroveManager(a.troveManager).adjustTrove(msg.sender, int256(collAmount), 0);
+        _reInsert(a, upperHint, lowerHint);
 
- // ─── withdrawColl ─────────────────────────────────────────────────────────
+        emit CollateralAdded(msg.sender, collAmount);
+    }
 
- function withdrawColl(
- uint256 collAmount,
- address upperHint,
- address lowerHint
- ) external override nonReentrant {
- if (collAmount == 0) revert ZeroAmount();
- IAddressesRegistry.Addresses memory a = registry.addresses();
- _requireActive(a);
+    // ─── withdrawColl ─────────────────────────────────────────────────────────
 
- ITroveManager(a.troveManager).adjustTrove(msg.sender, -int256(collAmount), 0);
- _requireICRAboveMCR(a);
+    function withdrawColl(
+        uint256 collAmount,
+        address upperHint,
+        address lowerHint
+    ) external override nonReentrant {
+        if (collAmount == 0) revert ZeroAmount();
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        _requireActive(a);
 
- IActivePool(a.activePool).sendCollateral(msg.sender, collAmount);
- _reInsert(a, upperHint, lowerHint);
+        ITroveManager(a.troveManager).adjustTrove(msg.sender, -int256(collAmount), 0);
+        _requireICRAboveMCR(a);
 
- emit CollateralWithdrawn(msg.sender, collAmount);
- }
+        IActivePool(a.activePool).sendCollateral(msg.sender, collAmount);
+        _reInsert(a, upperHint, lowerHint);
 
- // ─── withdrawFnUSD ────────────────────────────────────────────────────────
+        emit CollateralWithdrawn(msg.sender, collAmount);
+    }
 
- function withdrawFnUSD(
- uint256 fnUSDAmount6,
- address upperHint,
- address lowerHint
- ) external override nonReentrant {
- if (fnUSDAmount6 == 0) revert ZeroAmount();
- IAddressesRegistry.Addresses memory a = registry.addresses();
- _requireActive(a);
+    // ─── withdrawFnUSD ────────────────────────────────────────────────────────
 
- uint256 amount18 = Decimals.to18(fnUSDAmount6);
- uint256 fee18 = (amount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
- uint256 netNew = amount18 + fee18;
+    function withdrawFnUSD(
+        uint256 fnUSDAmount6,
+        address upperHint,
+        address lowerHint
+    ) external override nonReentrant {
+        if (fnUSDAmount6 == 0) revert ZeroAmount();
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        _requireActive(a);
 
- ITroveManager(a.troveManager).adjustTrove(msg.sender, 0, int256(netNew));
- _requireICRAboveMCR(a);
+        uint256 amount18 = Decimals.to18(fnUSDAmount6);
+        uint256 fee18    = (amount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
+        uint256 netNew   = amount18 + fee18;
 
- IActivePool(a.activePool).increaseDebt(netNew);
- IFnUSD(a.fnUSD).mint(msg.sender, amount18);
- if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18);
- _reInsert(a, upperHint, lowerHint);
+        ITroveManager(a.troveManager).adjustTrove(msg.sender, 0, int256(netNew));
+        _requireICRAboveMCR(a);
 
- emit FnUSDBorrowed(msg.sender, amount18);
- }
+        IActivePool(a.activePool).increaseDebt(netNew);
+        IFnUSD(a.fnUSD).mint(msg.sender, amount18);
+        if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18);
+        _reInsert(a, upperHint, lowerHint);
 
- // ─── repayFnUSD ───────────────────────────────────────────────────────────
+        emit FnUSDBorrowed(msg.sender, amount18);
+    }
 
- function repayFnUSD(
- uint256 fnUSDAmount6,
- address upperHint,
- address lowerHint
- ) external override nonReentrant {
- if (fnUSDAmount6 == 0) revert ZeroAmount();
- IAddressesRegistry.Addresses memory a = registry.addresses();
- _requireActive(a);
+    // ─── repayFnUSD ───────────────────────────────────────────────────────────
 
- uint256 amount18 = Decimals.to18(fnUSDAmount6);
+    function repayFnUSD(
+        uint256 fnUSDAmount6,
+        address upperHint,
+        address lowerHint
+    ) external override nonReentrant {
+        if (fnUSDAmount6 == 0) revert ZeroAmount();
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        _requireActive(a);
 
- if (IFnUSD(a.fnUSD).balanceOf(msg.sender) < fnUSDAmount6) {
- revert InsufficientFnUSDBalance();
- }
+        uint256 amount18 = Decimals.to18(fnUSDAmount6);
 
- IFnUSD(a.fnUSD).burn(msg.sender, amount18);
- IActivePool(a.activePool).decreaseDebt(amount18);
- ITroveManager(a.troveManager).adjustTrove(msg.sender, 0, -int256(amount18));
- _reInsert(a, upperHint, lowerHint);
+        if (IFnUSD(a.fnUSD).balanceOf(msg.sender) < fnUSDAmount6) {
+            revert InsufficientFnUSDBalance();
+        }
 
- emit FnUSDRepaid(msg.sender, amount18);
- }
+        IFnUSD(a.fnUSD).burn(msg.sender, amount18);
+        IActivePool(a.activePool).decreaseDebt(amount18);
+        ITroveManager(a.troveManager).adjustTrove(msg.sender, 0, -int256(amount18));
+        _reInsert(a, upperHint, lowerHint);
 
- // ─── closeTrove ───────────────────────────────────────────────────────────
+        emit FnUSDRepaid(msg.sender, amount18);
+    }
 
- function closeTrove() external override nonReentrant {
- IAddressesRegistry.Addresses memory a = registry.addresses();
- _requireActive(a);
+    // ─── closeTrove ───────────────────────────────────────────────────────────
 
- ITroveManager tm = ITroveManager(a.troveManager);
- (uint256 debt, uint256 coll,) = tm.getEntireDebtAndColl(msg.sender);
+    // User repays their full debt (borrowed + accrued interest + origination fee).
+    // No gas compensation — just repay what you owe, get your collateral back.
+    function closeTrove() external override nonReentrant {
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        _requireActive(a);
 
- uint256 gasComp = GasPool(a.gasPool).GAS_COMPENSATION();
- uint256 repayable = debt - gasComp;
- uint256 repay6 = Decimals.from18(repayable);
+        ITroveManager tm = ITroveManager(a.troveManager);
+        (uint256 debt, uint256 coll,) = tm.getEntireDebtAndColl(msg.sender);
 
- if (IFnUSD(a.fnUSD).balanceOf(msg.sender) < repay6) {
- revert InsufficientFnUSDBalance();
- }
+        uint256 repay6 = Decimals.from18(debt);
 
- IFnUSD(a.fnUSD).burn(msg.sender, repayable);
- IFnUSD(a.fnUSD).burn(a.gasPool, gasComp);
+        if (IFnUSD(a.fnUSD).balanceOf(msg.sender) < repay6) {
+            revert InsufficientFnUSDBalance();
+        }
 
- tm.closeTrove(msg.sender);
- ISortedTroves(a.sortedTroves).remove(msg.sender);
- IActivePool(a.activePool).decreaseDebt(debt);
- IActivePool(a.activePool).sendCollateral(msg.sender, coll);
+        // Burn the full debt
+        IFnUSD(a.fnUSD).burn(msg.sender, debt);
 
- emit TroveClosed(msg.sender);
- }
+        // Close Trove, remove from list, return collateral
+        tm.closeTrove(msg.sender);
+        ISortedTroves(a.sortedTroves).remove(msg.sender);
+        IActivePool(a.activePool).decreaseDebt(debt);
+        IActivePool(a.activePool).sendCollateral(msg.sender, coll);
 
- // ─── claimCollateral ──────────────────────────────────────────────────────
+        emit TroveClosed(msg.sender);
+    }
 
- function claimCollateral() external override nonReentrant {
- IAddressesRegistry.Addresses memory a = registry.addresses();
- ICollSurplusPool(a.collSurplusPool).claim(msg.sender);
- emit CollateralClaimed(msg.sender, 0);
- }
+    // ─── claimCollateral ──────────────────────────────────────────────────────
 
- // ─── Internal helpers ─────────────────────────────────────────────────────
+    function claimCollateral() external override nonReentrant {
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        ICollSurplusPool(a.collSurplusPool).claim(msg.sender);
+        emit CollateralClaimed(msg.sender, 0);
+    }
 
- function _requireActive(IAddressesRegistry.Addresses memory a) internal view {
- if (ITroveManager(a.troveManager).getTroveStatus(msg.sender) != ITroveManager.Status.Active) {
- revert TroveNotActive();
- }
- }
+    // ─── Internal helpers ─────────────────────────────────────────────────────
 
- function _requireICRAboveMCR(IAddressesRegistry.Addresses memory a) internal view {
- (uint256 price,) = IPriceFeed(a.priceFeed).fetchPrice();
- uint256 icr = ITroveManager(a.troveManager).getCurrentICR(msg.sender, price);
- if (icr < Constants.MCR) revert BelowMCR(icr, Constants.MCR);
- }
+    function _requireActive(IAddressesRegistry.Addresses memory a) internal view {
+        if (ITroveManager(a.troveManager).getTroveStatus(msg.sender) != ITroveManager.Status.Active) {
+            revert TroveNotActive();
+        }
+    }
 
- function _reInsert(
- IAddressesRegistry.Addresses memory a,
- address upperHint,
- address lowerHint
- ) internal {
- uint256 newNICR = ITroveManager(a.troveManager).getNominalICR(msg.sender);
- ISortedTroves(a.sortedTroves).reInsert(msg.sender, newNICR, upperHint, lowerHint);
- }
-}
+    function _requireICRAboveMCR(IAddressesRegistry.Addresses memory a) internal view {
+        (uint256 price,) = IPriceFeed(a.priceFeed).fetchPrice();
+        uint256 icr = ITroveManager(a.troveManager).getCurrentICR(msg.sender, price);
+        if (icr < Constants.MCR) revert BelowMCR(icr, Constants.MCR);
+    }
 
-// Minimal interface to read GAS_COMPENSATION from GasPool
-interface GasPool {
- function GAS_COMPENSATION() external view returns (uint256);
+    function _reInsert(
+        IAddressesRegistry.Addresses memory a,
+        address upperHint,
+        address lowerHint
+    ) internal {
+        uint256 newNICR = ITroveManager(a.troveManager).getNominalICR(msg.sender);
+        ISortedTroves(a.sortedTroves).reInsert(msg.sender, newNICR, upperHint, lowerHint);
+    }
 }
