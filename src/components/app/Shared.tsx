@@ -1,6 +1,20 @@
 import { ReactNode } from "react";
 
-export const Card = ({
+// Token images
+const TOKEN_IMAGES: Record<string, string> = {
+  zkLTC: "https://www.image2url.com/r2/default/images/1777631633399-a83840bb-eef1-4386-8749-2007be4a5e87.jpg",
+  WzkLTC: "https://www.image2url.com/r2/default/images/1777631633399-a83840bb-eef1-4386-8749-2007be4a5e87.jpg",
+  FnUSD: "https://www.image2url.com/r2/default/images/1777632157848-482b63d8-a570-4f01-bc38-94ba9ebe0722.jpg",
+  LP: "https://www.image2url.com/r2/default/images/1777632157848-482b63d8-a570-4f01-bc38-94ba9ebe0722.jpg",
+};
+
+function TokenIcon({ symbol, size = "h-5 w-5" }: { symbol: string; size?: string }) {
+  const src = TOKEN_IMAGES[symbol];
+  if (src) {
+    return <img src={src} alt={symbol} className={`${size} rounded-full object-cover`} />;
+  }
+  return <span className={`${size} rounded-full bg-gradient-to-br from-foreground/80 to-foreground/30`} />;
+}
   children,
   className = "",
 }: {

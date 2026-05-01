@@ -31,8 +31,7 @@ contract RedemptionHelper is ReentrancyGuard {
  uint256 public baseRate;
  uint256 public lastFeeOperationTime;
 
- // Minimum redemption: 100 FnUSD (18-dec internal)
- uint256 private constant MIN_REDEMPTION = 100e18;
+ // No minimum redemption — users can redeem any amount.
 
  event Redemption(
  address indexed redeemer,
@@ -48,7 +47,6 @@ contract RedemptionHelper is ReentrancyGuard {
  error InsufficientFnUSDBalance();
  error NoRedeemableTroves();
  error PriceFeedDown();
- error BelowMinRedemption();
 
  constructor(IAddressesRegistry _registry) {
  registry = _registry;
@@ -65,7 +63,6 @@ contract RedemptionHelper is ReentrancyGuard {
  if (fnUSDAmount6 == 0) revert ZeroAmount();
 
  uint256 amount18 = Decimals.to18(fnUSDAmount6);
- if (amount18 < MIN_REDEMPTION) revert BelowMinRedemption();
 
  IAddressesRegistry.Addresses memory a = registry.addresses();
  IFnUSD fnUSD = IFnUSD(a.fnUSD);

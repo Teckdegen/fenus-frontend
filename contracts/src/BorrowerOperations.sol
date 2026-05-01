@@ -47,7 +47,6 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
     error TroveAlreadyExists();
     error BelowOpenICR(uint256 icr, uint256 required);
     error BelowMCR(uint256 icr, uint256 mcr);
-    error BelowMinDebt(uint256 debt, uint256 minDebt);
     error ZeroAmount();
     error InsufficientFnUSDBalance();
     error PriceFeedDown();
@@ -83,8 +82,6 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         // Origination fee (0.5%) added to debt, goes to treasury
         uint256 fee18   = (fnUSDAmount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
         uint256 netDebt = fnUSDAmount18 + fee18;
-
-        if (netDebt < Constants.MIN_NET_DEBT) revert BelowMinDebt(netDebt, Constants.MIN_NET_DEBT);
 
         (uint256 price, bool isLive) = IPriceFeed(a.priceFeed).fetchPrice();
         if (!isLive) revert PriceFeedDown();
