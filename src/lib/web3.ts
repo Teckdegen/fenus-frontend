@@ -41,7 +41,10 @@ export const appKit = createAppKit({
     name: "FENUS",
     description: "FENUS — Borrow FnUSD against zkLTC",
     url: typeof window !== "undefined" ? window.location.origin : "https://fenus.xyz",
-    icons: ["https://fenus.xyz/favicon.ico"],
+    icons: [
+      "https://fenus.xyz/favicon.ico",
+      "https://www.image2url.com/r2/default/images/1777632157848-482b63d8-a570-4f01-bc38-94ba9ebe0722.jpg",
+    ],
   },
   features: {
     analytics: false,

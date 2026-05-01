@@ -8,6 +8,7 @@
     "deploy:testnet": "hardhat run scripts/deploy.ts --network liteforge",
     "deploy:local":   "hardhat run scripts/deploy.ts --network localhost",
     "test:pricefeed": "hardhat run scripts/testPriceFeed.ts --network liteforge",
+    "mint:wzklitecoin": "hardhat run scripts/mintWzkLTC.ts --network liteforge",
     "node":           "hardhat node",
     "clean":          "hardhat clean"
   },

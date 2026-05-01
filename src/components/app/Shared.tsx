@@ -1,11 +1,16 @@
 import { ReactNode } from "react";
 
 // ─── Token images ─────────────────────────────────────────────────────────────
+// These URLs are used everywhere tokens are displayed — inputs, pools, dashboard.
+// Also used in wallet metadata so wallets like MetaMask show the correct icons.
+export const WZKLITECOIN_IMAGE_URL = "https://www.image2url.com/r2/default/images/1777631633399-a83840bb-eef1-4386-8749-2007be4a5e87.jpg";
+export const FNUSD_IMAGE_URL       = "https://www.image2url.com/r2/default/images/1777632157848-482b63d8-a570-4f01-bc38-94ba9ebe0722.jpg";
+
 export const TOKEN_IMAGES: Record<string, string> = {
-  zkLTC:  "https://www.image2url.com/r2/default/images/1777631633399-a83840bb-eef1-4386-8749-2007be4a5e87.jpg",
-  WzkLTC: "https://www.image2url.com/r2/default/images/1777631633399-a83840bb-eef1-4386-8749-2007be4a5e87.jpg",
-  FnUSD:  "https://www.image2url.com/r2/default/images/1777632157848-482b63d8-a570-4f01-bc38-94ba9ebe0722.jpg",
-  USDC:   "https://www.image2url.com/r2/default/images/1777632157848-482b63d8-a570-4f01-bc38-94ba9ebe0722.jpg",
+  zkLTC:  WZKLITECOIN_IMAGE_URL,
+  WzkLTC: WZKLITECOIN_IMAGE_URL,
+  FnUSD:  FNUSD_IMAGE_URL,
+  USDC:   FNUSD_IMAGE_URL,
 };
 
 // Reusable token icon — real image if available, gradient fallback otherwise

@@ -8,12 +8,12 @@ import {
   SectionLabel,
   TokenInput,
 } from "@/components/app/Shared";
+import { useBalances } from "@/hooks/useBalances";
 
 const MCR             = 1.30;
 const BUFFER          = 1.35;
 const ORIGINATION_FEE = 0.005;
 const ANNUAL_RATE     = 0.01;
-const MOCK_PRICE      = 0;
 
 const TABS = ["Open", "Add", "Remove", "Borrow", "Repay", "Close"] as const;
 type Tab = (typeof TABS)[number];
@@ -107,9 +107,15 @@ const Trove = () => {
   const [moreInput,   setMoreInput]   = useState("");
   const [repayInput,  setRepayInput]  = useState("");
 
-  const existingColl = 0;
-  const existingDebt = 0;
-  const price        = MOCK_PRICE;
+  const {
+    wzkLTCBalance, fnUSDBalance, priceNum,
+    hasTrove, troveColl: existingCollStr, troveDebt: existingDebtStr,
+    isConnected,
+  } = useBalances();
+
+  const existingColl = parseFloat(existingCollStr.replace(/,/g, "")) || 0;
+  const existingDebt = parseFloat(existingDebtStr.replace(/,/g, "")) || 0;
+  const price        = priceNum;
 
   // Open
   const openCalc = useMemo(() => {
@@ -201,9 +207,9 @@ const Trove = () => {
         {/* ── OPEN ─────────────────────────────────────────────────────── */}
         {tab === "Open" && (
           <div className="space-y-3">
-            <TokenInput label="Deposit WzkLTC" symbol="zkLTC" balance="0.00"
+            <TokenInput label="Deposit WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
               value={collInput} onChange={setCollInput} />
-            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance="0.00"
+            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalance}
               value={borrowInput} onChange={setBorrowInput} />
 
             {openCalc && (
@@ -285,7 +291,7 @@ const Trove = () => {
         {/* ── ADD COLLATERAL ───────────────────────────────────────────── */}
         {tab === "Add" && (
           <div className="space-y-3">
-            <TokenInput label="Add WzkLTC" symbol="zkLTC" balance="0.00"
+            <TokenInput label="Add WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
               value={addInput} onChange={setAddInput} />
             {addInput && <Preview {...addCalc} safe={true} />}
             <div className="flex justify-end pt-1">
@@ -297,7 +303,7 @@ const Trove = () => {
         {/* ── REMOVE COLLATERAL ────────────────────────────────────────── */}
         {tab === "Remove" && (
           <div className="space-y-3">
-            <TokenInput label="Remove WzkLTC" symbol="zkLTC" balance="0.00"
+            <TokenInput label="Remove WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
               value={removeInput} onChange={setRemoveInput} />
             {removeInput && <Preview {...removeCalc} />}
             <div className="flex justify-end pt-1">
@@ -311,7 +317,7 @@ const Trove = () => {
         {/* ── BORROW MORE ──────────────────────────────────────────────── */}
         {tab === "Borrow" && (
           <div className="space-y-3">
-            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance="0.00"
+            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalance}
               value={moreInput} onChange={setMoreInput} />
             {moreInput && <Preview {...borrowCalc} showFee />}
             <div className="flex justify-end pt-1">
@@ -325,7 +331,7 @@ const Trove = () => {
         {/* ── REPAY DEBT ───────────────────────────────────────────────── */}
         {tab === "Repay" && (
           <div className="space-y-3">
-            <TokenInput label="Repay FnUSD" symbol="FnUSD" balance="0.00"
+            <TokenInput label="Repay FnUSD" symbol="FnUSD" balance={fnUSDBalance}
               value={repayInput} onChange={setRepayInput} />
             {repayInput && <Preview {...repayCalc} safe={true} />}
             <div className="flex justify-end pt-1">
