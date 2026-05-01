@@ -15,8 +15,7 @@ library Constants {
     // Collateral ratios.
     uint256 internal constant MCR = 130e16; // 130% — minimum before liquidation
 
-    // Debt floor removed — users can deposit and borrow any amount.
-    // uint256 internal constant MIN_NET_DEBT = 500e18;
+    // No minimum debt — users can deposit and borrow any amount.
 
     // Fixed annual interest rate — all Troves pay 1%. Not user-configurable.
     uint256 internal constant ANNUAL_INTEREST_RATE = 1e16; // 1%

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { ArrowDown, Info } from "lucide-react";
 import {
- Card,
- PrimaryButton,
- Row,
- SectionLabel,
- TokenInput,
+  Card,
+  PrimaryButton,
+  Row,
+  SectionLabel,
+  TokenInput,
+  TokenIcon,
 } from "@/components/app/Shared";
 
 const REDEMPTION_FEE_FLOOR = 0.005; // 0.5% matches Constants.sol
@@ -71,7 +72,7 @@ const Redeem = () => {
  {collOutDisplay}
  </span>
  <div className="flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1.5">
- <span className="h-5 w-5 rounded-full bg-gradient-to-br from-foreground/80 to-foreground/30" />
+ <TokenIcon symbol="zkLTC" className="h-5 w-5" />
  <span className="font-display text-xs font-medium tracking-wide">zkLTC</span>
  </div>
  </div>

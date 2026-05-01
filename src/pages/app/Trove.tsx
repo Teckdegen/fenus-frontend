@@ -13,7 +13,6 @@ const MCR             = 1.30;
 const BUFFER          = 1.35;
 const ORIGINATION_FEE = 0.005;
 const ANNUAL_RATE     = 0.01;
-const MIN_DEBT        = 500;
 const MOCK_PRICE      = 0;
 
 const TABS = ["Open", "Add", "Remove", "Borrow", "Repay", "Close"] as const;
@@ -122,7 +121,7 @@ const Trove = () => {
     const collUSD   = price > 0 ? coll * price : 0;
     const ratio     = totalDebt > 0 && collUSD > 0 ? collUSD / totalDebt : null;
     const liqPrice  = totalDebt > 0 && coll > 0 ? (totalDebt * MCR) / coll : null;
-    const canOpen   = ratio !== null && ratio >= BUFFER && totalDebt >= MIN_DEBT;
+    const canOpen   = ratio !== null && ratio >= BUFFER;
     const int6m     = totalDebt * ANNUAL_RATE / 2;
     const int1y     = totalDebt * ANNUAL_RATE;
     return { coll, fee, totalDebt, collUSD, ratio, liqPrice, canOpen, int6m, int1y };
@@ -267,12 +266,6 @@ const Trove = () => {
                     </p>
                   </div>
                 )}
-                {openCalc.totalDebt > 0 && openCalc.totalDebt < MIN_DEBT && (
-                  <div className="px-4 py-3 flex items-start gap-2">
-                    <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-orange-400 mt-0.5" />
-                    <p className="text-[11px] text-orange-400">Minimum debt is 500 FnUSD.</p>
-                  </div>
-                )}
                 {openCalc.ratio !== null && openCalc.ratio >= BUFFER && openCalc.ratio < 1.6 && (
                   <div className="px-4 py-3 flex items-start gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-orange-400 mt-0.5" />
@@ -400,7 +393,6 @@ const Trove = () => {
           <Row label="Origination Fee"       value="0.50%"       hint="One-time on each borrow, goes to treasury" />
           <Row label="Liquidation threshold" value="130%"        hint="Below this your Trove is liquidated by the bot" />
           <Row label="Minimum ratio"         value="135%"        hint="Required for all operations" />
-          <Row label="Min Debt"              value="500 FnUSD"   hint="Minimum position size" />
           <Row label="Collateral"            value="WzkLTC only" />
         </Card>
       </div>

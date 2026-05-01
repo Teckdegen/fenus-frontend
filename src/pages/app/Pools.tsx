@@ -1,8 +1,11 @@
-import { Card, Row, SectionLabel } from "@/components/app/Shared";
+import { ExternalLink } from "lucide-react";
+import { Card, Row, SectionLabel, TokenIcon, TOKEN_IMAGES } from "@/components/app/Shared";
 
 const pools = [
   {
     pair: "FnUSD / zkLTC",
+    token0: "FnUSD",
+    token1: "zkLTC",
     venue: "Addax",
     tvl: "$0",
     apr: "0.00%",
@@ -10,6 +13,8 @@ const pools = [
   },
   {
     pair: "FnUSD / USDC",
+    token0: "FnUSD",
+    token1: "USDC",
     venue: "Addax",
     tvl: "$0",
     apr: "0.00%",
@@ -46,17 +51,20 @@ const Pools = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2">
-                  <span className="h-9 w-9 rounded-full border-2 border-card bg-gradient-to-br from-foreground/80 to-foreground/30" />
-                  <span className="h-9 w-9 rounded-full border-2 border-card bg-gradient-to-br from-foreground/40 to-foreground/10" />
+                  <TokenIcon symbol={p.token0} className="h-9 w-9 border-2 border-card" />
+                  <TokenIcon symbol={p.token1} className="h-9 w-9 border-2 border-card" />
                 </div>
                 <div>
                   <p className="font-display text-sm font-medium">{p.pair}</p>
                   <p className="text-[11px] text-muted-foreground">{p.venue}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-display text-sm tabular-nums">{p.apr} APR</p>
-                <p className="text-[11px] tabular-nums text-muted-foreground">TVL {p.tvl}</p>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="font-display text-sm tabular-nums">{p.apr} APR</p>
+                  <p className="text-[11px] tabular-nums text-muted-foreground">TVL {p.tvl}</p>
+                </div>
+                <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
               </div>
             </a>
           ))}
