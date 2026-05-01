@@ -289,6 +289,7 @@ const Trove = () => {
               </div>
             </div>
           ) : (
+            <div className="space-y-3">
             <TokenInput label="Deposit WzkLTC" symbol="zkLTC" balance={wzkLTCBalanceFull}
               value={collInput} onChange={(v) => { setCollInput(v); actions.reset(); }} />
             <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
