@@ -6,6 +6,7 @@ import {
 } from "@/components/app/Shared";
 import { useBalances } from "@/hooks/useBalances";
 import { useTroveActions } from "@/hooks/useTroveActions";
+import { TxSuccessModal } from "@/components/app/TxSuccessModal";
 
 const MCR             = 1.30;
 const BUFFER          = 1.35;
@@ -522,6 +523,12 @@ const Trove = () => {
           <Row label="Collateral"            value="WzkLTC only" />
         </Card>
       </div>
+
+      {/* Full-screen success modal */}
+      <TxSuccessModal
+        data={actions.txResult}
+        onClose={() => actions.reset()}
+      />
     </div>
   );
 };

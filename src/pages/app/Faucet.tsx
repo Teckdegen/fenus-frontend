@@ -3,6 +3,7 @@ import { Droplets, CheckCircle2, Loader2, AlertTriangle, Wallet, Clock } from "l
 import { useAppKit } from "@reown/appkit/react";
 import { Card, PrimaryButton, Row, SectionLabel, TokenIcon } from "@/components/app/Shared";
 import { useBalances } from "@/hooks/useBalances";
+import { TxSuccessModal } from "@/components/app/TxSuccessModal";
 
 const COOLDOWN_MS = 48 * 60 * 60 * 1000;
 const EXPLORER    = "https://liteforge.explorer.caldera.xyz/tx/";
@@ -29,6 +30,7 @@ const Faucet = () => {
   const [txHash,   setTxHash]   = useState("");
   const [error,    setError]    = useState("");
   const [timeLeft, setTimeLeft] = useState(0);
+  const [modalData, setModalData] = useState<{ type: string; amount: string; txHash: string } | null>(null);
 
   // Update countdown every minute
   useEffect(() => {
@@ -57,6 +59,7 @@ const Faucet = () => {
       localStorage.setItem(getCooldownKey(address), Date.now().toString());
       setTimeLeft(COOLDOWN_MS);
       setStatus("success");
+      setModalData({ type: "Faucet Claim", amount: "1,000 WzkLTC", txHash: data.txHash });
     } catch (e: any) {
       setError(e?.message || "Request failed. Try again.");
       setStatus("error");
@@ -166,6 +169,8 @@ const Faucet = () => {
           <Row label="Network"      value="LitVM LiteForge (testnet)" />
         </Card>
       </div>
+
+      <TxSuccessModal data={modalData} onClose={() => setModalData(null)} />
     </div>
   );
 };

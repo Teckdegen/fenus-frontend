@@ -56,13 +56,21 @@ const GAS = {
 
 export type TxStatus = "idle" | "approving" | "pending" | "success" | "error";
 
+export interface TxResult {
+  type: string;
+  amount?: string;
+  amount2?: string;
+  txHash: string;
+}
+
 export function useTroveActions(address: `0x${string}` | undefined) {
   const { writeContractAsync } = useWriteContract();
-  const [status, setStatus] = useState<TxStatus>("idle");
-  const [txHash, setTxHash] = useState("");
-  const [error,  setError]  = useState("");
+  const [status,   setStatus]   = useState<TxStatus>("idle");
+  const [txHash,   setTxHash]   = useState("");
+  const [error,    setError]    = useState("");
+  const [txResult, setTxResult] = useState<TxResult | null>(null);
 
-  const reset = () => { setStatus("idle"); setTxHash(""); setError(""); };
+  const reset = () => { setStatus("idle"); setTxHash(""); setError(""); setTxResult(null); };
 
   const pub = createPublicClient({ transport: http(RPC) });
 
@@ -84,16 +92,16 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     }
   }
 
-  async function run(fn: () => Promise<`0x${string}`>) {
+  async function run(fn: () => Promise<`0x${string}`>, type: string, amount?: string, amount2?: string) {
     setStatus("pending");
     setError("");
     try {
       const hash = await fn();
       setTxHash(hash);
       await pub.waitForTransactionReceipt({ hash });
+      setTxResult({ type, amount, amount2, txHash: hash });
       setStatus("success");
     } catch (e: any) {
-      // Extract the most useful error message
       const msg = e?.shortMessage || e?.details || e?.message || "Transaction failed";
       setError(msg);
       setStatus("error");
@@ -112,7 +120,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       address: BO, abi: BO_ABI, functionName: "openTrove",
       args: [collAmt, fnUSDAmt, ZERO, ZERO],
       gas: GAS.openTrove,
-    }));
+    }), "Open Trove", `${fnUSDStr} FnUSD`, `${collStr} WzkLTC`);
   }
 
   async function addColl(collStr: string) {
@@ -123,7 +131,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       address: BO, abi: BO_ABI, functionName: "addColl",
       args: [collAmt, ZERO, ZERO],
       gas: GAS.addColl,
-    }));
+    }), "Add Collateral", `${collStr} WzkLTC`);
   }
 
   async function withdrawColl(collStr: string) {
@@ -133,7 +141,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       address: BO, abi: BO_ABI, functionName: "withdrawColl",
       args: [collAmt, ZERO, ZERO],
       gas: GAS.withdrawColl,
-    }));
+    }), "Remove Collateral", `${collStr} WzkLTC`);
   }
 
   async function borrowMore(fnUSDStr: string) {
@@ -143,7 +151,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       address: BO, abi: BO_ABI, functionName: "withdrawFnUSD",
       args: [fnUSDAmt, ZERO, ZERO],
       gas: GAS.borrowMore,
-    }));
+    }), "Borrow FnUSD", `${fnUSDStr} FnUSD`);
   }
 
   async function repayFnUSD(fnUSDStr: string) {
@@ -153,7 +161,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       address: BO, abi: BO_ABI, functionName: "repayFnUSD",
       args: [fnUSDAmt, ZERO, ZERO],
       gas: GAS.repayFnUSD,
-    }));
+    }), "Repay Debt", `${fnUSDStr} FnUSD`);
   }
 
   async function closeTrove() {
@@ -162,11 +170,11 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       address: BO, abi: BO_ABI, functionName: "closeTrove",
       args: [],
       gas: GAS.closeTrove,
-    }));
+    }), "Close Trove");
   }
 
   return {
-    status, txHash, error, reset,
+    status, txHash, error, txResult, reset,
     openTrove, addColl, withdrawColl, borrowMore, repayFnUSD, closeTrove,
   };
 }
