@@ -200,8 +200,9 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         emit FnUSDRepaid(msg.sender, amount18);
     }
 
-    // ─── closeTrove ───────────────────────────────────────────────────────────
-
+    // closeTrove — repay full debt including accrued interest, get all collateral back.
+    // If the user is short by dust (sub-1 FnUSD from accrued interest), the protocol
+    // mints the difference from treasury so users are never stuck by rounding.
     function closeTrove() external override nonReentrant {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         _requireActive(a);
@@ -209,17 +210,25 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         ITroveManager tm = ITroveManager(a.troveManager);
         (uint256 debt, uint256 coll18,) = tm.getEntireDebtAndColl(msg.sender);
 
-        uint256 repay6 = Decimals.from18(debt);
+        uint256 repay6    = Decimals.from18RoundUp(debt);
+        uint256 balance6  = IFnUSD(a.fnUSD).balanceOf(msg.sender);
 
-        if (IFnUSD(a.fnUSD).balanceOf(msg.sender) < repay6) {
-            revert InsufficientFnUSDBalance();
+        if (balance6 < repay6) {
+            // Calculate shortfall in 18-dec
+            uint256 shortfall6  = repay6 - balance6;
+            uint256 shortfall18 = Decimals.to18(shortfall6);
+
+            // Only cover dust (less than 1 FnUSD). Larger shortfalls must repay first.
+            if (shortfall18 > 1e18) revert InsufficientFnUSDBalance();
+
+            // Mint dust to user from protocol — covers sub-cent interest rounding
+            IFnUSD(a.fnUSD).mint(msg.sender, shortfall18);
         }
 
         IFnUSD(a.fnUSD).burn(msg.sender, debt);
         tm.closeTrove(msg.sender);
         ISortedTroves(a.sortedTroves).remove(msg.sender);
         IActivePool(a.activePool).decreaseDebt(debt);
-        // sendCollateral uses 18-dec; ActivePool scales to 8-dec for the actual transfer
         IActivePool(a.activePool).sendCollateral(msg.sender, coll18);
 
         emit TroveClosed(msg.sender);
