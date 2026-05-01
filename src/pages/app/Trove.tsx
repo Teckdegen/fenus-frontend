@@ -39,29 +39,123 @@ function barColor(r: number) {
   return "bg-red-500";
 }
 
-function Preview({
-  ratio, liqPrice, newColl, newDebt, fee, safe, showFee,
-}: {
-  ratio: number | null; liqPrice: number | null;
-  newColl: number; newDebt: number;
-  fee?: number; safe: boolean; showFee?: boolean;
-}) {
+function RatioBar({ ratio }: { ratio: number | null }) {
+  if (!ratio) return null;
   return (
+    <div className="h-1.5 w-full rounded-full bg-border/40 overflow-hidden">
+      <div
+        className={`h-full rounded-full transition-all ${barColor(ratio)}`}
+        style={{ width: `${Math.min((ratio / 3) * 100, 100)}%` }}
+      />
+    </div>
+  );
+}
+
+const Trove = () => {
+  const [tab, setTab] = useState<Tab>("Open");
+  const [collInput,   setCollInput]   = useState("");
+  const [borrowInput, setBorrowInput] = useState("");
+  const [addInput,    setAddInput]    = useState("");
+  const [removeInput, setRemoveInput] = useState("");
+  const [moreInput,   setMoreInput]   = useState("");
+  const [repayInput,  setRepayInput]  = useState("");
+
+  const {
+    wzkLTCBalance, fnUSDBalance, priceNum,
+    hasTrove, troveColl: existingCollStr, troveDebt: existingDebtStr,
+    isConnected, ltcPriceUSD,
+  } = useBalances();
+
+  const existingColl = parseFloat(existingCollStr.replace(/,/g, "")) || 0;
+  const existingDebt = parseFloat(existingDebtStr.replace(/,/g, "")) || 0;
+  const price        = priceNum;
+  const priceLoaded  = price > 0;
+
+  // ── Open calculations ──────────────────────────────────────────────────────
+  // All non-price fields compute immediately from inputs.
+  // Price-dependent fields (ratio, liqPrice) show when oracle loads.
+  const openCalc = useMemo(() => {
+    const coll   = parseFloat(collInput)   || 0;
+    const borrow = parseFloat(borrowInput) || 0;
+    if (!coll && !borrow) return null;
+
+    const fee       = borrow * ORIGINATION_FEE;
+    const totalDebt = borrow + fee;
+    const int6m     = totalDebt * ANNUAL_RATE / 2;
+    const int1y     = totalDebt * ANNUAL_RATE;
+
+    // Price-dependent
+    const collUSD  = priceLoaded ? coll * price : null;
+    const ratio    = collUSD !== null && totalDebt > 0 ? collUSD / totalDebt : null;
+    const liqPrice = totalDebt > 0 && coll > 0 ? (totalDebt * MCR) / coll : null;
+
+    // canOpen: both inputs filled + ratio ok if price available, or price not loaded yet
+    const ratioOk  = ratio !== null ? ratio >= BUFFER : true;
+    const canOpen  = coll > 0 && borrow > 0 && ratioOk;
+
+    return { coll, borrow, fee, totalDebt, collUSD, ratio, liqPrice, canOpen, int6m, int1y };
+  }, [collInput, borrowInput, price, priceLoaded]);
+
+  // ── Adjust calculations ────────────────────────────────────────────────────
+  const addCalc = useMemo(() => {
+    const amt      = parseFloat(addInput) || 0;
+    const newColl  = existingColl + amt;
+    const collUSD  = priceLoaded ? newColl * price : null;
+    const ratio    = collUSD !== null && existingDebt > 0 ? collUSD / existingDebt : null;
+    const liqPrice = existingDebt > 0 && newColl > 0 ? (existingDebt * MCR) / newColl : null;
+    return { newColl, newDebt: existingDebt, ratio, liqPrice, safe: true };
+  }, [addInput, existingColl, existingDebt, price, priceLoaded]);
+
+  const removeCalc = useMemo(() => {
+    const amt      = parseFloat(removeInput) || 0;
+    const newColl  = existingColl - amt;
+    const collUSD  = priceLoaded ? newColl * price : null;
+    const ratio    = collUSD !== null && existingDebt > 0 ? collUSD / existingDebt : null;
+    const liqPrice = existingDebt > 0 && newColl > 0 ? (existingDebt * MCR) / newColl : null;
+    const safe     = newColl >= 0 && (ratio === null || ratio >= BUFFER);
+    return { newColl, newDebt: existingDebt, ratio, liqPrice, safe };
+  }, [removeInput, existingColl, existingDebt, price, priceLoaded]);
+
+  const borrowCalc = useMemo(() => {
+    const amt      = parseFloat(moreInput) || 0;
+    const fee      = amt * ORIGINATION_FEE;
+    const newDebt  = existingDebt + amt + fee;
+    const collUSD  = priceLoaded ? existingColl * price : null;
+    const ratio    = collUSD !== null && newDebt > 0 ? collUSD / newDebt : null;
+    const liqPrice = newDebt > 0 && existingColl > 0 ? (newDebt * MCR) / existingColl : null;
+    const safe     = ratio === null || ratio >= BUFFER;
+    return { newColl: existingColl, newDebt, ratio, liqPrice, safe, fee };
+  }, [moreInput, existingColl, existingDebt, price, priceLoaded]);
+
+  const repayCalc = useMemo(() => {
+    const amt      = parseFloat(repayInput) || 0;
+    const newDebt  = Math.max(existingDebt - amt, 0);
+    const collUSD  = priceLoaded ? existingColl * price : null;
+    const ratio    = collUSD !== null && newDebt > 0 ? collUSD / newDebt : null;
+    const liqPrice = newDebt > 0 && existingColl > 0 ? (newDebt * MCR) / existingColl : null;
+    return { newColl: existingColl, newDebt, ratio, liqPrice, safe: true };
+  }, [repayInput, existingColl, existingDebt, price, priceLoaded]);
+
+  const closeDebt = existingDebt;
+
+  // ── Shared preview block ───────────────────────────────────────────────────
+  const PreviewBlock = ({
+    ratio, liqPrice, newColl, newDebt, fee, safe, showFee,
+  }: {
+    ratio: number | null; liqPrice: number | null;
+    newColl: number; newDebt: number;
+    fee?: number; safe: boolean; showFee?: boolean;
+  }) => (
     <div className="rounded-2xl border border-border/60 bg-background/20 divide-y divide-border/40">
       <div className="px-4 py-3">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] text-muted-foreground">Collateral Ratio</span>
           <span className={`font-display text-sm font-semibold tabular-nums ${ratioColor(ratio)}`}>
-            {ratio ? `${(ratio * 100).toFixed(1)}%` : "N/A"}
+            {ratio ? `${(ratio * 100).toFixed(1)}%` : priceLoaded ? "N/A" : "Loading price…"}
             {ratio && <span className="ml-1.5 text-[10px] font-normal opacity-70">{ratioLabel(ratio)}</span>}
           </span>
         </div>
-        {ratio && (
-          <div className="h-1.5 w-full rounded-full bg-border/40 overflow-hidden">
-            <div className={`h-full rounded-full transition-all ${barColor(ratio)}`}
-              style={{ width: `${Math.min((ratio / 3) * 100, 100)}%` }} />
-          </div>
-        )}
+        {ratio && <RatioBar ratio={ratio} />}
       </div>
       <div className="px-4 py-3 space-y-2">
         <div className="flex justify-between text-[11px]">
@@ -95,87 +189,6 @@ function Preview({
       )}
     </div>
   );
-}
-
-const Trove = () => {
-  const [tab, setTab] = useState<Tab>("Open");
-
-  const [collInput,   setCollInput]   = useState("");
-  const [borrowInput, setBorrowInput] = useState("");
-  const [addInput,    setAddInput]    = useState("");
-  const [removeInput, setRemoveInput] = useState("");
-  const [moreInput,   setMoreInput]   = useState("");
-  const [repayInput,  setRepayInput]  = useState("");
-
-  const {
-    wzkLTCBalance, fnUSDBalance, priceNum,
-    hasTrove, troveColl: existingCollStr, troveDebt: existingDebtStr,
-    isConnected,
-  } = useBalances();
-
-  const existingColl = parseFloat(existingCollStr.replace(/,/g, "")) || 0;
-  const existingDebt = parseFloat(existingDebtStr.replace(/,/g, "")) || 0;
-  const price        = priceNum;
-
-  // Open
-  const openCalc = useMemo(() => {
-    const coll   = parseFloat(collInput)   || 0;
-    const borrow = parseFloat(borrowInput) || 0;
-    if (!coll && !borrow) return null;
-    const fee       = borrow * ORIGINATION_FEE;
-    const totalDebt = borrow + fee;
-    const collUSD   = price > 0 ? coll * price : 0;
-    const ratio     = totalDebt > 0 && collUSD > 0 ? collUSD / totalDebt : null;
-    const liqPrice  = totalDebt > 0 && coll > 0 ? (totalDebt * MCR) / coll : null;
-    const canOpen   = ratio !== null && ratio >= BUFFER;
-    const int6m     = totalDebt * ANNUAL_RATE / 2;
-    const int1y     = totalDebt * ANNUAL_RATE;
-    return { coll, fee, totalDebt, collUSD, ratio, liqPrice, canOpen, int6m, int1y };
-  }, [collInput, borrowInput, price]);
-
-  // Add collateral
-  const addCalc = useMemo(() => {
-    const amt      = parseFloat(addInput) || 0;
-    const newColl  = existingColl + amt;
-    const ratio    = existingDebt > 0 && price > 0 ? (newColl * price) / existingDebt : null;
-    const liqPrice = existingDebt > 0 && newColl > 0 ? (existingDebt * MCR) / newColl : null;
-    return { newColl, newDebt: existingDebt, ratio, liqPrice, safe: true };
-  }, [addInput, existingColl, existingDebt, price]);
-
-  // Remove collateral
-  const removeCalc = useMemo(() => {
-    const amt      = parseFloat(removeInput) || 0;
-    const newColl  = existingColl - amt;
-    const collUSD  = price > 0 ? newColl * price : 0;
-    const ratio    = existingDebt > 0 && collUSD > 0 ? collUSD / existingDebt : null;
-    const liqPrice = existingDebt > 0 && newColl > 0 ? (existingDebt * MCR) / newColl : null;
-    const safe     = newColl >= 0 && (ratio === null || ratio >= BUFFER);
-    return { newColl, newDebt: existingDebt, ratio, liqPrice, safe };
-  }, [removeInput, existingColl, existingDebt, price]);
-
-  // Borrow more
-  const borrowCalc = useMemo(() => {
-    const amt      = parseFloat(moreInput) || 0;
-    const fee      = amt * ORIGINATION_FEE;
-    const newDebt  = existingDebt + amt + fee;
-    const collUSD  = price > 0 ? existingColl * price : 0;
-    const ratio    = newDebt > 0 && collUSD > 0 ? collUSD / newDebt : null;
-    const liqPrice = newDebt > 0 && existingColl > 0 ? (newDebt * MCR) / existingColl : null;
-    const safe     = ratio === null || ratio >= BUFFER;
-    return { newColl: existingColl, newDebt, ratio, liqPrice, safe, fee };
-  }, [moreInput, existingColl, existingDebt, price]);
-
-  // Repay
-  const repayCalc = useMemo(() => {
-    const amt      = parseFloat(repayInput) || 0;
-    const newDebt  = Math.max(existingDebt - amt, 0);
-    const collUSD  = price > 0 ? existingColl * price : 0;
-    const ratio    = newDebt > 0 && collUSD > 0 ? collUSD / newDebt : null;
-    const liqPrice = newDebt > 0 && existingColl > 0 ? (newDebt * MCR) / existingColl : null;
-    return { newColl: existingColl, newDebt, ratio, liqPrice, safe: true };
-  }, [repayInput, existingColl, existingDebt, price]);
-
-  const closeDebt = existingDebt;
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
@@ -186,21 +199,25 @@ const Trove = () => {
         </p>
       </div>
 
+      {/* Live price strip */}
+      <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background/20 px-4 py-2.5">
+        <span className="text-[11px] text-muted-foreground">LTC/USD Oracle</span>
+        <span className="font-display text-sm font-semibold tabular-nums">
+          {priceLoaded ? `$${price.toFixed(4)}` : (
+            <span className="text-muted-foreground animate-pulse">Fetching price…</span>
+          )}
+        </span>
+      </div>
+
       <Card className="p-4 space-y-4">
-        {/* Tab bar — 6 equal pills, small text so they all fit */}
+        {/* Tab bar */}
         <div className="flex rounded-full bg-background/60 p-1 gap-0.5">
           {TABS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
+            <button key={t} onClick={() => setTab(t)}
               className={`flex-1 rounded-full py-2 text-[10px] font-medium transition leading-none ${
-                tab === t
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground"
+                tab === t ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
               }`}
-            >
-              {t}
-            </button>
+            >{t}</button>
           ))}
         </div>
 
@@ -214,21 +231,23 @@ const Trove = () => {
 
             {openCalc && (
               <div className="rounded-2xl border border-border/60 bg-background/20 divide-y divide-border/40">
+                {/* Ratio — shows when price loads */}
                 <div className="px-4 py-3">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] text-muted-foreground">Collateral Ratio</span>
                     <span className={`font-display text-sm font-semibold tabular-nums ${ratioColor(openCalc.ratio)}`}>
-                      {openCalc.ratio ? `${(openCalc.ratio * 100).toFixed(1)}%` : "N/A"}
-                      {openCalc.ratio && <span className="ml-1.5 text-[10px] font-normal opacity-70">{ratioLabel(openCalc.ratio)}</span>}
+                      {openCalc.ratio
+                        ? `${(openCalc.ratio * 100).toFixed(1)}%`
+                        : priceLoaded ? "N/A" : <span className="text-muted-foreground animate-pulse">Loading…</span>}
+                      {openCalc.ratio && (
+                        <span className="ml-1.5 text-[10px] font-normal opacity-70">{ratioLabel(openCalc.ratio)}</span>
+                      )}
                     </span>
                   </div>
-                  {openCalc.ratio && (
-                    <div className="h-1.5 w-full rounded-full bg-border/40 overflow-hidden">
-                      <div className={`h-full rounded-full transition-all ${barColor(openCalc.ratio)}`}
-                        style={{ width: `${Math.min((openCalc.ratio / 3) * 100, 100)}%` }} />
-                    </div>
-                  )}
+                  {openCalc.ratio && <RatioBar ratio={openCalc.ratio} />}
                 </div>
+
+                {/* Always-visible numbers — no price needed */}
                 <div className="px-4 py-3 space-y-2">
                   <div className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">Liquidation price</span>
@@ -245,6 +264,8 @@ const Trove = () => {
                     <span className="tabular-nums font-medium">{openCalc.totalDebt.toFixed(2)} FnUSD</span>
                   </div>
                 </div>
+
+                {/* Interest projections — no price needed */}
                 <div className="px-4 py-3 space-y-2">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">
                     Interest projections (1% APR)
@@ -264,6 +285,8 @@ const Trove = () => {
                     </span>
                   </div>
                 </div>
+
+                {/* Warnings */}
                 {openCalc.ratio !== null && openCalc.ratio < BUFFER && openCalc.ratio > 0 && (
                   <div className="px-4 py-3 flex items-start gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400 mt-0.5" />
@@ -282,30 +305,31 @@ const Trove = () => {
                 )}
               </div>
             )}
+
             <div className="flex justify-end pt-1">
               <PrimaryButton disabled={!openCalc?.canOpen}>Open Trove</PrimaryButton>
             </div>
           </div>
         )}
 
-        {/* ── ADD COLLATERAL ───────────────────────────────────────────── */}
+        {/* ── ADD ──────────────────────────────────────────────────────── */}
         {tab === "Add" && (
           <div className="space-y-3">
             <TokenInput label="Add WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
               value={addInput} onChange={setAddInput} />
-            {addInput && <Preview {...addCalc} safe={true} />}
+            {addInput && <PreviewBlock {...addCalc} safe={true} />}
             <div className="flex justify-end pt-1">
               <PrimaryButton disabled={!addInput}>Add Collateral</PrimaryButton>
             </div>
           </div>
         )}
 
-        {/* ── REMOVE COLLATERAL ────────────────────────────────────────── */}
+        {/* ── REMOVE ───────────────────────────────────────────────────── */}
         {tab === "Remove" && (
           <div className="space-y-3">
             <TokenInput label="Remove WzkLTC" symbol="zkLTC" balance={wzkLTCBalance}
               value={removeInput} onChange={setRemoveInput} />
-            {removeInput && <Preview {...removeCalc} />}
+            {removeInput && <PreviewBlock {...removeCalc} />}
             <div className="flex justify-end pt-1">
               <PrimaryButton disabled={!removeInput || !removeCalc.safe}>
                 Remove Collateral
@@ -314,12 +338,12 @@ const Trove = () => {
           </div>
         )}
 
-        {/* ── BORROW MORE ──────────────────────────────────────────────── */}
+        {/* ── BORROW ───────────────────────────────────────────────────── */}
         {tab === "Borrow" && (
           <div className="space-y-3">
             <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalance}
               value={moreInput} onChange={setMoreInput} />
-            {moreInput && <Preview {...borrowCalc} showFee />}
+            {moreInput && <PreviewBlock {...borrowCalc} showFee />}
             <div className="flex justify-end pt-1">
               <PrimaryButton disabled={!moreInput || !borrowCalc.safe}>
                 Borrow More
@@ -328,12 +352,12 @@ const Trove = () => {
           </div>
         )}
 
-        {/* ── REPAY DEBT ───────────────────────────────────────────────── */}
+        {/* ── REPAY ────────────────────────────────────────────────────── */}
         {tab === "Repay" && (
           <div className="space-y-3">
             <TokenInput label="Repay FnUSD" symbol="FnUSD" balance={fnUSDBalance}
               value={repayInput} onChange={setRepayInput} />
-            {repayInput && <Preview {...repayCalc} safe={true} />}
+            {repayInput && <PreviewBlock {...repayCalc} safe={true} />}
             <div className="flex justify-end pt-1">
               <PrimaryButton disabled={!repayInput}>Repay Debt</PrimaryButton>
             </div>
@@ -344,9 +368,7 @@ const Trove = () => {
         {tab === "Close" && (
           <div className="space-y-3">
             <div className="rounded-2xl border border-border/60 bg-background/20 px-4 py-4 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">
-                What you repay
-              </p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">What you repay</p>
               <div className="flex justify-between text-[11px]">
                 <span className="text-muted-foreground">Outstanding debt</span>
                 <span className="tabular-nums">{closeDebt.toFixed(2)} FnUSD</span>
@@ -361,14 +383,12 @@ const Trove = () => {
               </div>
             </div>
             <div className="rounded-2xl border border-border/60 bg-background/20 px-4 py-4 space-y-2">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">
-                What you receive
-              </p>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">What you receive</p>
               <div className="flex justify-between text-[11px]">
                 <span className="text-muted-foreground">Collateral returned</span>
                 <span className="tabular-nums">{existingColl.toFixed(4)} zkLTC</span>
               </div>
-              {price > 0 && (
+              {priceLoaded && (
                 <div className="flex justify-between text-[11px]">
                   <span className="text-muted-foreground">Value at current price</span>
                   <span className="tabular-nums">
