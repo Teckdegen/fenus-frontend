@@ -3,15 +3,22 @@ import { writeFileSync, mkdirSync, existsSync } from "fs";
 import { join } from "path";
 import "dotenv/config";
 
+// ── Existing WzkLTC — DO NOT REDEPLOY ────────────────────────────────────────
+// WzkLTC already has 2M+ tokens minted and is the collateral token.
+// All other contracts are redeployed fresh with the decimal scaling fix.
+const EXISTING_WZKLITECOIN = "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec";
+
 async function main() {
   const [deployer] = await ethers.getSigners();
 
   console.log("\n══════════════════════════════════════════");
-  console.log("  FENUS Protocol Deployment");
+  console.log("  FENUS Protocol Redeployment");
+  console.log("  (WzkLTC address preserved)");
   console.log("══════════════════════════════════════════");
   console.log(`  Network  : ${network.name} (chainId ${network.config.chainId})`);
   console.log(`  Deployer : ${deployer.address}`);
   console.log(`  Balance  : ${ethers.formatEther(await ethers.provider.getBalance(deployer.address))} zkLTC`);
+  console.log(`  WzkLTC   : ${EXISTING_WZKLITECOIN} (existing — not redeployed)`);
   console.log("══════════════════════════════════════════\n");
 
   const primaryOracle  = process.env.PRIMARY_ORACLE  || "0x45dDa5d881BD2C917976CCfde74fFd6f6412da29";
@@ -27,11 +34,8 @@ async function main() {
   await registry.waitForDeployment();
   console.log(`✅ AddressesRegistry  : ${await registry.getAddress()}`);
 
-  // ── 2. WzkLTC ─────────────────────────────────────────────────────────────
-  const WzkLTC = await ethers.getContractFactory("WzkLTC");
-  const wzkLTC = await WzkLTC.deploy(deployer.address);
-  await wzkLTC.waitForDeployment();
-  console.log(`✅ WzkLTC             : ${await wzkLTC.getAddress()}`);
+  // ── 2. WzkLTC — REUSE EXISTING ────────────────────────────────────────────
+  console.log(`✅ WzkLTC             : ${EXISTING_WZKLITECOIN} (existing)`);
 
   // ── 3. FnUSD ──────────────────────────────────────────────────────────────
   const FnUSD = await ethers.getContractFactory("FnUSD");
@@ -49,7 +53,7 @@ async function main() {
   const ActivePool = await ethers.getContractFactory("ActivePool");
   const activePool = await ActivePool.deploy(
     await registry.getAddress(),
-    await wzkLTC.getAddress()
+    EXISTING_WZKLITECOIN
   );
   await activePool.waitForDeployment();
   console.log(`✅ ActivePool         : ${await activePool.getAddress()}`);
@@ -57,7 +61,7 @@ async function main() {
   const DefaultPool = await ethers.getContractFactory("DefaultPool");
   const defaultPool = await DefaultPool.deploy(
     await registry.getAddress(),
-    await wzkLTC.getAddress()
+    EXISTING_WZKLITECOIN
   );
   await defaultPool.waitForDeployment();
   console.log(`✅ DefaultPool        : ${await defaultPool.getAddress()}`);
@@ -65,7 +69,7 @@ async function main() {
   const CollSurplusPool = await ethers.getContractFactory("CollSurplusPool");
   const collSurplusPool = await CollSurplusPool.deploy(
     await registry.getAddress(),
-    await wzkLTC.getAddress()
+    EXISTING_WZKLITECOIN
   );
   await collSurplusPool.waitForDeployment();
   console.log(`✅ CollSurplusPool    : ${await collSurplusPool.getAddress()}`);
@@ -111,7 +115,7 @@ async function main() {
   // ── 9. Freeze the registry ────────────────────────────────────────────────
   console.log("\n🔒 Freezing AddressesRegistry...");
   const tx = await registry.setAddresses({
-    collateralToken:    await wzkLTC.getAddress(),
+    collateralToken:    EXISTING_WZKLITECOIN,
     fnUSD:              await fnUSD.getAddress(),
     priceFeed:          await priceFeed.getAddress(),
     borrowerOperations: await borrowerOps.getAddress(),
@@ -130,15 +134,27 @@ async function main() {
   console.log("✅ Registry frozen — addresses immutable");
 
   // ── 10. Register WzkLTC in CollateralRegistry ─────────────────────────────
-  const MCR = ethers.parseEther("1.3"); // 130%
+  const MCR = ethers.parseEther("1.3");
   await (await collateralRegistry.addCollateral(
-    await wzkLTC.getAddress(),
+    EXISTING_WZKLITECOIN,
     MCR,
     await registry.getAddress()
   )).wait();
   console.log("✅ WzkLTC registered as collateral @ 130% MCR");
 
-  // ── 11. Build deployment output ───────────────────────────────────────────
+  // ── 11. Approve BorrowerOperations to spend WzkLTC from ActivePool ─────────
+  // The existing WzkLTC tokens are already in wallets — users will approve BO
+  // themselves. No action needed here.
+
+  // ── 12. Seed PriceFeed ────────────────────────────────────────────────────
+  console.log("\n🌱 Seeding PriceFeed...");
+  const PF_ABI = ["function fetchPrice() external returns (uint256, bool)"];
+  const pf = new ethers.Contract(await priceFeed.getAddress(), PF_ABI, deployer);
+  const pfTx = await pf.fetchPrice();
+  await pfTx.wait();
+  console.log("✅ PriceFeed seeded with live LTC/USD price");
+
+  // ── 13. Build deployment output ───────────────────────────────────────────
   const addresses = {
     network:            network.name,
     chainId:            network.config.chainId,
@@ -146,7 +162,7 @@ async function main() {
     deployer:           deployer.address,
     treasury,
     AddressesRegistry:  await registry.getAddress(),
-    WzkLTC:             await wzkLTC.getAddress(),
+    WzkLTC:             EXISTING_WZKLITECOIN,
     FnUSD:              await fnUSD.getAddress(),
     PriceFeed:          await priceFeed.getAddress(),
     ActivePool:         await activePool.getAddress(),
@@ -161,18 +177,16 @@ async function main() {
     CollateralRegistry: await collateralRegistry.getAddress(),
   };
 
-  // Write to contracts/deployments/<network>.json
   const deploymentsDir = join(__dirname, "..", "deployments");
   if (!existsSync(deploymentsDir)) mkdirSync(deploymentsDir);
-  const outPath = join(deploymentsDir, `${network.name}.json`);
-  writeFileSync(outPath, JSON.stringify(addresses, null, 2));
+  writeFileSync(join(deploymentsDir, `${network.name}.json`), JSON.stringify(addresses, null, 2));
   console.log(`\n📄 Addresses saved → contracts/deployments/${network.name}.json`);
 
-  // Also write to frontend src/lib/contracts.ts so the UI picks them up
   const frontendPath = join(__dirname, "..", "..", "src", "lib", "contracts.ts");
   const frontendContent = `// Auto-generated by deploy script — do not edit manually
 // Network: ${network.name} | ChainId: ${network.config.chainId}
 // Deployed: ${new Date().toISOString()}
+// WzkLTC preserved at existing address
 
 export const CONTRACTS = ${JSON.stringify(addresses, null, 2)} as const;
 
@@ -182,7 +196,8 @@ export type ContractName = keyof typeof CONTRACTS;
   console.log(`📄 Frontend contracts → src/lib/contracts.ts`);
 
   console.log("\n══════════════════════════════════════════");
-  console.log("  DEPLOYMENT COMPLETE");
+  console.log("  REDEPLOYMENT COMPLETE");
+  console.log("  WzkLTC unchanged — all other contracts fresh");
   console.log("══════════════════════════════════════════\n");
 }
 
