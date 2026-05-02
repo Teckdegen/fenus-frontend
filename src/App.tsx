@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound.tsx";
 import AppLayout from "./components/app/AppLayout.tsx";
 import Dashboard from "./pages/app/Dashboard.tsx";
 import Trove from "./pages/app/Trove.tsx";
+import Transfer from "./pages/app/Transfer.tsx";
 import Pools from "./pages/app/Pools.tsx";
 import Faucet from "./pages/app/Faucet.tsx";
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/app" element={<AppLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="trove" element={<Trove />} />
+              <Route path="transfer" element={<Transfer />} />
               <Route path="pools" element={<Pools />} />
               <Route path="faucet" element={<Faucet />} />
             </Route>

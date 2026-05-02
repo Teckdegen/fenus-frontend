@@ -1,35 +1,30 @@
 import { ethers } from "hardhat";
-import "dotenv/config";
-
-const WZKLITECOIN = "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec";
-const AMOUNT      = ethers.parseUnits("100000000", 8); // 100,000,000 WzkLTC (8 decimals)
-
-const ABI = [
-  "function adminMint(address to, uint256 amount) external",
-  "function balanceOf(address) view returns (uint256)",
-];
 
 async function main() {
+  console.log("🪙 Minting WzkLTC to admin wallet...\n");
+
   const [deployer] = await ethers.getSigners();
-  const token = new ethers.Contract(WZKLITECOIN, ABI, deployer);
+  console.log("Admin wallet:", deployer.address);
 
-  console.log("\n══════════════════════════════════════════");
-  console.log("  Mint WzkLTC — LitVM LiteForge");
-  console.log("══════════════════════════════════════════");
-  console.log(`  To      : ${deployer.address}`);
-  console.log(`  Amount  : 100,000,000 WzkLTC`);
+  const wzkLTCAddress = "0xb474BcBAAdB14109937d20f826BE51f36318DC16";
+  const WzkLTC = await ethers.getContractAt("WzkLTC", wzkLTCAddress);
 
-  const before = await token.balanceOf(deployer.address);
-  console.log(`  Balance before: ${ethers.formatUnits(before, 8)} WzkLTC`);
-
-  const tx = await token.adminMint(deployer.address, AMOUNT);
-  console.log(`  Tx: ${tx.hash}`);
+  const amount = ethers.parseUnits("100000000", 8); // 100,000,000 wzkLTC (8 decimals)
+  
+  console.log("Minting 100,000,000 wzkLTC...");
+  const tx = await WzkLTC.adminMint(deployer.address, amount);
   await tx.wait();
 
-  const after = await token.balanceOf(deployer.address);
-  console.log(`  Balance after : ${ethers.formatUnits(after, 8)} WzkLTC`);
-  console.log("  ✅ Done");
-  console.log("══════════════════════════════════════════\n");
+  console.log("✅ Minted successfully!");
+  console.log("Transaction:", tx.hash);
+  
+  const balance = await WzkLTC.balanceOf(deployer.address);
+  console.log("\nNew balance:", ethers.formatUnits(balance, 8), "wzkLTC");
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

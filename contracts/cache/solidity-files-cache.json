@@ -84,8 +84,8 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IAddressesRegistry.sol": {
-      "lastModificationDate": 1777749895735,
-      "contentHash": "25ad1e7843c2ed31a9dd6fbbac45abb0",
+      "lastModificationDate": 1777756936807,
+      "contentHash": "2b81a0592fd0dd0601e0b6ce6c79536e",
       "sourceName": "src/interfaces/IAddressesRegistry.sol",
       "solcConfig": {
         "version": "0.8.26",
@@ -979,7 +979,7 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\TroveNFT.sol": {
-      "lastModificationDate": 1777750401389,
+      "lastModificationDate": 1777756936803,
       "contentHash": "1107784923b1c794738c030105b4a210",
       "sourceName": "src/TroveNFT.sol",
       "solcConfig": {
@@ -1020,7 +1020,7 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\TroveManager.sol": {
-      "lastModificationDate": 1777750365605,
+      "lastModificationDate": 1777756936798,
       "contentHash": "29a4339a61061209484cd828e3fced73",
       "sourceName": "src/TroveManager.sol",
       "solcConfig": {
@@ -1920,7 +1920,7 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\AddressesRegistry.sol": {
-      "lastModificationDate": 1777749904833,
+      "lastModificationDate": 1777756936792,
       "contentHash": "9f345f020e337c9499c2a925545d1675",
       "sourceName": "src/AddressesRegistry.sol",
       "solcConfig": {
