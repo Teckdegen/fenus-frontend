@@ -54,8 +54,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const privateKey = process.env.FAUCET_PRIVATE_KEY as `0x${string}`;
   if (!privateKey) return res.status(500).json({ error: "Faucet not configured" });
 
+  // Ensure private key has 0x prefix
+  const formattedKey = (privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`) as `0x${string}`;
+
   try {
-    const account = privateKeyToAccount(privateKey);
+    const account = privateKeyToAccount(formattedKey);
     const pub     = createPublicClient({ transport: http(RPC) });
     const wallet  = createWalletClient({ account, chain, transport: http(RPC) });
 
