@@ -178,6 +178,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TroveManager__factory>;
     getContractFactory(
+      name: "ITroveManagerNotify",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ITroveManagerNotify__factory>;
+    getContractFactory(
       name: "TroveNFT",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TroveNFT__factory>;
@@ -392,6 +396,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.TroveManager>;
     getContractAt(
+      name: "ITroveManagerNotify",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ITroveManagerNotify>;
+    getContractAt(
       name: "TroveNFT",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -567,6 +576,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TroveManager>;
     deployContract(
+      name: "ITroveManagerNotify",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ITroveManagerNotify>;
+    deployContract(
       name: "TroveNFT",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TroveNFT>;
@@ -780,6 +793,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TroveManager>;
+    deployContract(
+      name: "ITroveManagerNotify",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ITroveManagerNotify>;
     deployContract(
       name: "TroveNFT",
       args: any[],

@@ -42,11 +42,11 @@ export interface TroveManagerInterface extends Interface {
       | "getTroveOwnersCount"
       | "getTroveStatus"
       | "liquidate"
+      | "notifyTransfer"
       | "openTrove"
       | "redeem"
       | "registry"
       | "totalStakes"
-      | "troveNFT"
       | "troves"
   ): FunctionFragment;
 
@@ -115,6 +115,10 @@ export interface TroveManagerInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "notifyTransfer",
+    values: [BigNumberish, AddressLike, AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "openTrove",
     values: [AddressLike, BigNumberish, BigNumberish]
   ): string;
@@ -127,7 +131,6 @@ export interface TroveManagerInterface extends Interface {
     functionFragment: "totalStakes",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "troveNFT", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "troves",
     values: [BigNumberish]
@@ -182,6 +185,10 @@ export interface TroveManagerInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "liquidate", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "notifyTransfer",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "openTrove", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "redeem", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "registry", data: BytesLike): Result;
@@ -189,7 +196,6 @@ export interface TroveManagerInterface extends Interface {
     functionFragment: "totalStakes",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "troveNFT", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "troves", data: BytesLike): Result;
 }
 
@@ -397,6 +403,12 @@ export interface TroveManager extends BaseContract {
 
   liquidate: TypedContractMethod<[owner: AddressLike], [void], "nonpayable">;
 
+  notifyTransfer: TypedContractMethod<
+    [tokenId: BigNumberish, from: AddressLike, to: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
   openTrove: TypedContractMethod<
     [owner: AddressLike, coll: BigNumberish, debt: BigNumberish],
     [void],
@@ -412,8 +424,6 @@ export interface TroveManager extends BaseContract {
   registry: TypedContractMethod<[], [string], "view">;
 
   totalStakes: TypedContractMethod<[], [bigint], "view">;
-
-  troveNFT: TypedContractMethod<[], [string], "view">;
 
   troves: TypedContractMethod<
     [arg0: BigNumberish],
@@ -495,6 +505,13 @@ export interface TroveManager extends BaseContract {
     nameOrSignature: "liquidate"
   ): TypedContractMethod<[owner: AddressLike], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "notifyTransfer"
+  ): TypedContractMethod<
+    [tokenId: BigNumberish, from: AddressLike, to: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "openTrove"
   ): TypedContractMethod<
     [owner: AddressLike, coll: BigNumberish, debt: BigNumberish],
@@ -514,9 +531,6 @@ export interface TroveManager extends BaseContract {
   getFunction(
     nameOrSignature: "totalStakes"
   ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "troveNFT"
-  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "troves"
   ): TypedContractMethod<

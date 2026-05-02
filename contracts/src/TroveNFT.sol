@@ -4,6 +4,10 @@ pragma solidity ^0.8.24;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IAddressesRegistry} from "./interfaces/IAddressesRegistry.sol";
 
+interface ITroveManagerNotify {
+    function notifyTransfer(uint256 tokenId, address from, address to) external;
+}
+
 // TroveNFT — ERC721 representing Trove positions.
 // Each NFT = 1 Trove. Transfer NFT = transfer the entire position.
 // Inspired by Uniswap V3 LP NFTs.
@@ -25,23 +29,23 @@ contract TroveNFT is ERC721 {
         registry = _registry;
     }
     
-    modifier onlyBorrowerOps() {
-        if (msg.sender != registry.addresses().borrowerOperations) revert NotAuthorized();
+    modifier onlyTroveManager() {
+        if (msg.sender != registry.addresses().troveManager) revert NotAuthorized();
         _;
     }
-    
-    // ─── Mint/Burn (only BorrowerOperations) ──────────────────────────────────
-    
-    function mint(address to) external onlyBorrowerOps returns (uint256 tokenId) {
+
+    // ─── Mint/Burn (only TroveManager — owns the position lifecycle) ──────────
+
+    function mint(address to) external onlyTroveManager returns (uint256 tokenId) {
         if (ownerToTokenId[to] != 0) revert TroveAlreadyExists();
-        
+
         tokenId = _nextTokenId++;
         _mint(to, tokenId);
         ownerToTokenId[to] = tokenId;
         tokenExists[tokenId] = true;
     }
-    
-    function burn(uint256 tokenId) external onlyBorrowerOps {
+
+    function burn(uint256 tokenId) external onlyTroveManager {
         address owner = ownerOf(tokenId);
         ownerToTokenId[owner] = 0;
         tokenExists[tokenId] = false;
@@ -56,7 +60,7 @@ contract TroveNFT is ERC721 {
         returns (address)
     {
         address from = super._update(to, tokenId, auth);
-        
+
         // Update reverse mapping
         if (from != address(0)) {
             ownerToTokenId[from] = 0;
@@ -64,7 +68,16 @@ contract TroveNFT is ERC721 {
         if (to != address(0)) {
             ownerToTokenId[to] = tokenId;
         }
-        
+
+        // On user-to-user transfers, ask TroveManager to re-key SortedTroves.
+        // (mint/burn already happen via TM in open/closeTrove.)
+        if (from != address(0) && to != address(0)) {
+            address tm = registry.addresses().troveManager;
+            if (tm != address(0)) {
+                ITroveManagerNotify(tm).notifyTransfer(tokenId, from, to);
+            }
+        }
+
         return from;
     }
     

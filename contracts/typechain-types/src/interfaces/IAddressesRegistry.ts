@@ -27,6 +27,7 @@ export declare namespace IAddressesRegistry {
     priceFeed: AddressLike;
     borrowerOperations: AddressLike;
     troveManager: AddressLike;
+    troveNFT: AddressLike;
     sortedTroves: AddressLike;
     activePool: AddressLike;
     defaultPool: AddressLike;
@@ -44,6 +45,7 @@ export declare namespace IAddressesRegistry {
     priceFeed: string,
     borrowerOperations: string,
     troveManager: string,
+    troveNFT: string,
     sortedTroves: string,
     activePool: string,
     defaultPool: string,
@@ -59,6 +61,7 @@ export declare namespace IAddressesRegistry {
     priceFeed: string;
     borrowerOperations: string;
     troveManager: string;
+    troveNFT: string;
     sortedTroves: string;
     activePool: string;
     defaultPool: string;

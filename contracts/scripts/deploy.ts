@@ -85,6 +85,12 @@ async function main() {
   await sortedTroves.waitForDeployment();
   console.log(`✅ SortedTroves       : ${await sortedTroves.getAddress()}`);
 
+  // ── 6b. TroveNFT ──────────────────────────────────────────────────────────
+  const TroveNFT = await ethers.getContractFactory("TroveNFT");
+  const troveNFT = await TroveNFT.deploy(await registry.getAddress());
+  await troveNFT.waitForDeployment();
+  console.log(`✅ TroveNFT           : ${await troveNFT.getAddress()}`);
+
   // ── 7. Core logic ─────────────────────────────────────────────────────────
   const TroveManager = await ethers.getContractFactory("TroveManager");
   const troveManager = await TroveManager.deploy(await registry.getAddress());
@@ -120,6 +126,7 @@ async function main() {
     priceFeed:          await priceFeed.getAddress(),
     borrowerOperations: await borrowerOps.getAddress(),
     troveManager:       await troveManager.getAddress(),
+    troveNFT:           await troveNFT.getAddress(),
     sortedTroves:       await sortedTroves.getAddress(),
     activePool:         await activePool.getAddress(),
     defaultPool:        await defaultPool.getAddress(),
@@ -170,6 +177,7 @@ async function main() {
     CollSurplusPool:    await collSurplusPool.getAddress(),
     GasPool:            await gasPool.getAddress(),
     SortedTroves:       await sortedTroves.getAddress(),
+    TroveNFT:           await troveNFT.getAddress(),
     TroveManager:       await troveManager.getAddress(),
     BorrowerOperations: await borrowerOps.getAddress(),
     RedemptionHelper:   await redemptionHelper.getAddress(),

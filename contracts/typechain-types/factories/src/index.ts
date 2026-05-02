@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as priceFeedSol from "./PriceFeed.sol";
+export * as troveNftSol from "./TroveNFT.sol";
 export * as interfaces from "./interfaces";
 export { ActivePool__factory } from "./ActivePool__factory";
 export { AddressesRegistry__factory } from "./AddressesRegistry__factory";
@@ -15,5 +16,4 @@ export { HintHelpers__factory } from "./HintHelpers__factory";
 export { RedemptionHelper__factory } from "./RedemptionHelper__factory";
 export { SortedTroves__factory } from "./SortedTroves__factory";
 export { TroveManager__factory } from "./TroveManager__factory";
-export { TroveNFT__factory } from "./TroveNFT__factory";
 export { WzkLTC__factory } from "./WzkLTC__factory";

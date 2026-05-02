@@ -16,7 +16,6 @@ import {LiquityMath} from "./libraries/LiquityMath.sol";
 // Storage is minimized: only debt/coll per tokenId, no arrays or complex mappings.
 contract TroveManager is ITroveManager, ReentrancyGuard {
     IAddressesRegistry public immutable registry;
-    TroveNFT public immutable troveNFT;
 
     struct TroveData {
         uint256 debt;
@@ -50,9 +49,12 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     error TroveAlreadyExists();
     error NothingToLiquidate();
 
-    constructor(IAddressesRegistry _registry, TroveNFT _troveNFT) {
+    constructor(IAddressesRegistry _registry) {
         registry = _registry;
-        troveNFT = _troveNFT;
+    }
+
+    function _troveNFT() internal view returns (TroveNFT) {
+        return TroveNFT(registry.addresses().troveNFT);
     }
 
     modifier onlyBO() {
@@ -75,17 +77,17 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     }
     
     function getTroveStatus(address owner) external view override returns (Status) { 
-        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        uint256 tokenId = _troveNFT().ownerToTokenId(owner);
         return tokenId == 0 ? Status.NonExistent : troves[tokenId].status;
     }
     
     function getTroveColl(address owner) external view override returns (uint256) { 
-        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        uint256 tokenId = _troveNFT().ownerToTokenId(owner);
         return tokenId == 0 ? 0 : troves[tokenId].coll;
     }
     
     function getTroveDebt(address owner) external view override returns (uint256) { 
-        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        uint256 tokenId = _troveNFT().ownerToTokenId(owner);
         return tokenId == 0 ? 0 : troves[tokenId].debt;
     }
 
@@ -109,10 +111,10 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     // ─── BorrowerOperations callbacks ─────────────────────────────────────────
 
     function openTrove(address owner, uint256 coll, uint256 debt) external override onlyBO nonReentrant {
-        if (troveNFT.hasTrove(owner)) revert TroveAlreadyExists();
+        if (_troveNFT().hasTrove(owner)) revert TroveAlreadyExists();
 
         // Mint NFT for this position
-        uint256 tokenId = troveNFT.mint(owner);
+        uint256 tokenId = _troveNFT().mint(owner);
         
         TroveData storage t = troves[tokenId];
         t.debt           = debt;
@@ -135,7 +137,7 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     function adjustTrove(address owner, int256 collDelta, int256 debtDelta)
         external override onlyBOorRH nonReentrant
     {
-        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        uint256 tokenId = _troveNFT().ownerToTokenId(owner);
         if (tokenId == 0) revert TroveNotActive();
         
         TroveData storage t = troves[tokenId];
@@ -160,7 +162,7 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     }
 
     function closeTrove(address owner) external override onlyBOorRH nonReentrant {
-        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        uint256 tokenId = _troveNFT().ownerToTokenId(owner);
         if (tokenId == 0) revert TroveNotActive();
         
         TroveData storage t = troves[tokenId];
@@ -177,7 +179,7 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         _removeTokenId(tokenId);
         
         // Burn the NFT
-        troveNFT.burn(tokenId);
+        _troveNFT().burn(tokenId);
 
         emit TroveClosed(tokenId, t.status);
         emit TroveUpdated(tokenId, 0, 0, 0, 2);
@@ -205,7 +207,7 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         bool    liquidatedAny;
 
         for (uint256 i = 0; i < owners.length; i++) {
-            uint256 tokenId = troveNFT.ownerToTokenId(owners[i]);
+            uint256 tokenId = _troveNFT().ownerToTokenId(owners[i]);
             if (tokenId == 0) continue;
             
             TroveData storage t = troves[tokenId];
@@ -245,7 +247,7 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
             _removeTokenId(tokenId);
             
             // Burn NFT
-            troveNFT.burn(tokenId);
+            _troveNFT().burn(tokenId);
 
             if (collForHolders > 0 && totalStakes > 0) {
                 uint256 debtForHolders = (debt * collForHolders) / coll;
@@ -325,11 +327,27 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         delete _tokenIdIndex[tokenId];
     }
 
+    // Called by TroveNFT during ERC721 transfer. Keeps SortedTroves keyed by
+    // current owner so liquidations / redemptions / hint walks remain valid.
+    function notifyTransfer(uint256 tokenId, address from, address to) external {
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        if (msg.sender != a.troveNFT) revert NotAuthorized();
+        // Mint (from == 0) and burn (to == 0) are handled by openTrove/closeTrove themselves.
+        if (from == address(0) || to == address(0)) return;
+
+        TroveData storage t = troves[tokenId];
+        if (t.status != Status.Active) return;
+
+        uint256 nicr = LiquityMath._computeNominalCR(t.coll, t.debt);
+        ISortedTroves(a.sortedTroves).remove(from);
+        ISortedTroves(a.sortedTroves).insert(to, nicr, address(0), address(0));
+    }
+
     function _getEntireDebtAndColl(address owner)
         internal view
         returns (uint256 debt, uint256 coll)
     {
-        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        uint256 tokenId = _troveNFT().ownerToTokenId(owner);
         if (tokenId == 0) return (0, 0);
         
         TroveData storage t = troves[tokenId];

@@ -36,6 +36,11 @@
             },
             {
               "internalType": "address",
+              "name": "troveNFT",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
               "name": "sortedTroves",
               "type": "address"
             },
@@ -128,6 +133,11 @@
             {
               "internalType": "address",
               "name": "troveManager",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "troveNFT",
               "type": "address"
             },
             {

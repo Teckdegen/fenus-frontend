@@ -7,13 +7,13 @@ async function main() {
   console.log("Deploying with account:", deployer.address);
   console.log("Account balance:", ethers.formatEther(await ethers.provider.getBalance(deployer.address)), "ETH\n");
 
-  // Existing contract addresses (from deployment)
+  // Existing contract addresses (from SECOND NFT deployment)
   const addresses = {
     collateralToken: "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec", // WzkLTC
     fnUSD: "0x39d3861C1E60823b95f545f41dD3cb45f1f529AD",
     priceFeed: "0x0B3c8318327a775Bc8d67cF6B996408DBae1b62D",
-    borrowerOperations: "0xC4b78665883C72a0C88cAE0157502CCCbB78DeFF", // NEW NFT-based
-    troveManager: "0x7886a09D9D004Bc0a9cc167f769bCA582c3FFe15", // NEW NFT-based
+    borrowerOperations: "0xAa915955893125A22351EeFfdCA4Ad59a85EC05B", // SECOND NFT deployment
+    troveManager: "0x17a41A0154441Bb7d6FCb35c123A5bD2973DF755", // SECOND NFT deployment
     sortedTroves: "0xD12Eb5F67C3823a15A722d629E6EB79a0f045Ce6",
     activePool: "0x60cebB7639eF69a1889602d1b8441390fAF59A56",
     defaultPool: "0x3ca147c8f183468EFC6b67A783A71d2c12f094d3",

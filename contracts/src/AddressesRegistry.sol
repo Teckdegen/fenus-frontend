@@ -28,6 +28,7 @@ contract AddressesRegistry is IAddressesRegistry {
  if (a.priceFeed == address(0)) revert ZeroAddress();
  if (a.borrowerOperations == address(0)) revert ZeroAddress();
  if (a.troveManager == address(0)) revert ZeroAddress();
+ if (a.troveNFT == address(0)) revert ZeroAddress();
  if (a.sortedTroves == address(0)) revert ZeroAddress();
  if (a.activePool == address(0)) revert ZeroAddress();
  if (a.defaultPool == address(0)) revert ZeroAddress();

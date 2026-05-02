@@ -42,6 +42,11 @@ const _abi = [
           },
           {
             internalType: "address",
+            name: "troveNFT",
+            type: "address",
+          },
+          {
+            internalType: "address",
             name: "sortedTroves",
             type: "address",
           },
@@ -134,6 +139,11 @@ const _abi = [
           {
             internalType: "address",
             name: "troveManager",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "troveNFT",
             type: "address",
           },
           {

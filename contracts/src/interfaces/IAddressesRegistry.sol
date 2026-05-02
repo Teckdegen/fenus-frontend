@@ -8,6 +8,7 @@ interface IAddressesRegistry {
         address priceFeed;
         address borrowerOperations;
         address troveManager;
+        address troveNFT;
         address sortedTroves;
         address activePool;
         address defaultPool;         // holds redistributed debt/coll from liquidated Troves
