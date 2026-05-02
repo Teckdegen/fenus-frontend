@@ -10,7 +10,7 @@ When your wallet is connected, you typically see three headline numbers:
 
 | Field | Meaning |
 |-------|---------|
-| **WzkLTC balance** | zkLTC tokens in your wallet (not yet deposited into a Trove) |
+| **wzkLTC balance** | wzkLTC tokens in your wallet (not yet deposited into a Trove) |
 | **FnUSD balance** | Stablecoin in your wallet — used to repay debt or close |
 | **LTC price** | Oracle reference price shown by the app (for mental math and ratios) |
 
@@ -18,12 +18,12 @@ When your wallet is connected, you typically see three headline numbers:
 
 ## Empty collateral hint
 
-If you are connected but **WzkLTC** reads **0**, the app may show a reminder to visit the **Faucet** so you can obtain test collateral before opening a Trove.
+If you are connected but **wzkLTC** reads **0**, the app may show a reminder to visit the **Faucet** so you can obtain test collateral before opening a Trove.
 
 | Situation | Suggested action |
 |-----------|------------------|
-| No WzkLTC | Use **Faucet** (if enabled on your deployment) |
-| Have WzkLTC | Go to **Trove → Open** |
+| No wzkLTC | Use **Faucet** (if enabled on your deployment) |
+| Have wzkLTC | Go to **Trove → Open** |
 
 ---
 
@@ -33,10 +33,10 @@ If you already have an active Trove, the Dashboard summarizes it:
 
 | Row | Meaning |
 |-----|---------|
-| **Collateral** | How much **zkLTC** is locked in your Trove |
+| **Collateral** | How much **wzkLTC** is locked in your Trove |
 | **Debt** | How much **FnUSD** you owe (including fees already baked into protocol accounting where applicable) |
 | **Collateral ratio** | Collateral value ÷ debt — keep **≥ 135%** (see [Collateral ratio](trove/collateral-ratio-explained.md)) |
-| **Liquidation price** | Approximate **zkLTC** price at which your position becomes unsafe |
+| **Liquidation price** | Approximate **wzkLTC** price at which your position becomes unsafe |
 
 Use **Manage Trove** to jump to the Trove screen for deposits, withdrawals, borrow, repay, or close.
 
@@ -59,9 +59,9 @@ The **Dashboard** surfaces four related lines (labels match the app):
 
 | Label | Sub-label | What it means (plain language) |
 |-------|-----------|--------------------------------|
-| **Pending Coll. Gain** | *From liquidated Troves* | Collateral-side **fees / rewards** tied to liquidations that can flow to Trove holders — often **0.0000 zkLTC** until something happens on-chain or the UI shows live values. |
+| **Pending Coll. Gain** | *From liquidated Troves* | Collateral-side **fees / rewards** tied to liquidations that can flow to Trove holders — often **0.0000 wzkLTC** until something happens on-chain or the UI shows live values. |
 | **Pending Debt Absorbed** | — | Debt-side movements that go with the same mechanics; **0.00 FnUSD** when nothing is pending. |
-| **Default Pool Coll.** | — | **zkLTC** in protocol accounting linked to those liquidation flows before they fully settle into active Troves. |
+| **Default Pool Coll.** | — | **wzkLTC** in protocol accounting linked to those liquidation flows before they fully settle into active Troves. |
 | **Default Pool Debt** | — | **FnUSD** side of that pool — the matching bookkeeping. |
 
 ### Takeaways

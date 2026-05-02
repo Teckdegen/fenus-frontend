@@ -7,6 +7,7 @@ export const WZKLITECOIN_IMAGE_URL = "https://www.image2url.com/r2/default/image
 export const FNUSD_IMAGE_URL       = "https://www.image2url.com/r2/default/images/1777632157848-482b63d8-a570-4f01-bc38-94ba9ebe0722.jpg";
 
 export const TOKEN_IMAGES: Record<string, string> = {
+  wzkLTC: WZKLITECOIN_IMAGE_URL,
   zkLTC:  WZKLITECOIN_IMAGE_URL,
   WzkLTC: WZKLITECOIN_IMAGE_URL,
   FnUSD:  FNUSD_IMAGE_URL,

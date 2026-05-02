@@ -52,7 +52,7 @@ function TxStatus({ status, txHash, error }: { status: string; txHash: string; e
   if (status === "approving") return (
     <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
       <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-      <p className="text-[11px] text-muted-foreground">Approving WzkLTC spend…</p>
+      <p className="text-[11px] text-muted-foreground">Approving wzkLTC spend…</p>
     </div>
   );
   if (status === "pending") return (
@@ -185,12 +185,12 @@ const Trove = () => {
         <div className="flex justify-between text-[11px]">
           <span className="text-muted-foreground">Liquidation price</span>
           <span className="tabular-nums font-medium">
-            {liqPrice ? `$${liqPrice.toFixed(4)} / zkLTC` : "N/A"}
+            {liqPrice ? `$${liqPrice.toFixed(4)} / wzkLTC` : "N/A"}
           </span>
         </div>
         <div className="flex justify-between text-[11px]">
           <span className="text-muted-foreground">New collateral</span>
-          <span className="tabular-nums">{newColl.toFixed(4)} zkLTC</span>
+          <span className="tabular-nums">{newColl.toFixed(4)} wzkLTC</span>
         </div>
         <div className="flex justify-between text-[11px]">
           <span className="text-muted-foreground">New debt</span>
@@ -220,7 +220,7 @@ const Trove = () => {
       <div className="mx-auto w-full max-w-3xl space-y-6">
         <div className="px-1">
           <h1 className="font-display text-2xl font-semibold tracking-tight">Trove</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Deposit WzkLTC, mint FnUSD, manage your position.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Deposit wzkLTC, mint FnUSD, manage your position.</p>
         </div>
         <Card className="p-10 flex flex-col items-center justify-center text-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/10">
@@ -242,12 +242,12 @@ const Trove = () => {
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Trove</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Deposit WzkLTC, mint FnUSD, manage your position.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Deposit wzkLTC, mint FnUSD, manage your position.</p>
       </div>
 
       {/* Live price */}
       <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background/20 px-4 py-2.5">
-        <span className="text-[11px] text-muted-foreground">LTC/USD Oracle</span>
+        <span className="text-[11px] text-muted-foreground">wzkLTC / USD Oracle</span>
         <span className="font-display text-sm font-semibold tabular-nums">
           {priceLoaded ? `$${price.toFixed(4)}` : (
             <span className="text-muted-foreground animate-pulse">Fetching price…</span>
@@ -288,7 +288,7 @@ const Trove = () => {
             </div>
           ) : (
             <div className="space-y-3">
-            <TokenInput label="Deposit WzkLTC" symbol="zkLTC" balance={wzkLTCBalanceFull}
+            <TokenInput label="Deposit wzkLTC" symbol="wzkLTC" balance={wzkLTCBalanceFull}
               value={collInput} onChange={(v) => { setCollInput(v); actions.reset(); }} />
             <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
               value={borrowInput} onChange={(v) => { setBorrowInput(v); actions.reset(); }} />
@@ -311,7 +311,7 @@ const Trove = () => {
                   <div className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">Liquidation price</span>
                     <span className="tabular-nums font-medium">
-                      {openCalc.liqPrice ? `$${openCalc.liqPrice.toFixed(4)} / zkLTC` : "N/A"}
+                      {openCalc.liqPrice ? `$${openCalc.liqPrice.toFixed(4)} / wzkLTC` : "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between text-[11px]">
@@ -353,7 +353,7 @@ const Trove = () => {
         {/* ── ADD ──────────────────────────────────────────────────────── */}
         {tab === "Add" && (
           <div className="space-y-3">
-            <TokenInput label="Add WzkLTC" symbol="zkLTC" balance={wzkLTCBalanceFull}
+            <TokenInput label="Add wzkLTC" symbol="wzkLTC" balance={wzkLTCBalanceFull}
               value={addInput} onChange={(v) => { setAddInput(v); actions.reset(); }} />
             {addInput && <PreviewBlock {...addCalc} safe={true} />}
             <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
@@ -369,7 +369,7 @@ const Trove = () => {
         {/* ── REMOVE ───────────────────────────────────────────────────── */}
         {tab === "Remove" && (
           <div className="space-y-3">
-            <TokenInput label="Remove WzkLTC" symbol="zkLTC" balance={wzkLTCBalanceFull}
+            <TokenInput label="Remove wzkLTC" symbol="wzkLTC" balance={wzkLTCBalanceFull}
               value={removeInput} onChange={(v) => { setRemoveInput(v); actions.reset(); }} />
             {removeInput && <PreviewBlock {...removeCalc} />}
             <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />
@@ -466,7 +466,7 @@ const Trove = () => {
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">What you receive</p>
               <div className="flex justify-between text-[11px]">
                 <span className="text-muted-foreground">Collateral returned</span>
-                <span className="tabular-nums">{closeColl.toFixed(4)} zkLTC</span>
+                <span className="tabular-nums">{closeColl.toFixed(4)} wzkLTC</span>
               </div>
               {priceLoaded && (
                 <div className="flex justify-between text-[11px]">
@@ -500,7 +500,7 @@ const Trove = () => {
           <Row label="Origination Fee"       value="0.50%"       hint="One-time on each borrow, goes to treasury" />
           <Row label="Liquidation threshold" value="130%"        hint="Below this your Trove is liquidated by the bot" />
           <Row label="Minimum ratio"         value="135%"        hint="Required for all operations" />
-          <Row label="Collateral"            value="WzkLTC only" />
+          <Row label="Collateral"            value="wzkLTC only" />
         </Card>
       </div>
 

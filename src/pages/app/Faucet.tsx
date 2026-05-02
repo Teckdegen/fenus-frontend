@@ -59,7 +59,7 @@ const Faucet = () => {
       localStorage.setItem(getCooldownKey(address), Date.now().toString());
       setTimeLeft(COOLDOWN_MS);
       setStatus("success");
-      setModalData({ type: "Faucet Claim", amount: "1,000 WzkLTC", txHash: data.txHash });
+      setModalData({ type: "Faucet Claim", amount: "1,000 wzkLTC", txHash: data.txHash });
     } catch (e: any) {
       setError(e?.message || "Request failed. Try again.");
       setStatus("error");
@@ -71,7 +71,7 @@ const Faucet = () => {
       <div className="mx-auto w-full max-w-3xl space-y-6">
         <div className="px-1">
           <h1 className="font-display text-2xl font-semibold tracking-tight">Faucet</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Get 1,000 WzkLTC every 48 hours to test the protocol.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Get 1,000 wzkLTC every 48 hours to test the protocol.</p>
         </div>
         <Card className="p-10 flex flex-col items-center justify-center text-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/10">
@@ -80,7 +80,7 @@ const Faucet = () => {
           <div>
             <p className="font-display text-base font-semibold">Connect your wallet</p>
             <p className="mt-1 text-sm text-muted-foreground max-w-xs">
-              Connect to claim 1,000 WzkLTC for testing.
+              Connect to claim 1,000 wzkLTC for testing.
             </p>
           </div>
           <PrimaryButton onClick={() => open()}>Connect Wallet</PrimaryButton>
@@ -94,16 +94,16 @@ const Faucet = () => {
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Faucet</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Get 1,000 WzkLTC every 48 hours to test the protocol.
+          Get 1,000 wzkLTC every 48 hours to test the protocol.
         </p>
       </div>
 
       <Card className="p-8 flex flex-col items-center text-center gap-6">
         <div className="flex flex-col items-center gap-3">
-          <TokenIcon symbol="WzkLTC" className="h-16 w-16" />
+          <TokenIcon symbol="wzkLTC" className="h-16 w-16" />
           <div>
             <p className="font-display text-4xl font-semibold tracking-tight">1,000</p>
-            <p className="text-sm text-muted-foreground mt-1">WzkLTC per claim</p>
+            <p className="text-sm text-muted-foreground mt-1">wzkLTC per claim</p>
           </div>
         </div>
 
@@ -124,14 +124,14 @@ const Faucet = () => {
         {status === "pending" && (
           <div className="flex items-center gap-2 w-full rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
             <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-            <p className="text-[11px] text-muted-foreground">Sending WzkLTC to your wallet…</p>
+            <p className="text-[11px] text-muted-foreground">Sending wzkLTC to your wallet…</p>
           </div>
         )}
         {status === "success" && (
           <div className="flex items-start gap-2 w-full rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-foreground/60 mt-0.5" />
             <div className="text-left">
-              <p className="text-[11px] font-medium">1,000 WzkLTC sent to your wallet</p>
+              <p className="text-[11px] font-medium">1,000 wzkLTC sent to your wallet</p>
               {txHash && (
                 <a href={`${EXPLORER}${txHash}`} target="_blank" rel="noopener noreferrer"
                   className="text-[10px] text-muted-foreground hover:text-foreground underline">
@@ -154,7 +154,7 @@ const Faucet = () => {
           ) : timeLeft > 0 ? (
             `Available in ${formatTimeLeft(timeLeft)}`
           ) : (
-            "Claim 1,000 WzkLTC"
+            "Claim 1,000 wzkLTC"
           )}
         </PrimaryButton>
       </Card>
@@ -162,8 +162,8 @@ const Faucet = () => {
       <div>
         <SectionLabel>Details</SectionLabel>
         <Card className="p-5">
-          <Row label="Your WzkLTC"  value={`${wzkLTCBalance} WzkLTC`} />
-          <Row label="Amount"       value="1,000 WzkLTC per claim" />
+          <Row label="Your wzkLTC"  value={`${wzkLTCBalance} wzkLTC`} />
+          <Row label="Amount"       value="1,000 wzkLTC per claim" />
           <Row label="Cooldown"     value="48 hours per wallet" />
           <Row label="No wallet tx" value="No gas needed to claim" hint="The faucet pays gas on your behalf" />
           <Row label="Network"      value="LitVM LiteForge (testnet)" />

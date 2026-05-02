@@ -8,7 +8,7 @@ Your **collateral ratio** is the main safety dial for a Trove. The app shows it 
 
 | Concept | Meaning |
 |---------|---------|
-| **Collateral ratio** | (Value of your **zkLTC** in USD) ÷ (Your **FnUSD** debt) |
+| **Collateral ratio** | (Value of your **wzkLTC** in USD) ÷ (Your **FnUSD** debt) |
 | Higher ratio | Safer — more collateral per dollar borrowed |
 | Lower ratio | Riskier — closer to liquidation |
 
@@ -32,7 +32,7 @@ The app labels regions such as **Safe**, **Moderate**, **Risky**, and **Below mi
 
 | Field | Meaning |
 |-------|---------|
-| **Liquidation price** | Rough **zkLTC** price at which your position approaches dangerous territory |
+| **Liquidation price** | Rough **wzkLTC** price at which your position approaches dangerous territory |
 
 Use it alongside ratio: when market price falls toward that zone, consider **adding collateral** or **repaying**.
 

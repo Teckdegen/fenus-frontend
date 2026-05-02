@@ -1,6 +1,6 @@
 # Pools & liquidity
 
-The **Pools** screen points to **external venues** where you can supply liquidity using **FnUSD** and other assets — for example **FnUSD / zkLTC** or **FnUSD / USDC** on **Addax**.
+The **Pools** screen points to **external venues** where you can supply liquidity using **FnUSD** and other assets — for example **FnUSD / wzkLTC** or **FnUSD / USDC** on **Addax**.
 
 ---
 
@@ -8,7 +8,7 @@ The **Pools** screen points to **external venues** where you can supply liquidit
 
 | Activity | Where | Purpose |
 |----------|--------|---------|
-| Borrow FnUSD against zkLTC | **Trove** | Collateralized debt |
+| Borrow FnUSD against wzkLTC | **Trove** | Collateralized debt |
 | Earn fees on token pairs | **Pools** → external DEX | Liquidity provision — different product |
 
 ---
@@ -29,7 +29,7 @@ Each row links out to the venue’s website.
 
 | Pair | Venue | Notes |
 |------|-------|-------|
-| FnUSD / zkLTC | Addax | Opens in new tab from app |
+| FnUSD / wzkLTC | Addax | Opens in new tab from app |
 | FnUSD / USDC | Addax | Stable pairing |
 
 APR and TVL in the app may show **0** until pools are live or wired to live stats.

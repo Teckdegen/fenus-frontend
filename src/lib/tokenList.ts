@@ -14,7 +14,7 @@ export const FENUS_TOKEN_LIST = {
       chainId:  4441,
       address:  CONTRACTS.WzkLTC,
       name:     "Wrapped zkLitecoin",
-      symbol:   "WzkLTC",
+      symbol:   "wzkLTC",
       decimals: 8,
       logoURI:  WZKLITECOIN_IMAGE_URL,
       tags:     ["collateral"],

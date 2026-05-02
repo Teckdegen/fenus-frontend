@@ -1,6 +1,6 @@
 # Faucet
 
-The **Faucet** gives you **test WzkLTC** so you can try opening and managing a Trove without bringing your own collateral.
+The **Faucet** gives you **test wzkLTC** so you can try opening and managing a Trove without bringing your own collateral.
 
 Availability depends on deployment — some production environments may hide or disable it.
 
@@ -10,7 +10,7 @@ Availability depends on deployment — some production environments may hide or 
 
 | User | Reason |
 |------|--------|
-| New tester | Starts with zero **WzkLTC** |
+| New tester | Starts with zero **wzkLTC** |
 | Demo | Quickly funds a wallet for screenshots or trials |
 
 ---
@@ -32,7 +32,7 @@ Availability depends on deployment — some production environments may hide or 
 | 2 | Press the claim button when enabled |
 | 3 | Wait for confirmation |
 
-Typical payout on test setups: **1,000 WzkLTC** per successful claim (confirm on your deployment).
+Typical payout on test setups: **1,000 wzkLTC** per successful claim (confirm on your deployment).
 
 ---
 

@@ -8,7 +8,7 @@ Single-page reference for the numbers repeated across the Trove UI unless your d
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Collateral asset | **WzkLTC** | Wrapped zkLTC |
+| Collateral asset | **wzkLTC** | Wrapped zkLitecoin (ERC-20 collateral) |
 | Debt asset | **FnUSD** | Borrowed stablecoin |
 | Troves per wallet | **1** | Open a second Trove from same address is not supported in UI |
 

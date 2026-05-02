@@ -161,7 +161,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     }
   }
 
-  // WzkLTC is 8 decimals — all collateral amounts use parseUnits(str, 8)
+  // wzkLTC (WzkLTC token) is 8 decimals — all collateral amounts use parseUnits(str, 8)
   // FnUSD external surface is 6 decimals — all debt amounts use parseUnits(str, 6)
 
   async function openTrove(collStr: string, fnUSDStr: string) {
@@ -181,7 +181,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         gas: GAS.openTrove,
         ...fees,
       });
-    }, "Open Trove", `${fnUSDClean} FnUSD`, `${collClean} WzkLTC`);
+    }, "Open Trove", `${fnUSDClean} FnUSD`, `${collClean} wzkLTC`);
   }
 
   async function addColl(collStr: string) {
@@ -198,7 +198,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         gas: GAS.addColl,
         ...fees,
       });
-    }, "Add Collateral", `${collClean} WzkLTC`);
+    }, "Add Collateral", `${collClean} wzkLTC`);
   }
 
   async function withdrawColl(collStr: string) {
@@ -214,7 +214,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         gas: GAS.withdrawColl,
         ...fees,
       });
-    }, "Remove Collateral", `${collClean} WzkLTC`);
+    }, "Remove Collateral", `${collClean} wzkLTC`);
   }
 
   async function borrowMore(fnUSDStr: string) {

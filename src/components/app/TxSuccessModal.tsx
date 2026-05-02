@@ -6,7 +6,7 @@ const EXPLORER = "https://liteforge.explorer.caldera.xyz/tx/";
 export interface TxSuccessData {
   type: string;        // e.g. "Open Trove", "Add Collateral"
   amount?: string;     // e.g. "500.00 FnUSD"
-  amount2?: string;    // e.g. "10.00 WzkLTC" (for two-sided ops)
+  amount2?: string;    // e.g. "10.00 wzkLTC" (for two-sided ops)
   txHash: string;
 }
 

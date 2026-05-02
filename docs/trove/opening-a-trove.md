@@ -1,6 +1,6 @@
 # Open a Trove
 
-**Open** creates your Trove: you deposit **WzkLTC** and choose how much **FnUSD** to borrow.
+**Open** creates your Trove: you deposit **wzkLTC** and choose how much **FnUSD** to borrow.
 
 ---
 
@@ -9,7 +9,7 @@
 | Check | Requirement |
 |-------|-------------|
 | Wallet | Connected |
-| Collateral | Enough **WzkLTC** in your wallet |
+| Collateral | Enough **wzkLTC** in your wallet |
 | Existing Trove | None — only one Trove per wallet |
 | Ratio | Opening position must meet the protocol **minimum collateral ratio** (see [Collateral ratio](collateral-ratio-explained.md)) |
 
@@ -19,7 +19,7 @@
 
 | Field | What you enter |
 |-------|----------------|
-| **Deposit WzkLTC** | Amount of zkLTC collateral to lock |
+| **Deposit wzkLTC** | Amount of wzkLTC collateral to lock |
 | **Borrow FnUSD** | How much FnUSD you want to receive |
 
 ---
@@ -29,7 +29,7 @@
 | Line | Meaning |
 |------|---------|
 | **Collateral ratio** | Safety of the position after open — must stay **at or above** the minimum required for actions |
-| **Liquidation price** | Rough zkLTC price level where liquidation becomes relevant |
+| **Liquidation price** | Rough wzkLTC price level where liquidation becomes relevant |
 | **Origination fee** | One-time fee on the borrowed amount at open |
 | **Total debt at open** | Borrow amount **plus** origination fee — this is what your ratio is computed against |
 
@@ -53,7 +53,7 @@ Exact decimals and rounding follow on-chain behavior; the preview is your guide 
 | 1 | Go to **Trove** → tab **Open** |
 | 2 | Enter collateral and borrow amounts |
 | 3 | Confirm preview — fix warnings if ratio is too low |
-| 4 | Approve **WzkLTC** if the app asks (first time) |
+| 4 | Approve **wzkLTC** if the app asks (first time) |
 | 5 | Submit **Open Trove** and confirm in wallet |
 
 ---

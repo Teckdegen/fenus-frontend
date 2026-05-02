@@ -39,7 +39,7 @@ export const appKit = createAppKit({
   projectId,
   metadata: {
     name: "FENUS",
-    description: "FENUS — Borrow FnUSD against zkLTC",
+    description: "FENUS — Borrow FnUSD against wzkLTC collateral",
     url: typeof window !== "undefined" ? window.location.origin : "https://fenus.xyz",
     icons: [
       "https://fenus.xyz/favicon.ico",

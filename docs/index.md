@@ -1,6 +1,6 @@
 # FENUS documentation
 
-Welcome to the user guide for **FENUS** — borrow **FnUSD** using **WzkLTC** as collateral through a single position called a **Trove**.
+Welcome to the user guide for **FENUS** — borrow **FnUSD** using **wzkLTC** as collateral through a single position called a **Trove**.
 
 This documentation is written for anyone using the app. It focuses on **what to do in the interface**, not smart contracts or code.
 
@@ -24,10 +24,10 @@ Read in order from top to bottom, or jump to a topic.
 |---------|-------------|
 | [Getting started](getting-started/getting-started.md) | Wallet, app navigation, what each area is for |
 | [Dashboard](dashboard-and-balances.md) | Home screen: balances, Trove summary, pools teaser |
-| [Faucet](faucet.md) | Claim test WzkLTC (where available) |
+| [Faucet](faucet.md) | Claim test wzkLTC (where available) |
 | [What is a Trove?](trove/what-is-a-trove.md) | One-line mental model before you act |
 | [Open a Trove](trove/opening-a-trove.md) | Deposit collateral and mint FnUSD |
-| [Collateral: add & remove](trove/managing-collateral.md) | Increase or decrease zkLTC in your Trove |
+| [Collateral: add & remove](trove/managing-collateral.md) | Increase or decrease wzkLTC in your Trove |
 | [Borrow & repay FnUSD](trove/borrowing-and-repaying.md) | Increase debt or pay it down |
 | [Close your Trove](trove/closing-a-trove.md) | Repay everything and withdraw collateral |
 | [Collateral ratio & safety](trove/collateral-ratio-explained.md) | CR, liquidation price, and UI labels |
@@ -41,7 +41,7 @@ Read in order from top to bottom, or jump to a topic.
 | Term | Meaning |
 |------|---------|
 | **Trove** | Your personal loan position: collateral locked + FnUSD owed |
-| **WzkLTC** | Wrapped zkLTC token you deposit as collateral |
+| **wzkLTC** | Wrapped zkLitecoin — the ERC-20 collateral token you deposit |
 | **FnUSD** | Stablecoin you borrow and must repay to unwind |
 | **Collateral ratio (CR)** | Value of your collateral divided by your debt — **FENUS uses 135%** as what you must maintain; higher is safer |
 | **Liquidation** | If CR falls too low, the position can be cleared by the protocol |

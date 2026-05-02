@@ -10,7 +10,7 @@ This page explains how you enter the app and where each main screen lives.
 |-------------|--------|
 | Compatible wallet | Use a wallet supported by the app’s **Connect** flow (e.g. typical browser wallets) |
 | Correct network | Switch your wallet to the network the app expects — transactions fail on the wrong chain |
-| Tokens | **WzkLTC** for collateral; **FnUSD** when repaying or closing (you receive FnUSD when you borrow) |
+| Tokens | **wzkLTC** for collateral; **FnUSD** when repaying or closing (you receive FnUSD when you borrow) |
 
 ---
 
@@ -33,7 +33,7 @@ The app groups features into a small set of sections:
 | Route / tab | Purpose |
 |-------------|---------|
 | **Home** (`/app`) | Dashboard: wallet balances, Trove snapshot, links to manage |
-| **Faucet** (`/app/faucet`) | Claim test **WzkLTC** on environments where the faucet is enabled |
+| **Faucet** (`/app/faucet`) | Claim test **wzkLTC** on environments where the faucet is enabled |
 | **Trove** (`/app/trove`) | Open and manage your Trove (deposit, borrow, repay, close) |
 | **Pools** (`/app/pools`) | Links and summaries for liquidity venues (e.g. Addax) |
 
@@ -43,8 +43,8 @@ The app groups features into a small set of sections:
 
 | Order | Where | What you do |
 |-------|--------|-------------|
-| 1 | Faucet | Claim **WzkLTC** if you start with zero collateral |
-| 2 | Trove → **Open** | Deposit **WzkLTC**, choose how much **FnUSD** to mint |
+| 1 | Faucet | Claim **wzkLTC** if you start with zero collateral |
+| 2 | Trove → **Open** | Deposit **wzkLTC**, choose how much **FnUSD** to mint |
 | 3 | Dashboard | Monitor collateral, debt, ratio, and liquidation price |
 
 ---
@@ -53,7 +53,7 @@ The app groups features into a small set of sections:
 
 | Stage | What you see |
 |-------|----------------|
-| Approving | The app may ask you to **approve** **WzkLTC** spending once before deposits |
+| Approving | The app may ask you to **approve** **wzkLTC** spending once before deposits |
 | Pending | Wait for block confirmation — duration depends on the chain |
 | Success | A confirmation message and often a link to a block explorer |
 

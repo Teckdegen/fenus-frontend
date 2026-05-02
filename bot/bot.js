@@ -336,7 +336,7 @@ class LiquidationBot {
     eligible.sort((a, b) => (a.icr < b.icr ? -1 : a.icr > b.icr ? 1 : 0));
 
     log.info(
-      `Block ${blockNumber} | zkLTC ~ $${ethers.formatEther(price)} | ` +
+      `Block ${blockNumber} | wzkLTC ~ $${ethers.formatEther(price)} | ` +
         `${eligible.length} Trove(s) below MCR`
     );
 

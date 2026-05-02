@@ -6,7 +6,7 @@ A **Trove** is **your loan account** inside FENUS.
 
 ## One sentence
 
-You **lock WzkLTC** as collateral and **mint FnUSD** as debt — then you manage that position until you **repay** and optionally **close**.
+You **lock wzkLTC** as collateral and **mint FnUSD** as debt — then you manage that position until you **repay** and optionally **close**.
 
 ---
 
@@ -23,7 +23,7 @@ You **lock WzkLTC** as collateral and **mint FnUSD** as debt — then you manage
 
 | Side | Asset | Direction |
 |------|--------|-----------|
-| Collateral | **WzkLTC** | You deposit; it stays locked until you withdraw or close |
+| Collateral | **wzkLTC** | You deposit; it stays locked until you withdraw or close |
 | Debt | **FnUSD** | You owe the protocol; increases when you borrow, decreases when you repay |
 
 ---

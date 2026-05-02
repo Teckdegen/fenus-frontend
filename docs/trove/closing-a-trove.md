@@ -18,7 +18,7 @@
 | Section | Meaning |
 |---------|---------|
 | **What you repay** | Outstanding debt in **FnUSD** (total to repay) |
-| **What you receive** | **zkLTC** collateral returned to you; optional USD value at current oracle price |
+| **What you receive** | **wzkLTC** collateral returned to you; optional USD value at current oracle price |
 
 ---
 
@@ -38,7 +38,7 @@
 | Item | Expected result |
 |------|------------------|
 | Trove | Position cleared — no active Trove until you **Open** again (still **one active Trove per wallet** at a time) |
-| Wallet | **FnUSD** reduced by debt paid; **WzkLTC** increased by returned collateral |
+| Wallet | **FnUSD** reduced by debt paid; **wzkLTC** increased by returned collateral |
 
 ---
 

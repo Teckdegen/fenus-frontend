@@ -19,7 +19,7 @@ const Hero = () => {
           Borrow Against Your<br />LitVM Holdings.
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-balance text-base text-muted-foreground sm:text-lg">
-          Mint $FnUSD with $zkLTC collateral.
+          Mint $FnUSD with $wzkLTC collateral.
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">

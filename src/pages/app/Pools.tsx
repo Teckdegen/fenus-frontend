@@ -3,9 +3,9 @@ import { Card, Row, SectionLabel, TokenIcon, TOKEN_IMAGES } from "@/components/a
 
 const pools = [
   {
-    pair: "FnUSD / zkLTC",
+    pair: "FnUSD / wzkLTC",
     token0: "FnUSD",
-    token1: "zkLTC",
+    token1: "wzkLTC",
     venue: "Addax",
     tvl: "$0",
     apr: "0.00%",
