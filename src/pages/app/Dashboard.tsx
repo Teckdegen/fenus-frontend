@@ -12,7 +12,8 @@ const Dashboard = () => {
     troveColl, troveDebt, troveCollUSD,
     troveRatio, troveLiqPrice,
     defaultPoolColl, defaultPoolDebt,
-    wzkLTCBalance, wzkLTCBalanceFull, fnUSDBalance, ltcPriceUSD,
+    wzkLTCBalanceFull, fnUSDBalance, ltcPriceUSD,
+    raw,
   } = useBalances();
 
   return (
@@ -45,7 +46,7 @@ const Dashboard = () => {
       )}
 
       {/* Wrap notification — shown when connected but wzkLTC balance is 0 */}
-      {isConnected && wzkLTCBalance === "0.00" && (
+      {isConnected && (raw.wzkLTCBal ?? 0n) === 0n && (
         <div className="flex items-start gap-3 rounded-2xl border border-border bg-card/60 px-4 py-3">
           <AlertCircle className="h-4 w-4 shrink-0 text-foreground/60 mt-0.5" />
           <div className="flex-1">

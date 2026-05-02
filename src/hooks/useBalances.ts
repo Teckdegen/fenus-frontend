@@ -49,23 +49,24 @@ const DEFAULT_POOL_ABI = [
 function compact(n: number, dp = 2): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(dp)}M`;
   if (n >= 1_000)     return `${(n / 1_000).toFixed(dp)}K`;
-  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: dp });
+  return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: dp });
 }
 
 // Format a bigint token amount with compact notation
 function fmtCompact(val: bigint | undefined, decimals: number): string {
   if (val === undefined || val === null) return "0.00";
   const n = parseFloat(formatUnits(val, decimals));
-  return compact(n);
+  // If it's a tiny non-zero, allow more precision so it doesn't render as 0.
+  const dp = n > 0 && n < 0.01 ? Math.min(decimals, 8) : 2;
+  return compact(n, dp);
 }
 
 // Format a bigint token amount with full precision (for inputs/rows)
 function fmt(val: bigint | undefined, decimals: number, dp = 4): string {
   if (val === undefined || val === null) return "0.00";
-  return parseFloat(formatUnits(val, decimals)).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: dp,
-  });
+  const n = parseFloat(formatUnits(val, decimals));
+  const maxDp = n > 0 && n < 0.01 ? Math.min(decimals, 8) : dp;
+  return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: maxDp });
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
