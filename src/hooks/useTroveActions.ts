@@ -113,55 +113,62 @@ export function useTroveActions(address: `0x${string}` | undefined) {
 
   async function openTrove(collStr: string, fnUSDStr: string) {
     reset();
-    const collAmt  = parseUnits(collStr,  8);
-    const fnUSDAmt = parseUnits(fnUSDStr, 6);
+    // Strip commas from formatted numbers before parsing
+    const collClean  = collStr.replace(/,/g, "");
+    const fnUSDClean = fnUSDStr.replace(/,/g, "");
+    const collAmt  = parseUnits(collClean,  8);
+    const fnUSDAmt = parseUnits(fnUSDClean, 6);
     await ensureApproval(collAmt);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "openTrove",
       args: [collAmt, fnUSDAmt, ZERO, ZERO],
       gas: GAS.openTrove,
-    }), "Open Trove", `${fnUSDStr} FnUSD`, `${collStr} WzkLTC`);
+    }), "Open Trove", `${fnUSDClean} FnUSD`, `${collClean} WzkLTC`);
   }
 
   async function addColl(collStr: string) {
     reset();
-    const collAmt = parseUnits(collStr, 8);
+    const collClean = collStr.replace(/,/g, "");
+    const collAmt = parseUnits(collClean, 8);
     await ensureApproval(collAmt);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "addColl",
       args: [collAmt, ZERO, ZERO],
       gas: GAS.addColl,
-    }), "Add Collateral", `${collStr} WzkLTC`);
+    }), "Add Collateral", `${collClean} WzkLTC`);
   }
 
   async function withdrawColl(collStr: string) {
     reset();
-    const collAmt = parseUnits(collStr, 8);
+    const collClean = collStr.replace(/,/g, "");
+    const collAmt = parseUnits(collClean, 8);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "withdrawColl",
       args: [collAmt, ZERO, ZERO],
       gas: GAS.withdrawColl,
-    }), "Remove Collateral", `${collStr} WzkLTC`);
+    }), "Remove Collateral", `${collClean} WzkLTC`);
   }
 
   async function borrowMore(fnUSDStr: string) {
     reset();
-    const fnUSDAmt = parseUnits(fnUSDStr, 6);
+    const fnUSDClean = fnUSDStr.replace(/,/g, "");
+    const fnUSDAmt = parseUnits(fnUSDClean, 6);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "withdrawFnUSD",
       args: [fnUSDAmt, ZERO, ZERO],
       gas: GAS.borrowMore,
-    }), "Borrow FnUSD", `${fnUSDStr} FnUSD`);
+    }), "Borrow FnUSD", `${fnUSDClean} FnUSD`);
   }
 
   async function repayFnUSD(fnUSDStr: string) {
     reset();
-    const fnUSDAmt = parseUnits(fnUSDStr, 6);
+    const fnUSDClean = fnUSDStr.replace(/,/g, "");
+    const fnUSDAmt = parseUnits(fnUSDClean, 6);
     await run(() => writeContractAsync({
       address: BO, abi: BO_ABI, functionName: "repayFnUSD",
       args: [fnUSDAmt, ZERO, ZERO],
       gas: GAS.repayFnUSD,
-    }), "Repay Debt", `${fnUSDStr} FnUSD`);
+    }), "Repay Debt", `${fnUSDClean} FnUSD`);
   }
 
   async function closeTrove() {

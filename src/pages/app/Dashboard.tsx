@@ -12,7 +12,7 @@ const Dashboard = () => {
     troveColl, troveDebt, troveCollUSD,
     troveRatio, troveLiqPrice,
     defaultPoolColl, defaultPoolDebt,
-    wzkLTCBalance, fnUSDBalance, ltcPriceUSD,
+    wzkLTCBalance, wzkLTCBalanceFull, fnUSDBalance, ltcPriceUSD,
   } = useBalances();
 
   return (
@@ -29,7 +29,7 @@ const Dashboard = () => {
         <Card className="p-4 flex items-center justify-around gap-4">
           <div className="text-center">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">WzkLTC Balance</p>
-            <p className="font-display text-lg font-semibold tabular-nums mt-0.5">{wzkLTCBalance}</p>
+            <p className="font-display text-lg font-semibold tabular-nums mt-0.5">{wzkLTCBalanceFull}</p>
           </div>
           <div className="h-8 w-px bg-border/40" />
           <div className="text-center">
@@ -70,7 +70,7 @@ const Dashboard = () => {
           <Card className="p-5">
             {hasTrove ? (
               <>
-                <Row label="Collateral"        value={`${troveColl} zkLTC`}  hint={`≈ $${troveCollUSD}`} />
+                <Row label="Collateral"        value={`${troveColl} zkLTC`}  hint={`≈ ${troveCollUSD}`} />
                 <Row label="Debt"              value={`${troveDebt} FnUSD`} />
                 <Row label="Collateral Ratio"  value={troveRatio}            hint="Min 130%" />
                 <Row label="Liquidation Price" value={`$${troveLiqPrice}`}   hint="per zkLTC" />

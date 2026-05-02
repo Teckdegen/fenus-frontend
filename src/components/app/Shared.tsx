@@ -80,7 +80,11 @@ export const TokenInput = ({
         inputMode="decimal"
         placeholder={placeholder}
         value={value}
-        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        onChange={onChange ? (e) => {
+          // Strip commas so users can paste formatted numbers like "1,000.00"
+          const clean = e.target.value.replace(/,/g, "");
+          onChange(clean);
+        } : undefined}
         className="min-w-0 flex-1 bg-transparent font-display text-2xl sm:text-3xl font-semibold tabular-nums outline-none placeholder:text-muted-foreground/30"
       />
       {/* Token pill — fixed width so it never overflows */}
