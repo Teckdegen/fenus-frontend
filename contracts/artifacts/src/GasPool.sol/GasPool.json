@@ -1,0 +1,66 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "GasPool",
+  "sourceName": "src/GasPool.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IAddressesRegistry",
+          "name": "_registry",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "fund",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "payLiquidator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "registry",
+      "outputs": [
+        {
+          "internalType": "contract IAddressesRegistry",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x60a03461006857601f61017638819003918201601f19168301916001600160401b0383118484101761006d5780849260209460405283398101031261006857516001600160a01b03811681036100685760805260405160f2908161008482396080518160890152f35b600080fd5b634e487b7160e01b600052604160045260246000fdfe6080806040526004361015601257600080fd5b600090813560e01c9081637b1039991460775750806390f7b0661460535763ca1d209d14603e57600080fd5b34605057602036600319011260505780f35b80fd5b503460505760403660031901126050576004356001600160a01b0381160360505780f35b90503460b8578160031936011260b8577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b5080fdfea2646970667358221220d6efe7e9f58584d14751781ee0fc58166391d5c4aa9fae85f9b921929cdb041264736f6c63430008180033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c9081637b1039991460775750806390f7b0661460535763ca1d209d14603e57600080fd5b34605057602036600319011260505780f35b80fd5b503460505760403660031901126050576004356001600160a01b0381160360505780f35b90503460b8578160031936011260b8577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b5080fdfea2646970667358221220d6efe7e9f58584d14751781ee0fc58166391d5c4aa9fae85f9b921929cdb041264736f6c63430008180033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
