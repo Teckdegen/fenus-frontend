@@ -30,7 +30,7 @@ const Hero = () => {
             Launch App
           </a>
           <a
-            href="#"
+            href="/docs"
             className="rounded-full border border-foreground/30 bg-transparent px-7 py-3.5 text-sm font-semibold text-foreground transition hover:bg-foreground/10"
           >
             Docs
