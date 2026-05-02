@@ -1,8 +1,6 @@
-# Summary
+# Table of contents
 
-Use this file when importing into GitBook (or similar) to define the sidebar order.
-
-* [Introduction](index.md)
+* [Introduction](README.md)
 
 ## Getting started
 
