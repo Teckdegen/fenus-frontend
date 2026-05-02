@@ -1,6 +1,19 @@
 # Open a Trove
 
-**Open** creates your Trove: you deposit **wzkLTC** and choose how much **FnUSD** to borrow.
+**Open** creates your Trove: you deposit **wzkLTC** and choose how much **FnUSD** to borrow. This also **mints an NFT** representing your position.
+
+---
+
+## What happens when you open
+
+When you open a Trove, the protocol:
+
+1. **Locks your wzkLTC** as collateral
+2. **Mints FnUSD** to your wallet
+3. **Mints a Trove NFT** to your wallet (ERC721 token)
+4. **Records your debt** on-chain
+
+The NFT represents your entire position and will appear in your wallet (MetaMask, OpenSea, etc.).
 
 ---
 
@@ -10,7 +23,7 @@
 |-------|-------------|
 | Wallet | Connected |
 | Collateral | Enough **wzkLTC** in your wallet |
-| Existing Trove | None — only one Trove per wallet |
+| Existing Trove | None - only one Trove per wallet |
 | Ratio | Opening position must meet the protocol **minimum collateral ratio** (see [Collateral ratio](collateral-ratio-explained.md)) |
 
 ---
@@ -74,3 +87,11 @@ Exact decimals and rounding follow on-chain behavior; the preview is your guide 
 |-------|----------------|
 | **Dashboard** | Collateral, debt, ratio |
 | Wallet | **FnUSD** balance increased |
+| Wallet NFTs | **Trove NFT** appears (check MetaMask NFT tab) |
+
+Your Trove NFT will show:
+- Token ID (e.g., #42)
+- Current debt and collateral
+- You can view it on NFT marketplaces
+
+**Remember:** This NFT represents your entire position. If you transfer it, you transfer your debt! See [Transfer your Trove](transferring-your-trove.md).

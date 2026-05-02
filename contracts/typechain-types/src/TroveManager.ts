@@ -46,7 +46,7 @@ export interface TroveManagerInterface extends Interface {
       | "redeem"
       | "registry"
       | "totalStakes"
-      | "troveOwners"
+      | "troveNFT"
       | "troves"
   ): FunctionFragment;
 
@@ -127,11 +127,11 @@ export interface TroveManagerInterface extends Interface {
     functionFragment: "totalStakes",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "troveNFT", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "troveOwners",
+    functionFragment: "troves",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "troves", values: [AddressLike]): string;
 
   decodeFunctionResult(functionFragment: "L_coll", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "L_debt", data: BytesLike): Result;
@@ -189,10 +189,7 @@ export interface TroveManagerInterface extends Interface {
     functionFragment: "totalStakes",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "troveOwners",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "troveNFT", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "troves", data: BytesLike): Result;
 }
 
@@ -219,10 +216,10 @@ export namespace LiquidationEvent {
 }
 
 export namespace TroveClosedEvent {
-  export type InputTuple = [owner: AddressLike, status: BigNumberish];
-  export type OutputTuple = [owner: string, status: bigint];
+  export type InputTuple = [tokenId: BigNumberish, status: BigNumberish];
+  export type OutputTuple = [tokenId: bigint, status: bigint];
   export interface OutputObject {
-    owner: string;
+    tokenId: bigint;
     status: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -233,19 +230,19 @@ export namespace TroveClosedEvent {
 
 export namespace TroveLiquidatedEvent {
   export type InputTuple = [
-    owner: AddressLike,
+    tokenId: BigNumberish,
     debt: BigNumberish,
     coll: BigNumberish,
     liquidationMode: BigNumberish
   ];
   export type OutputTuple = [
-    owner: string,
+    tokenId: bigint,
     debt: bigint,
     coll: bigint,
     liquidationMode: bigint
   ];
   export interface OutputObject {
-    owner: string;
+    tokenId: bigint;
     debt: bigint;
     coll: bigint;
     liquidationMode: bigint;
@@ -259,12 +256,19 @@ export namespace TroveLiquidatedEvent {
 export namespace TroveOpenedEvent {
   export type InputTuple = [
     owner: AddressLike,
+    tokenId: BigNumberish,
     debt: BigNumberish,
     coll: BigNumberish
   ];
-  export type OutputTuple = [owner: string, debt: bigint, coll: bigint];
+  export type OutputTuple = [
+    owner: string,
+    tokenId: bigint,
+    debt: bigint,
+    coll: bigint
+  ];
   export interface OutputObject {
     owner: string;
+    tokenId: bigint;
     debt: bigint;
     coll: bigint;
   }
@@ -276,21 +280,21 @@ export namespace TroveOpenedEvent {
 
 export namespace TroveUpdatedEvent {
   export type InputTuple = [
-    owner: AddressLike,
+    tokenId: BigNumberish,
     debt: BigNumberish,
     coll: BigNumberish,
     stake: BigNumberish,
     operation: BigNumberish
   ];
   export type OutputTuple = [
-    owner: string,
+    tokenId: bigint,
     debt: bigint,
     coll: bigint,
     stake: bigint,
     operation: bigint
   ];
   export interface OutputObject {
-    owner: string;
+    tokenId: bigint;
     debt: bigint;
     coll: bigint;
     stake: bigint;
@@ -409,10 +413,10 @@ export interface TroveManager extends BaseContract {
 
   totalStakes: TypedContractMethod<[], [bigint], "view">;
 
-  troveOwners: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+  troveNFT: TypedContractMethod<[], [string], "view">;
 
   troves: TypedContractMethod<
-    [arg0: AddressLike],
+    [arg0: BigNumberish],
     [
       [bigint, bigint, bigint, bigint, bigint, bigint] & {
         debt: bigint;
@@ -511,12 +515,12 @@ export interface TroveManager extends BaseContract {
     nameOrSignature: "totalStakes"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "troveOwners"
-  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+    nameOrSignature: "troveNFT"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "troves"
   ): TypedContractMethod<
-    [arg0: AddressLike],
+    [arg0: BigNumberish],
     [
       [bigint, bigint, bigint, bigint, bigint, bigint] & {
         debt: bigint;
@@ -578,7 +582,7 @@ export interface TroveManager extends BaseContract {
       LiquidationEvent.OutputObject
     >;
 
-    "TroveClosed(address,uint8)": TypedContractEvent<
+    "TroveClosed(uint256,uint8)": TypedContractEvent<
       TroveClosedEvent.InputTuple,
       TroveClosedEvent.OutputTuple,
       TroveClosedEvent.OutputObject
@@ -589,7 +593,7 @@ export interface TroveManager extends BaseContract {
       TroveClosedEvent.OutputObject
     >;
 
-    "TroveLiquidated(address,uint256,uint256,uint8)": TypedContractEvent<
+    "TroveLiquidated(uint256,uint256,uint256,uint8)": TypedContractEvent<
       TroveLiquidatedEvent.InputTuple,
       TroveLiquidatedEvent.OutputTuple,
       TroveLiquidatedEvent.OutputObject
@@ -600,7 +604,7 @@ export interface TroveManager extends BaseContract {
       TroveLiquidatedEvent.OutputObject
     >;
 
-    "TroveOpened(address,uint256,uint256)": TypedContractEvent<
+    "TroveOpened(address,uint256,uint256,uint256)": TypedContractEvent<
       TroveOpenedEvent.InputTuple,
       TroveOpenedEvent.OutputTuple,
       TroveOpenedEvent.OutputObject
@@ -611,7 +615,7 @@ export interface TroveManager extends BaseContract {
       TroveOpenedEvent.OutputObject
     >;
 
-    "TroveUpdated(address,uint256,uint256,uint256,uint8)": TypedContractEvent<
+    "TroveUpdated(uint256,uint256,uint256,uint256,uint8)": TypedContractEvent<
       TroveUpdatedEvent.InputTuple,
       TroveUpdatedEvent.OutputTuple,
       TroveUpdatedEvent.OutputObject

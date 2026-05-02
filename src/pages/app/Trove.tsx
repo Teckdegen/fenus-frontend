@@ -6,6 +6,7 @@ import {
 } from "@/components/app/Shared";
 import { useBalances } from "@/hooks/useBalances";
 import { useTroveActions } from "@/hooks/useTroveActions";
+import { useTroveNFT } from "@/hooks/useTroveNFT";
 import { TxSuccessModal } from "@/components/app/TxSuccessModal";
 
 const MCR             = 1.30;
@@ -13,7 +14,7 @@ const BUFFER          = 1.35;
 const ORIGINATION_FEE = 0.005;
 const EXPLORER        = "https://liteforge.explorer.caldera.xyz/tx/";
 
-const TABS = ["Open", "Add", "Remove", "Borrow", "Repay", "Close"] as const;
+const TABS = ["Open", "Add", "Remove", "Borrow", "Repay", "Transfer", "Close"] as const;
 type Tab = (typeof TABS)[number];
 
 function ratioColor(r: number | null) {
@@ -92,6 +93,7 @@ const Trove = () => {
   const [removeInput, setRemoveInput] = useState("");
   const [moreInput,   setMoreInput]   = useState("");
   const [repayInput,  setRepayInput]  = useState("");
+  const [transferTo,  setTransferTo]  = useState("");
 
   const { open } = useAppKit();
 
@@ -102,6 +104,7 @@ const Trove = () => {
   } = useBalances();
 
   const actions = useTroveActions(address as `0x${string}` | undefined);
+  const nft = useTroveNFT();
 
   const existingColl = parseFloat(existingCollStr.replace(/,/g, "")) || 0;
   const closeColl      = parseFloat(troveCollClose.replace(/,/g, "")) || existingColl;
@@ -418,6 +421,14 @@ const Trove = () => {
                   <span className="tabular-nums">0.00 FnUSD</span>
                 </div>
               )}
+              {existingDebt > 0 && parseFloat(fnUSDBalanceFull) < existingDebt && (
+                <div className="flex items-start gap-1.5 mt-2 pt-2 border-t border-border/40">
+                  <Info className="h-3 w-3 shrink-0 text-amber-500/80 mt-0.5" />
+                  <p className="text-[10px] text-amber-500/80">
+                    Insufficient balance. You need {(existingDebt - parseFloat(fnUSDBalanceFull)).toFixed(2)} more FnUSD to repay in full.
+                  </p>
+                </div>
+              )}
             </div>
 
             <TokenInput label="Repay FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
@@ -444,6 +455,89 @@ const Trove = () => {
                 onClick={() => actions.repayFnUSD(repayInput)}>
                 {busy ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Working…</> : "Repay Debt"}
               </PrimaryButton>
+            </div>
+          </div>
+        )}
+
+        {/* ── TRANSFER ─────────────────────────────────────────────────── */}
+        {tab === "Transfer" && (
+          <div className="space-y-3">
+            {/* NFT Info */}
+            <div className="rounded-2xl border border-border/60 bg-background/20 px-4 py-3 space-y-2">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Your Trove NFT</p>
+              {nft.tokenId ? (
+                <>
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-muted-foreground">Token ID</span>
+                    <span className="tabular-nums font-medium text-foreground">#{nft.tokenId.toString()}</span>
+                  </div>
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-muted-foreground">Debt</span>
+                    <span className="tabular-nums">{existingDebt.toFixed(2)} FnUSD</span>
+                  </div>
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-muted-foreground">Collateral</span>
+                    <span className="tabular-nums">{existingColl.toFixed(4)} wzkLTC</span>
+                  </div>
+                </>
+              ) : (
+                <p className="text-[11px] text-muted-foreground">No trove NFT found</p>
+              )}
+            </div>
+
+            {/* Transfer Warning */}
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 space-y-2">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="text-[11px] font-medium text-amber-300">⚠️ Warning: Transferring Your Entire Position</p>
+                  <p className="text-[10px] text-amber-400/80">
+                    Transferring this NFT will transfer your ENTIRE trove position including:
+                  </p>
+                  <ul className="text-[10px] text-amber-400/80 list-disc list-inside space-y-0.5 ml-2">
+                    <li>All collateral ({existingColl.toFixed(4)} wzkLTC)</li>
+                    <li>All debt ({existingDebt.toFixed(2)} FnUSD)</li>
+                    <li>All future obligations and rewards</li>
+                  </ul>
+                  <p className="text-[10px] text-amber-400/80 mt-2">
+                    The recipient will become the new owner and will be responsible for maintaining the position.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Transfer Input */}
+            <div className="space-y-2">
+              <label className="block">
+                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1.5 block">
+                  Recipient Address
+                </span>
+                <input
+                  type="text"
+                  value={transferTo}
+                  onChange={(e) => { setTransferTo(e.target.value); nft.reset(); }}
+                  placeholder="0x..."
+                  className="w-full rounded-xl border border-border/60 bg-background/40 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </label>
+              <p className="text-[10px] text-muted-foreground/60 px-1">
+                Enter the Ethereum address of the person you want to transfer your trove to.
+              </p>
+            </div>
+
+            <TxStatus status={nft.status} txHash={nft.txHash} error={nft.error} />
+
+            <div className="flex justify-end pt-1">
+              <GhostButton 
+                disabled={!transferTo || !nft.tokenId || nft.status === "pending"}
+                onClick={() => nft.transferTrove(transferTo)}
+              >
+                {nft.status === "pending" ? (
+                  <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Transferring…</>
+                ) : (
+                  "Transfer Trove"
+                )}
+              </GhostButton>
             </div>
           </div>
         )}
@@ -480,7 +574,8 @@ const Trove = () => {
             <div className="flex items-start gap-2 px-1">
               <Info className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 mt-0.5" />
               <p className="text-[11px] text-muted-foreground/60">
-                You need {existingDebt.toFixed(2)} FnUSD in your wallet to close.
+                You need <span className="font-medium text-foreground">{existingDebt.toFixed(2)} FnUSD</span> in your wallet to close. 
+                This includes your borrowed amount plus any redistribution debt from liquidations.
               </p>
             </div>
             <TxStatus status={actions.status} txHash={actions.txHash} error={actions.error} />

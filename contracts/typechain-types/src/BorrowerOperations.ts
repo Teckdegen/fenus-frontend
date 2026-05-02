@@ -32,6 +32,7 @@ export interface BorrowerOperationsInterface extends Interface {
       | "openTrove"
       | "registry"
       | "repayFnUSD"
+      | "troveNFT"
       | "withdrawColl"
       | "withdrawFnUSD"
   ): FunctionFragment;
@@ -68,6 +69,7 @@ export interface BorrowerOperationsInterface extends Interface {
     functionFragment: "repayFnUSD",
     values: [BigNumberish, AddressLike, AddressLike]
   ): string;
+  encodeFunctionData(functionFragment: "troveNFT", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "withdrawColl",
     values: [BigNumberish, AddressLike, AddressLike]
@@ -86,6 +88,7 @@ export interface BorrowerOperationsInterface extends Interface {
   decodeFunctionResult(functionFragment: "openTrove", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "registry", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "repayFnUSD", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "troveNFT", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "withdrawColl",
     data: BytesLike
@@ -162,10 +165,11 @@ export namespace FnUSDRepaidEvent {
 }
 
 export namespace TroveClosedEvent {
-  export type InputTuple = [owner: AddressLike];
-  export type OutputTuple = [owner: string];
+  export type InputTuple = [owner: AddressLike, tokenId: BigNumberish];
+  export type OutputTuple = [owner: string, tokenId: bigint];
   export interface OutputObject {
     owner: string;
+    tokenId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -176,12 +180,19 @@ export namespace TroveClosedEvent {
 export namespace TroveOpenedEvent {
   export type InputTuple = [
     owner: AddressLike,
+    tokenId: BigNumberish,
     coll18: BigNumberish,
     debt18: BigNumberish
   ];
-  export type OutputTuple = [owner: string, coll18: bigint, debt18: bigint];
+  export type OutputTuple = [
+    owner: string,
+    tokenId: bigint,
+    coll18: bigint,
+    debt18: bigint
+  ];
   export interface OutputObject {
     owner: string;
+    tokenId: bigint;
     coll18: bigint;
     debt18: bigint;
   }
@@ -267,6 +278,8 @@ export interface BorrowerOperations extends BaseContract {
     "nonpayable"
   >;
 
+  troveNFT: TypedContractMethod<[], [string], "view">;
+
   withdrawColl: TypedContractMethod<
     [collAmount: BigNumberish, upperHint: AddressLike, lowerHint: AddressLike],
     [void],
@@ -326,6 +339,9 @@ export interface BorrowerOperations extends BaseContract {
     [void],
     "nonpayable"
   >;
+  getFunction(
+    nameOrSignature: "troveNFT"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "withdrawColl"
   ): TypedContractMethod<
@@ -451,7 +467,7 @@ export interface BorrowerOperations extends BaseContract {
       FnUSDRepaidEvent.OutputObject
     >;
 
-    "TroveClosed(address)": TypedContractEvent<
+    "TroveClosed(address,uint256)": TypedContractEvent<
       TroveClosedEvent.InputTuple,
       TroveClosedEvent.OutputTuple,
       TroveClosedEvent.OutputObject
@@ -462,7 +478,7 @@ export interface BorrowerOperations extends BaseContract {
       TroveClosedEvent.OutputObject
     >;
 
-    "TroveOpened(address,uint256,uint256)": TypedContractEvent<
+    "TroveOpened(address,uint256,uint256,uint256)": TypedContractEvent<
       TroveOpenedEvent.InputTuple,
       TroveOpenedEvent.OutputTuple,
       TroveOpenedEvent.OutputObject

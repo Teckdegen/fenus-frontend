@@ -46,9 +46,10 @@ const DEFAULT_POOL_ABI = [
 // ─── Format helpers ───────────────────────────────────────────────────────────
 
 // Compact number: 1,234 -> "1.23K", 1,234,567 -> "1.23M"
+// Only compact numbers >= 10,000 to avoid showing "1.00K" for small balances like 1 wzkLTC
 function compact(n: number, dp = 2): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(dp)}M`;
-  if (n >= 1_000)     return `${(n / 1_000).toFixed(dp)}K`;
+  if (n >= 10_000)    return `${(n / 1_000).toFixed(dp)}K`;
   return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: dp });
 }
 
@@ -148,7 +149,12 @@ export function useBalances() {
   // ─── Derived ──────────────────────────────────────────────────────────────
   const priceNum = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
   const collNum  = troveColl ? parseFloat(formatUnits(troveColl, 18)) : 0;
-  const debtNum  = troveDebt ? parseFloat(formatUnits(troveDebt, 18)) : 0;
+  
+  // Use ENTIRE debt (recorded + pending redistribution) for accurate display
+  const entireDebt = entireDebtAndColl?.[0];
+  const debtNum  = entireDebt ? parseFloat(formatUnits(entireDebt, 18)) : 
+                   troveDebt ? parseFloat(formatUnits(troveDebt, 18)) : 0;
+  
   const hasTrove = troveStatus === 1;
   const entireColl = entireDebtAndColl?.[1];
 

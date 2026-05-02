@@ -19,6 +19,7 @@ Use this file when importing into GitBook (or similar) to define the sidebar ord
 * [Open a Trove](trove/opening-a-trove.md)
 * [Managing collateral](trove/managing-collateral.md)
 * [Borrow & repay](trove/borrowing-and-repaying.md)
+* [Transfer your Trove](trove/transferring-your-trove.md)
 * [Close a Trove](trove/closing-a-trove.md)
 * [Collateral ratio explained](trove/collateral-ratio-explained.md)
 

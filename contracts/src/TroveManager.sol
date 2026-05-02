@@ -4,19 +4,19 @@ pragma solidity ^0.8.24;
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {ITroveManager} from "./interfaces/ITroveManager.sol";
 import {IAddressesRegistry} from "./interfaces/IAddressesRegistry.sol";
-import {IActivePool, IDefaultPool, ICollSurplusPool} from "./interfaces/IPools.sol";
+import {IActivePool, IDefaultPool} from "./interfaces/IPools.sol";
 import {IFnUSD} from "./interfaces/IFnUSD.sol";
 import {IPriceFeed} from "./interfaces/IPriceFeed.sol";
 import {ISortedTroves} from "./interfaces/ISortedTroves.sol";
+import {TroveNFT} from "./TroveNFT.sol";
 import {Constants} from "./Constants.sol";
 import {LiquityMath} from "./libraries/LiquityMath.sol";
-import {Decimals} from "./libraries/Decimals.sol";
 
-// TroveManager — core accounting engine for all Troves.
-// Zero interest: trove debt grows only through user-initiated borrows / fees,
-// never automatically over time.
+// TroveManager — NFT-based trove management (Uniswap V3 style).
+// Storage is minimized: only debt/coll per tokenId, no arrays or complex mappings.
 contract TroveManager is ITroveManager, ReentrancyGuard {
     IAddressesRegistry public immutable registry;
+    TroveNFT public immutable troveNFT;
 
     struct TroveData {
         uint256 debt;
@@ -27,18 +27,22 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         Status  status;
     }
 
-    mapping(address => TroveData) public troves;
-    address[] public troveOwners;
-    mapping(address => uint256) private _troveIndex;
-
+    // Storage: tokenId → TroveData (much cheaper than address → TroveData + arrays)
+    mapping(uint256 => TroveData) public troves;
+    
+    // Global redistribution tracking
     uint256 public L_coll;
     uint256 public L_debt;
     uint256 public totalStakes;
+    
+    // Lightweight tracking for liquidation iteration (optional)
+    uint256[] private _activeTokenIds;
+    mapping(uint256 => uint256) private _tokenIdIndex;
 
-    event TroveOpened(address indexed owner, uint256 debt, uint256 coll);
-    event TroveUpdated(address indexed owner, uint256 debt, uint256 coll, uint256 stake, uint8 operation);
-    event TroveLiquidated(address indexed owner, uint256 debt, uint256 coll, uint8 liquidationMode);
-    event TroveClosed(address indexed owner, Status status);
+    event TroveOpened(address indexed owner, uint256 indexed tokenId, uint256 debt, uint256 coll);
+    event TroveUpdated(uint256 indexed tokenId, uint256 debt, uint256 coll, uint256 stake, uint8 operation);
+    event TroveLiquidated(uint256 indexed tokenId, uint256 debt, uint256 coll, uint8 liquidationMode);
+    event TroveClosed(uint256 indexed tokenId, Status status);
     event Liquidation(uint256 liquidatedDebt, uint256 liquidatedColl, uint256 surplusColl);
 
     error NotAuthorized();
@@ -46,8 +50,9 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     error TroveAlreadyExists();
     error NothingToLiquidate();
 
-    constructor(IAddressesRegistry _registry) {
+    constructor(IAddressesRegistry _registry, TroveNFT _troveNFT) {
         registry = _registry;
+        troveNFT = _troveNFT;
     }
 
     modifier onlyBO() {
@@ -63,17 +68,26 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         _;
     }
 
-    modifier onlyRedemptionHelper() {
-        if (msg.sender != registry.addresses().redemptionHelper) revert NotAuthorized();
-        _;
-    }
-
     // ─── View ─────────────────────────────────────────────────────────────────
 
-    function getTroveOwnersCount() external view override returns (uint256) { return troveOwners.length; }
-    function getTroveStatus(address owner) external view override returns (Status) { return troves[owner].status; }
-    function getTroveColl(address owner) external view override returns (uint256) { return troves[owner].coll; }
-    function getTroveDebt(address owner) external view override returns (uint256) { return troves[owner].debt; }
+    function getTroveOwnersCount() external view override returns (uint256) { 
+        return _activeTokenIds.length; 
+    }
+    
+    function getTroveStatus(address owner) external view override returns (Status) { 
+        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        return tokenId == 0 ? Status.NonExistent : troves[tokenId].status;
+    }
+    
+    function getTroveColl(address owner) external view override returns (uint256) { 
+        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        return tokenId == 0 ? 0 : troves[tokenId].coll;
+    }
+    
+    function getTroveDebt(address owner) external view override returns (uint256) { 
+        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        return tokenId == 0 ? 0 : troves[tokenId].debt;
+    }
 
     function getCurrentICR(address owner, uint256 price) external view override returns (uint256) {
         (uint256 debt, uint256 coll) = _getEntireDebtAndColl(owner);
@@ -95,9 +109,12 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     // ─── BorrowerOperations callbacks ─────────────────────────────────────────
 
     function openTrove(address owner, uint256 coll, uint256 debt) external override onlyBO nonReentrant {
-        if (troves[owner].status == Status.Active) revert TroveAlreadyExists();
+        if (troveNFT.hasTrove(owner)) revert TroveAlreadyExists();
 
-        TroveData storage t = troves[owner];
+        // Mint NFT for this position
+        uint256 tokenId = troveNFT.mint(owner);
+        
+        TroveData storage t = troves[tokenId];
         t.debt           = debt;
         t.coll           = coll;
         t.status         = Status.Active;
@@ -108,21 +125,23 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         t.stake      = stake;
         totalStakes += stake;
 
-        _troveIndex[owner] = troveOwners.length;
-        troveOwners.push(owner);
+        _tokenIdIndex[tokenId] = _activeTokenIds.length;
+        _activeTokenIds.push(tokenId);
 
-        emit TroveOpened(owner, debt, coll);
-        emit TroveUpdated(owner, debt, coll, stake, 0);
+        emit TroveOpened(owner, tokenId, debt, coll);
+        emit TroveUpdated(tokenId, debt, coll, stake, 0);
     }
 
     function adjustTrove(address owner, int256 collDelta, int256 debtDelta)
         external override onlyBOorRH nonReentrant
     {
-        IAddressesRegistry.Addresses memory a = registry.addresses();
-        TroveData storage t = troves[owner];
+        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        if (tokenId == 0) revert TroveNotActive();
+        
+        TroveData storage t = troves[tokenId];
         if (t.status != Status.Active) revert TroveNotActive();
 
-        _applyPendingRewards(owner);
+        _applyPendingRewards(tokenId);
 
         if (collDelta > 0) t.coll += uint256(collDelta);
         else if (collDelta < 0) t.coll -= uint256(-collDelta);
@@ -137,29 +156,31 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         t.rewardSnapColl = L_coll;
         t.rewardSnapDebt = L_debt;
 
-        if (msg.sender == a.redemptionHelper) {
-            uint256 newNICR = LiquityMath._computeNominalCR(t.coll, t.debt);
-            ISortedTroves(a.sortedTroves).reInsert(owner, newNICR, address(0), address(0));
-        }
-
-        emit TroveUpdated(owner, t.debt, t.coll, t.stake, 1);
+        emit TroveUpdated(tokenId, t.debt, t.coll, t.stake, 1);
     }
 
     function closeTrove(address owner) external override onlyBOorRH nonReentrant {
-        IAddressesRegistry.Addresses memory a = registry.addresses();
-        TroveData storage t = troves[owner];
+        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        if (tokenId == 0) revert TroveNotActive();
+        
+        TroveData storage t = troves[tokenId];
         if (t.status != Status.Active) revert TroveNotActive();
 
         totalStakes -= t.stake;
         t.stake      = 0;
-        t.status     = (msg.sender == a.redemptionHelper)
+        
+        IAddressesRegistry.Addresses memory a = registry.addresses();
+        t.status = (msg.sender == a.redemptionHelper)
             ? Status.ClosedByRedemption
             : Status.ClosedByOwner;
 
-        _removeTroveOwner(owner);
+        _removeTokenId(tokenId);
+        
+        // Burn the NFT
+        troveNFT.burn(tokenId);
 
-        emit TroveClosed(owner, t.status);
-        emit TroveUpdated(owner, 0, 0, 0, 2);
+        emit TroveClosed(tokenId, t.status);
+        emit TroveUpdated(tokenId, 0, 0, 0, 2);
     }
 
     // ─── Liquidation ──────────────────────────────────────────────────────────
@@ -184,11 +205,13 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         bool    liquidatedAny;
 
         for (uint256 i = 0; i < owners.length; i++) {
-            address owner = owners[i];
-            TroveData storage t = troves[owner];
+            uint256 tokenId = troveNFT.ownerToTokenId(owners[i]);
+            if (tokenId == 0) continue;
+            
+            TroveData storage t = troves[tokenId];
             if (t.status != Status.Active) continue;
 
-            _applyPendingRewards(owner);
+            _applyPendingRewards(tokenId);
 
             uint256 icr = LiquityMath._computeCR(t.coll, t.debt, price);
             if (icr >= Constants.MCR) continue;
@@ -216,13 +239,14 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
                 surplusColl     = 0;
             }
 
-            // Remove Trove O(1)
             totalStakes -= t.stake;
             t.stake      = 0;
             t.status     = Status.ClosedByLiquidation;
-            _removeTroveOwner(owner);
+            _removeTokenId(tokenId);
+            
+            // Burn NFT
+            troveNFT.burn(tokenId);
 
-            // Redistribute 20% holder share via DefaultPool
             if (collForHolders > 0 && totalStakes > 0) {
                 uint256 debtForHolders = (debt * collForHolders) / coll;
 
@@ -234,7 +258,6 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
                 L_debt += (debtForHolders * Constants.DECIMAL_PRECISION) / totalStakes;
             }
 
-            // LP portion + 80% treasury surplus → treasury
             uint256 toTreasury = collForLP + collForTreasury;
             if (toTreasury > 0) {
                 IActivePool(a.activePool).sendCollateral(a.treasury, toTreasury);
@@ -245,8 +268,8 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
             totalSurplus        += surplusColl;
             liquidatedAny        = true;
 
-            emit TroveLiquidated(owner, debt, coll, 0);
-            emit TroveUpdated(owner, 0, 0, 0, 4);
+            emit TroveLiquidated(tokenId, debt, coll, 0);
+            emit TroveUpdated(tokenId, 0, 0, 0, 4);
         }
 
         if (!liquidatedAny) revert NothingToLiquidate();
@@ -255,7 +278,7 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
 
     // ─── Redemption stub ──────────────────────────────────────────────────────
 
-    function redeem(uint256, address, uint256) external override onlyRedemptionHelper returns (uint256) {
+    function redeem(uint256, address, uint256) external override returns (uint256) {
         revert NotAuthorized();
     }
 
@@ -265,10 +288,10 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     function getRedemptionFeeRate() external pure override returns (uint256) { return Constants.REDEMPTION_FEE_FLOOR; }
     function getRedemptionRateWithDecay() external pure override returns (uint256) { return Constants.REDEMPTION_FEE_FLOOR; }
 
-    // ─── Redistribution ───────────────────────────────────────────────────────
+    // ─── Internal ─────────────────────────────────────────────────────────────
 
-    function _applyPendingRewards(address owner) internal {
-        TroveData storage t = troves[owner];
+    function _applyPendingRewards(uint256 tokenId) internal {
+        TroveData storage t = troves[tokenId];
         if (t.status != Status.Active) return;
 
         uint256 pendingColl = (t.stake * (L_coll - t.rewardSnapColl)) / Constants.DECIMAL_PRECISION;
@@ -290,24 +313,26 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
 
     function _computeStake(uint256 coll) internal pure returns (uint256) { return coll; }
 
-    // O(1) swap-and-pop removal
-    function _removeTroveOwner(address owner) internal {
-        uint256 idx       = _troveIndex[owner];
-        uint256 lastIdx   = troveOwners.length - 1;
-        address lastOwner = troveOwners[lastIdx];
+    function _removeTokenId(uint256 tokenId) internal {
+        uint256 idx       = _tokenIdIndex[tokenId];
+        uint256 lastIdx   = _activeTokenIds.length - 1;
+        uint256 lastToken = _activeTokenIds[lastIdx];
 
-        troveOwners[idx]       = lastOwner;
-        _troveIndex[lastOwner] = idx;
+        _activeTokenIds[idx]     = lastToken;
+        _tokenIdIndex[lastToken] = idx;
 
-        troveOwners.pop();
-        delete _troveIndex[owner];
+        _activeTokenIds.pop();
+        delete _tokenIdIndex[tokenId];
     }
 
     function _getEntireDebtAndColl(address owner)
         internal view
         returns (uint256 debt, uint256 coll)
     {
-        TroveData storage t = troves[owner];
+        uint256 tokenId = troveNFT.ownerToTokenId(owner);
+        if (tokenId == 0) return (0, 0);
+        
+        TroveData storage t = troves[tokenId];
 
         uint256 pendingColl = (t.stake * (L_coll - t.rewardSnapColl)) / Constants.DECIMAL_PRECISION;
         uint256 pendingDebt = (t.stake * (L_debt - t.rewardSnapDebt)) / Constants.DECIMAL_PRECISION;

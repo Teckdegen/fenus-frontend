@@ -15,4 +15,5 @@ export { HintHelpers__factory } from "./HintHelpers__factory";
 export { RedemptionHelper__factory } from "./RedemptionHelper__factory";
 export { SortedTroves__factory } from "./SortedTroves__factory";
 export { TroveManager__factory } from "./TroveManager__factory";
+export { TroveNFT__factory } from "./TroveNFT__factory";
 export { WzkLTC__factory } from "./WzkLTC__factory";

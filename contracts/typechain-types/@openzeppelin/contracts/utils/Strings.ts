@@ -3,9 +3,7 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BytesLike,
   FunctionFragment,
-  Result,
   Interface,
   ContractRunner,
   ContractMethod,
@@ -16,22 +14,15 @@ import type {
   TypedDeferredTopicFilter,
   TypedEventLog,
   TypedListener,
-  TypedContractMethod,
-} from "../../common";
+} from "../../../common";
 
-export interface IDIAOracleInterface extends Interface {
-  getFunction(nameOrSignature: "getValue"): FunctionFragment;
+export interface StringsInterface extends Interface {}
 
-  encodeFunctionData(functionFragment: "getValue", values: [string]): string;
-
-  decodeFunctionResult(functionFragment: "getValue", data: BytesLike): Result;
-}
-
-export interface IDIAOracle extends BaseContract {
-  connect(runner?: ContractRunner | null): IDIAOracle;
+export interface Strings extends BaseContract {
+  connect(runner?: ContractRunner | null): Strings;
   waitForDeployment(): Promise<this>;
 
-  interface: IDIAOracleInterface;
+  interface: StringsInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -70,23 +61,9 @@ export interface IDIAOracle extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  getValue: TypedContractMethod<
-    [key: string],
-    [[bigint, bigint] & { price: bigint; timestamp: bigint }],
-    "view"
-  >;
-
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
-
-  getFunction(
-    nameOrSignature: "getValue"
-  ): TypedContractMethod<
-    [key: string],
-    [[bigint, bigint] & { price: bigint; timestamp: bigint }],
-    "view"
-  >;
 
   filters: {};
 }

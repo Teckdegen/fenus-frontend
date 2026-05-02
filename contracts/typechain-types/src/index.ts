@@ -17,4 +17,5 @@ export type { HintHelpers } from "./HintHelpers";
 export type { RedemptionHelper } from "./RedemptionHelper";
 export type { SortedTroves } from "./SortedTroves";
 export type { TroveManager } from "./TroveManager";
+export type { TroveNFT } from "./TroveNFT";
 export type { WzkLTC } from "./WzkLTC";

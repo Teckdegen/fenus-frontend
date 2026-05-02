@@ -11,35 +11,28 @@ import {IActivePool, ICollSurplusPool} from "./interfaces/IPools.sol";
 import {IFnUSD} from "./interfaces/IFnUSD.sol";
 import {IPriceFeed} from "./interfaces/IPriceFeed.sol";
 import {ISortedTroves} from "./interfaces/ISortedTroves.sol";
+import {TroveNFT} from "./TroveNFT.sol";
 import {Constants} from "./Constants.sol";
 import {LiquityMath} from "./libraries/LiquityMath.sol";
 import {Decimals} from "./libraries/Decimals.sol";
 
-// BorrowerOperations — user-facing entry point for all Trove management.
-//
-// Decimal boundary:
-//   WzkLTC ERC20 surface = 8 decimals  (collAmount8  — used only for safeTransferFrom/safeTransfer)
-//   Protocol internal    = 18 decimals (collAmount18 — used for all math, TroveManager, ActivePool)
-//   FnUSD ERC20 surface  = 6 decimals  (fnUSDAmount6 — used for balanceOf checks)
-//   FnUSD internal       = 18 decimals (fnUSDAmount18 — used for mint/burn/math)
-//
-//   COLL_SCALE = 1e10  converts 8-dec → 18-dec
-//   ActivePool.sendCollateral(to, amount18) — ActivePool scales back to 8-dec for the actual transfer
+// BorrowerOperations — NFT-based trove management.
+// Gas savings: no address arrays, minimal storage writes.
 contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IAddressesRegistry public immutable registry;
+    TroveNFT public immutable troveNFT;
 
-    // WzkLTC is 8 decimals; protocol uses 18 internally. Scale factor = 1e10.
     uint256 private constant COLL_SCALE    = 1e10;
     uint256 private constant OPEN_ICR_BUFFER = 135e16; // 135%
 
-    event TroveOpened(address indexed owner, uint256 coll18, uint256 debt18);
+    event TroveOpened(address indexed owner, uint256 indexed tokenId, uint256 coll18, uint256 debt18);
     event CollateralAdded(address indexed owner, uint256 amount18);
     event CollateralWithdrawn(address indexed owner, uint256 amount18);
     event FnUSDBorrowed(address indexed owner, uint256 amount18);
     event FnUSDRepaid(address indexed owner, uint256 amount18);
-    event TroveClosed(address indexed owner);
+    event TroveClosed(address indexed owner, uint256 indexed tokenId);
     event CollateralClaimed(address indexed owner, uint256 amount);
 
     error TroveNotActive();
@@ -50,14 +43,13 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
     error InsufficientFnUSDBalance();
     error PriceFeedDown();
 
-    constructor(IAddressesRegistry _registry) {
+    constructor(IAddressesRegistry _registry, TroveNFT _troveNFT) {
         registry = _registry;
+        troveNFT = _troveNFT;
     }
 
     // ─── openTrove ────────────────────────────────────────────────────────────
 
-    // collAmount: 8-dec WzkLTC units (what the user approves)
-    // fnUSDAmount6: 6-dec FnUSD units
     function openTrove(
         uint256 collAmount,   // 8-dec
         uint256 fnUSDAmount6, // 6-dec
@@ -74,7 +66,6 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
             revert TroveAlreadyExists();
         }
 
-        // Scale collateral to 18-dec for all internal math
         uint256 coll18 = collAmount * COLL_SCALE;
 
         uint256 fnUSDAmount18 = Decimals.to18(fnUSDAmount6);
@@ -87,13 +78,10 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         uint256 icr = LiquityMath._computeCR(coll18, netDebt, price);
         if (icr < OPEN_ICR_BUFFER) revert BelowOpenICR(icr, OPEN_ICR_BUFFER);
 
-        // Pull 8-dec tokens from user into ActivePool
         IERC20(a.collateralToken).safeTransferFrom(msg.sender, a.activePool, collAmount);
-        // Credit 18-dec amount to ActivePool accounting
         IActivePool(a.activePool).creditCollateral(coll18);
         IActivePool(a.activePool).increaseDebt(netDebt);
 
-        // Register Trove with 18-dec collateral
         tm.openTrove(msg.sender, coll18, netDebt);
 
         uint256 nicr = LiquityMath._computeNominalCR(coll18, netDebt);
@@ -102,13 +90,14 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         IFnUSD(a.fnUSD).mint(msg.sender, fnUSDAmount18);
         if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18);
 
-        emit TroveOpened(msg.sender, coll18, netDebt);
+        uint256 tokenId = troveNFT.ownerToTokenId(msg.sender);
+        emit TroveOpened(msg.sender, tokenId, coll18, netDebt);
     }
 
     // ─── addColl ──────────────────────────────────────────────────────────────
 
     function addColl(
-        uint256 collAmount,   // 8-dec
+        uint256 collAmount,
         address upperHint,
         address lowerHint
     ) external override nonReentrant {
@@ -129,7 +118,7 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
     // ─── withdrawColl ─────────────────────────────────────────────────────────
 
     function withdrawColl(
-        uint256 collAmount,   // 8-dec
+        uint256 collAmount,
         address upperHint,
         address lowerHint
     ) external override nonReentrant {
@@ -142,7 +131,6 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         ITroveManager(a.troveManager).adjustTrove(msg.sender, -int256(coll18), 0);
         _requireICRAboveBuffer(a);
 
-        // ActivePool sends 18-dec internally; it scales back to 8-dec for the token transfer
         IActivePool(a.activePool).sendCollateral(msg.sender, coll18);
         _reInsert(a, upperHint, lowerHint);
 
@@ -200,9 +188,8 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         emit FnUSDRepaid(msg.sender, amount18);
     }
 
-    // closeTrove — burn recorded trove debt only (Liquity-style): pending
-    // redistribution debt is forgiven on close; collateral still includes pending
-    // redistribution gains via getEntireDebtAndColl (coll only).
+    // ─── closeTrove ───────────────────────────────────────────────────────────
+
     function closeTrove() external override nonReentrant {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         _requireActive(a);
@@ -211,16 +198,21 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         uint256 debt = tm.getTroveDebt(msg.sender);
         (, uint256 coll18) = tm.getEntireDebtAndColl(msg.sender);
 
-        uint256 repay6 = Decimals.from18RoundUp(debt);
-        if (IFnUSD(a.fnUSD).balanceOf(msg.sender) < repay6) revert InsufficientFnUSDBalance();
+        // Only require FnUSD if there's debt to repay
+        if (debt > 0) {
+            uint256 repay6 = Decimals.from18RoundUp(debt);
+            if (IFnUSD(a.fnUSD).balanceOf(msg.sender) < repay6) revert InsufficientFnUSDBalance();
+            IFnUSD(a.fnUSD).burn(msg.sender, debt);
+            IActivePool(a.activePool).decreaseDebt(debt);
+        }
 
-        IFnUSD(a.fnUSD).burn(msg.sender, debt);
+        uint256 tokenId = troveNFT.ownerToTokenId(msg.sender);
+        
         tm.closeTrove(msg.sender);
         ISortedTroves(a.sortedTroves).remove(msg.sender);
-        IActivePool(a.activePool).decreaseDebt(debt);
         IActivePool(a.activePool).sendCollateral(msg.sender, coll18);
 
-        emit TroveClosed(msg.sender);
+        emit TroveClosed(msg.sender, tokenId);
     }
 
     // ─── claimCollateral ──────────────────────────────────────────────────────

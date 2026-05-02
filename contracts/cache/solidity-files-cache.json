@@ -2,18 +2,18 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\ActivePool.sol": {
-      "lastModificationDate": 1777674235934,
+      "lastModificationDate": 1777744273156,
       "contentHash": "7fdb3a368efab4f4bed2cfdbe9ab5357",
       "sourceName": "src/ActivePool.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -43,56 +43,19 @@
         "ActivePool"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IAddressesRegistry.sol": {
-      "lastModificationDate": 1777581592321,
-      "contentHash": "853d950fb168470914b403bb574d8122",
-      "sourceName": "src/interfaces/IAddressesRegistry.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "IAddressesRegistry"
-      ]
-    },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IPools.sol": {
-      "lastModificationDate": 1777558173023,
+      "lastModificationDate": 1777744273275,
       "contentHash": "4238b0e2397558b39672a66c159e2fc4",
       "sourceName": "src/interfaces/IPools.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -120,19 +83,56 @@
         "IGasPool"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\IERC20.sol": {
-      "lastModificationDate": 1777630133141,
-      "contentHash": "9261adf6457863de3e9892f51317ec89",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IAddressesRegistry.sol": {
+      "lastModificationDate": 1777744273259,
+      "contentHash": "853d950fb168470914b403bb574d8122",
+      "sourceName": "src/interfaces/IAddressesRegistry.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "IAddressesRegistry"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\IERC20.sol": {
+      "lastModificationDate": 1777630133141,
+      "contentHash": "9261adf6457863de3e9892f51317ec89",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
           "outputSelection": {
             "*": {
               "*": [
@@ -162,14 +162,14 @@
       "contentHash": "bf8e9c3398d381dc66c5302267927386",
       "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -202,14 +202,14 @@
       "contentHash": "a7fd0f05e36b0d0a21c75340c9c639ec",
       "sourceName": "@openzeppelin/contracts/interfaces/IERC1363.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -242,14 +242,14 @@
       "contentHash": "68620db2da7583d9a4919096ac77f577",
       "sourceName": "@openzeppelin/contracts/interfaces/IERC20.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -279,14 +279,14 @@
       "contentHash": "947853028399b7de34bcc3704ee06e99",
       "sourceName": "@openzeppelin/contracts/interfaces/IERC165.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -316,14 +316,14 @@
       "contentHash": "7074c93b1ea0a122063f26ddd1db1032",
       "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -348,19 +348,19 @@
         "IERC165"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\extensions\\IERC20Metadata.sol": {
-      "lastModificationDate": 1777630133158,
-      "contentHash": "513778b30d2750f5d2b9b19bbcf748a5",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721.sol": {
+      "lastModificationDate": 1777630133367,
+      "contentHash": "f62e11dbd302e17a5621a1438f4e054c",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -378,28 +378,28 @@
         }
       },
       "imports": [
-        "../IERC20.sol"
+        "../../utils/introspection/IERC165.sol"
       ],
       "versionPragmas": [
         ">=0.6.2"
       ],
       "artifacts": [
-        "IERC20Metadata"
+        "IERC721"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol": {
-      "lastModificationDate": 1777630132271,
-      "contentHash": "d15c4d05583536e080f1960ab282772d",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\extensions\\IERC721Metadata.sol": {
+      "lastModificationDate": 1777630133388,
+      "contentHash": "136c64eca25bcb8a68f43ac6605559f9",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -417,16 +417,58 @@
         }
       },
       "imports": [
-        "./IERC20.sol",
-        "./extensions/IERC20Metadata.sol",
+        "../IERC721.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.2"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\ERC721.sol": {
+      "lastModificationDate": 1777630132493,
+      "contentHash": "ad5144b924800b6f617bc84e4f1fb556",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC721.sol",
+        "./extensions/IERC721Metadata.sol",
+        "./utils/ERC721Utils.sol",
         "../../utils/Context.sol",
+        "../../utils/Strings.sol",
+        "../../utils/introspection/ERC165.sol",
         "../../interfaces/draft-IERC6093.sol"
       ],
       "versionPragmas": [
-        "^0.8.20"
+        "^0.8.24"
       ],
       "artifacts": [
-        "ERC20"
+        "ERC721"
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
@@ -434,14 +476,14 @@
       "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -471,14 +513,14 @@
       "contentHash": "bcc76f4747d56c28c40ae272ef3470a6",
       "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -505,19 +547,19 @@
         "IERC721Errors"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\WzkLTC.sol": {
-      "lastModificationDate": 1777620217617,
-      "contentHash": "30d6e8e2564556246d43599d03361f8e",
-      "sourceName": "src/WzkLTC.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Strings.sol": {
+      "lastModificationDate": 1777630133725,
+      "contentHash": "d2fa243e766a193585b7e9bf36898d80",
+      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -535,30 +577,31 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+        "./math/Math.sol",
+        "./math/SafeCast.sol",
+        "./math/SignedMath.sol",
+        "./Bytes.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
       ],
       "artifacts": [
-        "WzkLTC"
+        "Strings"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {
-      "lastModificationDate": 1777630133598,
-      "contentHash": "6e5efb502dd6652d12ad15eea2c5bdf4",
-      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\introspection\\ERC165.sol": {
+      "lastModificationDate": 1777630132205,
+      "contentHash": "0906d06dca25210d4696dcef6dad2909",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -576,28 +619,186 @@
         }
       },
       "imports": [
-        "./StorageSlot.sol"
+        "./IERC165.sol"
       ],
       "versionPragmas": [
         "^0.8.20"
       ],
       "artifacts": [
-        "ReentrancyGuard"
+        "ERC165"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\StorageSlot.sol": {
-      "lastModificationDate": 1777630133719,
-      "contentHash": "e656d64c4ce918f3d13030b91c935134",
-      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\utils\\ERC721Utils.sol": {
+      "lastModificationDate": 1777630132567,
+      "contentHash": "eaad77accc6e32b20dfbbbe9813e1dce",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/utils/ERC721Utils.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC721Receiver.sol",
+        "../../../interfaces/draft-IERC6093.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC721Utils"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Bytes.sol": {
+      "lastModificationDate": 1777630131334,
+      "contentHash": "3b32ea3a40a2d708f61e7161f081ca93",
+      "sourceName": "@openzeppelin/contracts/utils/Bytes.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./math/Math.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Bytes"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\Math.sol": {
+      "lastModificationDate": 1777630133467,
+      "contentHash": "5b8c6935ac52b7494df19d6feb38f5cc",
+      "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Panic.sol",
+        "./SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Math"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SignedMath.sol": {
+      "lastModificationDate": 1777630133654,
+      "contentHash": "ae3528afb8bdb0a7dcfba5b115ee8074",
+      "sourceName": "@openzeppelin/contracts/utils/math/SignedMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./SafeCast.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SignedMath"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SafeCast.sol": {
+      "lastModificationDate": 1777630133631,
+      "contentHash": "f28a38cd37f4225d0a91fb5405dd850f",
+      "sourceName": "@openzeppelin/contracts/utils/math/SafeCast.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
           "outputSelection": {
             "*": {
               "*": [
@@ -619,70 +820,22 @@
         "^0.8.20"
       ],
       "artifacts": [
-        "StorageSlot"
+        "SafeCast"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\TroveManager.sol": {
-      "lastModificationDate": 1777683254915,
-      "contentHash": "4cfd9f725eb17c4993d774331a6adfca",
-      "sourceName": "src/TroveManager.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Panic.sol": {
+      "lastModificationDate": 1777630133566,
+      "contentHash": "2133dc13536b4a6a98131e431fac59e1",
+      "sourceName": "@openzeppelin/contracts/utils/Panic.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "./interfaces/ITroveManager.sol",
-        "./interfaces/IAddressesRegistry.sol",
-        "./interfaces/IPools.sol",
-        "./interfaces/IFnUSD.sol",
-        "./interfaces/IPriceFeed.sol",
-        "./interfaces/ISortedTroves.sol",
-        "./Constants.sol",
-        "./libraries/LiquityMath.sol",
-        "./libraries/Decimals.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "TroveManager"
-      ]
-    },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\ITroveManager.sol": {
-      "lastModificationDate": 1777683199073,
-      "contentHash": "1cfb165b1c0d6f57cac626ce53e90db9",
-      "sourceName": "src/interfaces/ITroveManager.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -701,64 +854,25 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.24"
+        "^0.8.20"
       ],
       "artifacts": [
-        "ITroveManager"
+        "Panic"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IFnUSD.sol": {
-      "lastModificationDate": 1777557846010,
-      "contentHash": "7c8355877a9d42db36429ecb298a22bc",
-      "sourceName": "src/interfaces/IFnUSD.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC721\\IERC721Receiver.sol": {
+      "lastModificationDate": 1777630133395,
+      "contentHash": "d61660a41ce200e99816e4734f7fd202",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "IFnUSD"
-      ]
-    },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\ISortedTroves.sol": {
-      "lastModificationDate": 1777557950058,
-      "contentHash": "cfcf8bfd1995487a71f1fe6cfd9b420d",
-      "sourceName": "src/interfaces/ISortedTroves.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -777,99 +891,25 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.24"
+        ">=0.5.0"
       ],
       "artifacts": [
-        "ISortedTroves"
+        "IERC721Receiver"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\Constants.sol": {
-      "lastModificationDate": 1777683187425,
-      "contentHash": "86423c25ba2b6b1ed482171e052f5ec3",
-      "sourceName": "src/Constants.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol": {
+      "lastModificationDate": 1777630132271,
+      "contentHash": "d15c4d05583536e080f1960ab282772d",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "Constants"
-      ]
-    },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IPriceFeed.sol": {
-      "lastModificationDate": 1777557894464,
-      "contentHash": "968b858641f5c8ac8e4a56eeb771ac74",
-      "sourceName": "src/interfaces/IPriceFeed.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "IPriceFeed"
-      ]
-    },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\libraries\\LiquityMath.sol": {
-      "lastModificationDate": 1777620217442,
-      "contentHash": "fda70db157a2d43f7bbc8755f6a62d47",
-      "sourceName": "src/libraries/LiquityMath.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -887,28 +927,31 @@
         }
       },
       "imports": [
-        "../Constants.sol"
+        "./IERC20.sol",
+        "./extensions/IERC20Metadata.sol",
+        "../../utils/Context.sol",
+        "../../interfaces/draft-IERC6093.sol"
       ],
       "versionPragmas": [
-        "^0.8.24"
+        "^0.8.20"
       ],
       "artifacts": [
-        "LiquityMath"
+        "ERC20"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\libraries\\Decimals.sol": {
-      "lastModificationDate": 1777620217439,
-      "contentHash": "8966d04c81b6e32a7305bbda3804c836",
-      "sourceName": "src/libraries/Decimals.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\extensions\\IERC20Metadata.sol": {
+      "lastModificationDate": 1777630133158,
+      "contentHash": "513778b30d2750f5d2b9b19bbcf748a5",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -926,28 +969,28 @@
         }
       },
       "imports": [
-        "../Constants.sol"
+        "../IERC20.sol"
       ],
       "versionPragmas": [
-        "^0.8.24"
+        ">=0.6.2"
       ],
       "artifacts": [
-        "Decimals"
+        "IERC20Metadata"
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\RedemptionHelper.sol": {
-      "lastModificationDate": 1777633140226,
+      "lastModificationDate": 1777744273231,
       "contentHash": "6669cb276fda6d0b8b1ee8d37d5642a9",
       "sourceName": "src/RedemptionHelper.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -985,19 +1028,130 @@
         "RedemptionHelper"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\SortedTroves.sol": {
-      "lastModificationDate": 1777620217426,
-      "contentHash": "37b6c7efcea359cb93678d034a5ad471",
-      "sourceName": "src/SortedTroves.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\ISortedTroves.sol": {
+      "lastModificationDate": 1777744273284,
+      "contentHash": "cfcf8bfd1995487a71f1fe6cfd9b420d",
+      "sourceName": "src/interfaces/ISortedTroves.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "ISortedTroves"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IPriceFeed.sol": {
+      "lastModificationDate": 1777744273279,
+      "contentHash": "968b858641f5c8ac8e4a56eeb771ac74",
+      "sourceName": "src/interfaces/IPriceFeed.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "IPriceFeed"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\ITroveManager.sol": {
+      "lastModificationDate": 1777744273291,
+      "contentHash": "1cfb165b1c0d6f57cac626ce53e90db9",
+      "sourceName": "src/interfaces/ITroveManager.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "ITroveManager"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IFnUSD.sol": {
+      "lastModificationDate": 1777744273269,
+      "contentHash": "7c8355877a9d42db36429ecb298a22bc",
+      "sourceName": "src/interfaces/IFnUSD.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
           "outputSelection": {
             "*": {
               "*": [
@@ -1015,30 +1169,65 @@
         }
       },
       "imports": [
-        "./interfaces/ISortedTroves.sol",
-        "./interfaces/ITroveManager.sol",
-        "./interfaces/IAddressesRegistry.sol"
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
       ],
       "artifacts": [
-        "SortedTroves"
+        "IFnUSD"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\HintHelpers.sol": {
-      "lastModificationDate": 1777620217420,
-      "contentHash": "d96fa4976007c192b229f1b29ce6bbef",
-      "sourceName": "src/HintHelpers.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\Constants.sol": {
+      "lastModificationDate": 1777744273187,
+      "contentHash": "86423c25ba2b6b1ed482171e052f5ec3",
+      "sourceName": "src/Constants.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Constants"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\libraries\\Decimals.sol": {
+      "lastModificationDate": 1777744273297,
+      "contentHash": "8966d04c81b6e32a7305bbda3804c836",
+      "sourceName": "src/libraries/Decimals.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
           "outputSelection": {
             "*": {
               "*": [
@@ -1056,31 +1245,272 @@
         }
       },
       "imports": [
-        "./interfaces/IAddressesRegistry.sol",
+        "../Constants.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "Decimals"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\libraries\\LiquityMath.sol": {
+      "lastModificationDate": 1777744273304,
+      "contentHash": "fda70db157a2d43f7bbc8755f6a62d47",
+      "sourceName": "src/libraries/LiquityMath.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Constants.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "LiquityMath"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\ReentrancyGuard.sol": {
+      "lastModificationDate": 1777630133598,
+      "contentHash": "6e5efb502dd6652d12ad15eea2c5bdf4",
+      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./StorageSlot.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ReentrancyGuard"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\StorageSlot.sol": {
+      "lastModificationDate": 1777630133719,
+      "contentHash": "e656d64c4ce918f3d13030b91c935134",
+      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "StorageSlot"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\WzkLTC.sol": {
+      "lastModificationDate": 1777744729572,
+      "contentHash": "a1819aa7afdb4d3a4a1c586f0f1e85d6",
+      "sourceName": "src/WzkLTC.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "WzkLTC"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\TroveManager.sol": {
+      "lastModificationDate": 1777744273242,
+      "contentHash": "e901394ce36ae56731944acd81ef8ff6",
+      "sourceName": "src/TroveManager.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
         "./interfaces/ITroveManager.sol",
+        "./interfaces/IAddressesRegistry.sol",
+        "./interfaces/IPools.sol",
+        "./interfaces/IFnUSD.sol",
+        "./interfaces/IPriceFeed.sol",
         "./interfaces/ISortedTroves.sol",
+        "./TroveNFT.sol",
+        "./Constants.sol",
         "./libraries/LiquityMath.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
       ],
       "artifacts": [
-        "HintHelpers"
+        "TroveManager"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\PriceFeed.sol": {
-      "lastModificationDate": 1777665089299,
-      "contentHash": "1552884a42ec3bea2b548a04e1efe931",
-      "sourceName": "src/PriceFeed.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\TroveNFT.sol": {
+      "lastModificationDate": 1777744273248,
+      "contentHash": "432e0218a713b698a15f8c166133e9ac",
+      "sourceName": "src/TroveNFT.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "./interfaces/IAddressesRegistry.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "TroveNFT"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\PriceFeed.sol": {
+      "lastModificationDate": 1777744273227,
+      "contentHash": "1552884a42ec3bea2b548a04e1efe931",
+      "sourceName": "src/PriceFeed.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
           "outputSelection": {
             "*": {
               "*": [
@@ -1110,18 +1540,18 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\BorrowerOperations.sol": {
-      "lastModificationDate": 1777684128083,
-      "contentHash": "fa92549b060f8357be603a4466c0ff47",
+      "lastModificationDate": 1777744273167,
+      "contentHash": "9edc381c637ccd4ae1bae479c0ced6a2",
       "sourceName": "src/BorrowerOperations.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -1149,6 +1579,7 @@
         "./interfaces/IFnUSD.sol",
         "./interfaces/IPriceFeed.sol",
         "./interfaces/ISortedTroves.sol",
+        "./TroveNFT.sol",
         "./Constants.sol",
         "./libraries/LiquityMath.sol",
         "./libraries/Decimals.sol"
@@ -1161,18 +1592,18 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\interfaces\\IBorrowerOperations.sol": {
-      "lastModificationDate": 1777683207132,
+      "lastModificationDate": 1777744273264,
       "contentHash": "3cb2be7f0bffdc5fa0a1d88052b3777a",
       "sourceName": "src/interfaces/IBorrowerOperations.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -1198,18 +1629,18 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\FnUSD.sol": {
-      "lastModificationDate": 1777712143109,
+      "lastModificationDate": 1777744273205,
       "contentHash": "e894b7cfe6de31cdad3a3072bcdf0595",
       "sourceName": "src/FnUSD.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -1239,19 +1670,102 @@
         "FnUSD"
       ]
     },
-    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\GasPool.sol": {
-      "lastModificationDate": 1777621329700,
-      "contentHash": "acac946d13e3c16c92863bd693565883",
-      "sourceName": "src/GasPool.sol",
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\SortedTroves.sol": {
+      "lastModificationDate": 1777744273236,
+      "contentHash": "37b6c7efcea359cb93678d034a5ad471",
+      "sourceName": "src/SortedTroves.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/ISortedTroves.sol",
+        "./interfaces/ITroveManager.sol",
+        "./interfaces/IAddressesRegistry.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "SortedTroves"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\HintHelpers.sol": {
+      "lastModificationDate": 1777744273220,
+      "contentHash": "d96fa4976007c192b229f1b29ce6bbef",
+      "sourceName": "src/HintHelpers.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interfaces/IAddressesRegistry.sol",
+        "./interfaces/ITroveManager.sol",
+        "./interfaces/ISortedTroves.sol",
+        "./libraries/LiquityMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "HintHelpers"
+      ]
+    },
+    "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\GasPool.sol": {
+      "lastModificationDate": 1777744273211,
+      "contentHash": "acac946d13e3c16c92863bd693565883",
+      "sourceName": "src/GasPool.sol",
+      "solcConfig": {
+        "version": "0.8.26",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "cancun",
+          "viaIR": true,
           "outputSelection": {
             "*": {
               "*": [
@@ -1280,18 +1794,18 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\DefaultPool.sol": {
-      "lastModificationDate": 1777674328468,
+      "lastModificationDate": 1777744273192,
       "contentHash": "4354e258c35569f4eb4aa2346094eec5",
       "sourceName": "src/DefaultPool.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -1323,18 +1837,18 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\CollSurplusPool.sol": {
-      "lastModificationDate": 1777620217406,
+      "lastModificationDate": 1777744273181,
       "contentHash": "3d3d6a34be020aa03b6d1d69b97d8d69",
       "sourceName": "src/CollSurplusPool.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -1365,18 +1879,18 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\CollateralRegistry.sol": {
-      "lastModificationDate": 1777620217409,
+      "lastModificationDate": 1777744273174,
       "contentHash": "da1a4f249dda6ec3c9998ba31b7f8432",
       "sourceName": "src/CollateralRegistry.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [
@@ -1405,18 +1919,18 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\AddressesRegistry.sol": {
-      "lastModificationDate": 1777620217402,
+      "lastModificationDate": 1777744273162,
       "contentHash": "f68cbc755a91b56d223ad9ef48e6d4f3",
       "sourceName": "src/AddressesRegistry.sol",
       "solcConfig": {
-        "version": "0.8.24",
+        "version": "0.8.26",
         "settings": {
           "optimizer": {
             "enabled": true,
             "runs": 200
           },
+          "evmVersion": "cancun",
           "viaIR": true,
-          "evmVersion": "paris",
           "outputSelection": {
             "*": {
               "*": [

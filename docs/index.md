@@ -29,6 +29,7 @@ Read in order from top to bottom, or jump to a topic.
 | [Open a Trove](trove/opening-a-trove.md) | Deposit collateral and mint FnUSD |
 | [Collateral: add & remove](trove/managing-collateral.md) | Increase or decrease wzkLTC in your Trove |
 | [Borrow & repay FnUSD](trove/borrowing-and-repaying.md) | Increase debt or pay it down |
+| [Transfer your Trove](trove/transferring-your-trove.md) | Transfer your entire position to another address |
 | [Close your Trove](trove/closing-a-trove.md) | Repay everything and withdraw collateral |
 | [Collateral ratio & safety](trove/collateral-ratio-explained.md) | CR, liquidation price, and UI labels |
 | [Pools](pools-and-liquidity.md) | External liquidity (e.g. Addax) |
@@ -40,12 +41,13 @@ Read in order from top to bottom, or jump to a topic.
 
 | Term | Meaning |
 |------|---------|
-| **Trove** | Your personal loan position: collateral locked + FnUSD owed |
-| **wzkLTC** | Wrapped zkLitecoin — the ERC-20 collateral token you deposit |
+| **Trove** | Your personal loan position: collateral locked + FnUSD owed. Represented as an NFT you own |
+| **Trove NFT** | The ERC721 token representing your Trove position. Transferring this NFT transfers your entire position |
+| **wzkLTC** | Wrapped zkLitecoin - the ERC-20 collateral token you deposit |
 | **FnUSD** | Stablecoin you borrow and must repay to unwind |
-| **Collateral ratio (CR)** | Value of your collateral divided by your debt — **FENUS uses 135%** as what you must maintain; higher is safer |
+| **Collateral ratio (CR)** | Value of your collateral divided by your debt - **FENUS uses 135%** as what you must maintain; higher is safer |
 | **Liquidation** | If CR falls too low, the position can be cleared by the protocol |
-| **Redistribution / Default Pool** | After liquidations, Trove holders can **earn fees** from that activity — see [Dashboard](dashboard-and-balances.md#pending-redistribution-gains) |
+| **Redistribution / Default Pool** | After liquidations, Trove holders can **earn fees** from that activity - see [Dashboard](dashboard-and-balances.md#pending-redistribution-gains) |
 
 ---
 

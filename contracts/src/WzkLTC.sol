@@ -5,20 +5,20 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-// WzkLTC — Wrapped zkLitecoin.
+// WzkLTC — Wrapped token for the protocol.
 //
 // Two ways to get WzkLTC:
 //
 //   1. Bridge (normal users):
-//      Users send native zkLTC to this contract via wrap(). They receive
-//      WzkLTC 1:1. They can unwrap back to zkLTC at any time via unwrap().
+//      Users send native tokens to this contract via wrap(). They receive
+//      WzkLTC 1:1. They can unwrap back at any time via unwrap().
 //
 //   2. Admin mint (faucet / testnet):
 //      The admin can call adminMint() to mint any amount to any address.
 //      Used to fund the testnet faucet. On mainnet this should be renounced
 //      or transferred to a multisig after the bridge is live.
 //
-// Decimals: 8 — matches native Litecoin precision.
+// Decimals: 8 — standard precision.
 contract WzkLTC is ERC20, ReentrancyGuard {
     using SafeERC20 for ERC20;
 
@@ -41,7 +41,7 @@ contract WzkLTC is ERC20, ReentrancyGuard {
     error NativeTransferFailed();
     error AdminAlreadyRenounced();
 
-    constructor(address _admin) ERC20("Wrapped zkLitecoin", "WzkLTC") {
+    constructor(address _admin) ERC20("WzkLTC", "wzkLTC") {
         if (_admin == address(0)) revert NotAdmin();
         admin = _admin;
     }

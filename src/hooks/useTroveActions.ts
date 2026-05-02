@@ -28,6 +28,11 @@ const BO_ABI = [
     inputs: [], outputs: [] },
 ] as const;
 
+const TM_ABI = [
+  { name: "getTroveDebt", type: "function", stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
+] as const;
+
 const ERC20_APPROVE_ABI = [
   { name: "allowance", type: "function", stateMutability: "view",
     inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }],
@@ -40,8 +45,12 @@ const ERC20_APPROVE_ABI = [
 const ZERO = "0x0000000000000000000000000000000000000000" as `0x${string}`;
 const BO   = CONTRACTS.BorrowerOperations as `0x${string}`;
 const COLL = CONTRACTS.WzkLTC            as `0x${string}`;
+const TM   = CONTRACTS.TroveManager      as `0x${string}`;
 const RPC  = "https://liteforge.rpc.caldera.xyz/http";
 const CHAIN_ID = CONTRACTS.chainId;
+
+// FnUSD external is 6 decimals; protocol debt accounting is 18.
+const FNUSD_SCALE = 1_000_000_000_000n; // 1e12
 
 // Explicit gas limits — prevents the "tx fee exceeds cap" error that occurs
 // when the oracle's fetchPrice() (state-changing) is called during estimation.
@@ -237,6 +246,29 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     reset();
     const fnUSDClean = fnUSDStr.replace(/,/g, "");
     const fnUSDAmt = parseUnits(fnUSDClean, 6);
+
+    // If user is repaying (at least) the entire current debt, closing is the correct op.
+    // It avoids dust/rounding issues and matches user intent: "repay all" => close.
+    const debt18 = address
+      ? await pub.readContract({ address: TM, abi: TM_ABI, functionName: "getTroveDebt", args: [address] })
+      : 0n;
+    const repay6Needed = (debt18 + FNUSD_SCALE - 1n) / FNUSD_SCALE; // round up
+    const shouldClose = debt18 > 0n && fnUSDAmt >= repay6Needed;
+
+    if (shouldClose) {
+      await run(async () => {
+        const fees = await feeOverrides();
+        return writeContractAsync({
+          chainId: CHAIN_ID,
+          address: BO, abi: BO_ABI, functionName: "closeTrove",
+          args: [],
+          gas: GAS.closeTrove,
+          ...fees,
+        });
+      }, "Close Trove");
+      return;
+    }
+
     await run(async () => {
       const fees = await feeOverrides();
       return writeContractAsync({
