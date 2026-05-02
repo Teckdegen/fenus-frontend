@@ -25,11 +25,13 @@ if (ENC_KEY.length !== 32) throw new Error("CLIPFARM_ENCRYPTION_KEY_BASE64 must 
 const ADDR_WZK = mustEnv("WZKLTC_ADDRESS");
 const ADDR_FNUSD = mustEnv("FNUSD_ADDRESS");
 const ADDR_BO = mustEnv("BORROWER_OPERATIONS_ADDRESS");
+const ADDR_TM = mustEnv("TROVE_MANAGER_ADDRESS");
+const ADDR_PRICE_FEED = mustEnv("PRICE_FEED_ADDRESS");
 
 const FUND_NATIVE_GAS = parseFloat(envOr("FUND_NATIVE_GAS", "0.002"));
 const FUND_WZKLTC = parseFloat(envOr("FUND_WZKLTC", "2.0"));
 const OPEN_TROVE_DEPOSIT_WZKLTC = parseFloat(envOr("OPEN_TROVE_DEPOSIT_WZKLTC", "1.0"));
-const BORROW_MIN = parseFloat(envOr("OPEN_TROVE_BORROW_MIN_FNUSD", "39"));
+const BORROW_MIN = parseFloat(envOr("OPEN_TROVE_BORROW_MIN_FNUSD", "500"));
 const BORROW_MAX = parseFloat(envOr("OPEN_TROVE_BORROW_MAX_FNUSD", "5000"));
 
 const WALLETS_PER_24H = parseInt(envOr("WALLETS_PER_24H", "2000"), 10);
@@ -89,6 +91,16 @@ const BORROWER_OPS_ABI = [
   ], outputs: [] },
 ];
 
+const TROVE_MANAGER_ABI = [
+  { type: "function", name: "getTroveDebt", stateMutability: "view", inputs: [{ name: "borrower", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
+  { type: "function", name: "getTroveColl", stateMutability: "view", inputs: [{ name: "borrower", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
+  { type: "function", name: "getEntireDebtAndColl", stateMutability: "view", inputs: [{ name: "borrower", type: "address" }], outputs: [{ name: "debt", type: "uint256" }, { name: "coll", type: "uint256" }] },
+];
+
+const PRICE_FEED_ABI = [
+  { type: "function", name: "fetchPrice", stateMutability: "view", inputs: [], outputs: [{ name: "price", type: "uint256" }, { name: "isLive", type: "bool" }] },
+];
+
 // ---------- clients ----------
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
@@ -130,9 +142,9 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 // Borrow amounts: mostly small, sometimes bigger (still <= 5k)
 function sampleBorrowFnUSD() {
-  // 85%: 39..500 ; 15%: 500..5000
-  if (Math.random() < 0.85) return randBetween(Math.max(39, BORROW_MIN), Math.min(500, BORROW_MAX));
-  return randBetween(Math.max(500, BORROW_MIN), BORROW_MAX);
+  // 70%: 500..1500 ; 30%: 1500..5000
+  if (Math.random() < 0.70) return randBetween(Math.max(500, BORROW_MIN), Math.min(1500, BORROW_MAX));
+  return randBetween(Math.max(1500, BORROW_MIN), BORROW_MAX);
 }
 
 function encryptPk(privateKeyHex) {
@@ -213,12 +225,12 @@ async function fundNative(to, ethAmount) {
   await publicClient.waitForTransactionReceipt({ hash });
 }
 
-async function adminMintWzk(to, amountWzk) {
+async function adminTransferWzk(to, amountWzk) {
   const amount = parseUnits(String(amountWzk), 8);
   const hash = await adminWallet.writeContract({
     address: ADDR_WZK,
-    abi: WZK_ABI,
-    functionName: "adminMint",
+    abi: ERC20_ABI,
+    functionName: "transfer",
     args: [to, amount],
   });
   await publicClient.waitForTransactionReceipt({ hash });
@@ -250,12 +262,85 @@ function makeWalletClient(pkHex) {
   });
 }
 
+async function getPrice() {
+  const [price, isLive] = await publicClient.readContract({
+    address: ADDR_PRICE_FEED,
+    abi: PRICE_FEED_ABI,
+    functionName: "fetchPrice",
+  });
+  if (!isLive) throw new Error("Price feed down");
+  return price;
+}
+
+async function getTroveData(address) {
+  const [debt, coll] = await publicClient.readContract({
+    address: ADDR_TM,
+    abi: TROVE_MANAGER_ABI,
+    functionName: "getEntireDebtAndColl",
+    args: [address],
+  });
+  return { debt, coll };
+}
+
+function calculateCR(collAmount18, debtAmount18, price18) {
+  // CR = (coll * price) / debt * 100
+  // All values are in 18 decimals
+  if (debtAmount18 === 0n) return 999999n; // infinite CR
+  const collValue = (collAmount18 * price18) / parseUnits("1", 18);
+  const cr = (collValue * parseUnits("100", 18)) / debtAmount18;
+  return cr;
+}
+
+function crToPercent(cr18) {
+  // Convert 18-decimal CR to percentage number
+  return Number(formatUnits(cr18, 18));
+}
+
+async function canBorrowMore(address, additionalBorrow6) {
+  const { debt, coll } = await getTroveData(address);
+  const price = await getPrice();
+  
+  // Convert additional borrow from 6 decimals to 18 decimals
+  const additionalBorrow18 = parseUnits(String(additionalBorrow6), 12); // 6 to 18 = multiply by 1e12
+  const newDebt = debt + additionalBorrow18;
+  
+  const newCR = calculateCR(coll, newDebt, price);
+  const crPercent = crToPercent(newCR);
+  
+  // Need at least 140% to be safe (buffer above 135% minimum)
+  return crPercent >= 140;
+}
+
+async function canAddColl(address, additionalColl8) {
+  // Adding collateral always improves CR, so always safe
+  return true;
+}
+
 async function openTroveForWallet(row) {
   const pk = decryptPk(row);
   const wallet = makeWalletClient(pk);
 
   const coll = parseUnits(String(OPEN_TROVE_DEPOSIT_WZKLTC), 8);
-  const borrow = parseUnits(String(sampleBorrowFnUSD().toFixed(2)), 6);
+  const coll18 = coll * parseUnits("1", 10); // 8 decimals to 18 decimals
+  
+  // Get price and calculate max safe borrow
+  const price = await getPrice();
+  
+  // Calculate max borrow at 140% CR (safe buffer above 135%)
+  // CR = (coll * price) / debt * 100
+  // debt = (coll * price) / (CR / 100)
+  const collValue = (coll18 * price) / parseUnits("1", 18);
+  const targetCR = parseUnits("140", 18); // 140%
+  const maxDebt18 = (collValue * parseUnits("100", 18)) / targetCR;
+  const maxBorrow6 = Number(formatUnits(maxDebt18, 12)); // 18 to 6 decimals
+  
+  // Sample a borrow amount that's safe
+  let borrowAmount = sampleBorrowFnUSD();
+  if (borrowAmount > maxBorrow6 * 0.95) {
+    borrowAmount = maxBorrow6 * 0.90; // Use 90% of max to be extra safe
+  }
+  
+  const borrow = parseUnits(String(borrowAmount.toFixed(2)), 6);
 
   await ensureApprove(wallet, ADDR_WZK, ADDR_BO, coll, 8);
 
@@ -291,6 +376,13 @@ async function doDailyAction(row) {
   if (mode === "borrow") {
     const amt = randBetween(DAILY_FNUSD_MIN, DAILY_FNUSD_MAX);
     const fn = parseUnits(amt.toFixed(2), 6);
+    
+    // Check if we can safely borrow this amount
+    const canBorrow = await canBorrowMore(wallet.account.address, fn);
+    if (!canBorrow) {
+      return { action: "borrow:skip", amount: `${amt} FnUSD would breach CR` };
+    }
+    
     const hash = await wallet.writeContract({
       address: ADDR_BO,
       abi: BORROWER_OPS_ABI,
@@ -397,10 +489,10 @@ async function createOneWallet() {
 }
 
 async function bootstrapOneNewWallet(row) {
-  // Fund gas + mint collateral, then open trove
+  // Fund gas + transfer collateral, then open trove
   await markWallet(row.address, { status: "new", note: "funding" });
   await fundNative(row.address, FUND_NATIVE_GAS);
-  await adminMintWzk(row.address, FUND_WZKLTC);
+  await adminTransferWzk(row.address, FUND_WZKLTC);
   await markWallet(row.address, { status: "funded", note: `funded gas=${FUND_NATIVE_GAS}, wzk=${FUND_WZKLTC}` });
 
   await openTroveForWallet(row);
