@@ -8,7 +8,7 @@ import { createWalletClient, createPublicClient, http, parseUnits } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 const RPC           = "https://liteforge.rpc.caldera.xyz/http";
-const WZKLITECOIN   = "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec";
+const WZKLITECOIN   = "0xb474BcBAAdB14109937d20f826BE51f36318DC16";
 const AMOUNT        = parseUnits("1000", 8); // 1000 WzkLTC (8 decimals)
 const COOLDOWN_MS   = 48 * 60 * 60 * 1000;
 
