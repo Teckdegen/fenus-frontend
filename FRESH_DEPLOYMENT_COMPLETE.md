@@ -17,6 +17,10 @@ WzkLTC:  0xb474BcBAAdB14109937d20f826BE51f36318DC16
 FnUSD:   0x70598601C48Fac26021bcD0923D46b0DaC531805
 ```
 
+**Add to MetaMask:**
+- **WzkLTC**: `0xb474BcBAAdB14109937d20f826BE51f36318DC16` (8 decimals)
+- **FnUSD**: `0x70598601C48Fac26021bcD0923D46b0DaC531805` (6 decimals)
+
 ### 🎨 NFT System
 ```
 TroveNFT:           0xA90174a7d5E81BF978556199adBc807192Be9D35
@@ -116,6 +120,17 @@ https://liteforge.explorer.caldera.xyz/address/0xf3f045Fe91B67Bcb4c9Df5447b1D66e
 ### Tokens
 - WzkLTC: https://liteforge.explorer.caldera.xyz/address/0xb474BcBAAdB14109937d20f826BE51f36318DC16
 - FnUSD: https://liteforge.explorer.caldera.xyz/address/0x70598601C48Fac26021bcD0923D46b0DaC531805
+
+**Import to MetaMask:**
+```
+WzkLTC Address: 0xb474BcBAAdB14109937d20f826BE51f36318DC16
+Symbol: wzkLTC
+Decimals: 8
+
+FnUSD Address: 0x70598601C48Fac26021bcD0923D46b0DaC531805
+Symbol: FnUSD
+Decimals: 6
+```
 
 ### NFT System
 - TroveNFT: https://liteforge.explorer.caldera.xyz/address/0xA90174a7d5E81BF978556199adBc807192Be9D35
