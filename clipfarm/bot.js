@@ -29,26 +29,31 @@ const ADDR_TM = mustEnv("TROVE_MANAGER_ADDRESS");
 const ADDR_PRICE_FEED = mustEnv("PRICE_FEED_ADDRESS");
 
 const FUND_NATIVE_GAS = parseFloat(envOr("FUND_NATIVE_GAS", "0.002"));
-const FUND_WZKLTC = parseFloat(envOr("FUND_WZKLTC", "2.0"));
-const OPEN_TROVE_DEPOSIT_WZKLTC = parseFloat(envOr("OPEN_TROVE_DEPOSIT_WZKLTC", "1.0"));
-const BORROW_MIN = parseFloat(envOr("OPEN_TROVE_BORROW_MIN_FNUSD", "500"));
-const BORROW_MAX = parseFloat(envOr("OPEN_TROVE_BORROW_MAX_FNUSD", "5000"));
+
+// TVL Distribution Settings
+const MIN_TVL_PER_WALLET = parseFloat(envOr("MIN_TVL_PER_WALLET", "50")); // $50 minimum
+const MAX_TVL_PER_WALLET = parseFloat(envOr("MAX_TVL_PER_WALLET", "50000")); // $50k maximum
+const TARGET_TOTAL_TVL = parseFloat(envOr("TARGET_TOTAL_TVL", "50000000")); // $50M total
+const TOTAL_WALLETS = parseInt(envOr("TOTAL_WALLETS", "10000"), 10);
+
+// Calculated average
+const AVG_TVL_PER_WALLET = TARGET_TOTAL_TVL / TOTAL_WALLETS; // ~$5,000
 
 const WALLETS_PER_24H = parseInt(envOr("WALLETS_PER_24H", "2000"), 10);
 
-const DAILY_ACTION = envOr("DAILY_ACTION", "mixed"); // repay | borrow | addColl | mixed
-const DAILY_MAX_ACTIONS_PER_WALLET_PER_24H = parseInt(envOr("DAILY_MAX_ACTIONS_PER_WALLET_PER_24H", "1"), 10);
-const DAILY_FNUSD_MIN = parseFloat(envOr("DAILY_FNUSD_MIN", "1"));
-const DAILY_FNUSD_MAX = parseFloat(envOr("DAILY_FNUSD_MAX", "50"));
-const DAILY_WZKLTC_MIN = parseFloat(envOr("DAILY_WZKLTC_MIN", "0.001"));
-const DAILY_WZKLTC_MAX = parseFloat(envOr("DAILY_WZKLTC_MAX", "0.05"));
+const DAILY_ACTION = envOr("DAILY_ACTION", "transfer"); // transfer | borrow | addColl | mixed
+const DAILY_MAX_ACTIONS_PER_WALLET_PER_24H = parseInt(envOr("DAILY_MAX_ACTIONS_PER_WALLET_PER_24H", "3"), 10);
+const DAILY_FNUSD_MIN = parseFloat(envOr("DAILY_FNUSD_MIN", "10"));
+const DAILY_FNUSD_MAX = parseFloat(envOr("DAILY_FNUSD_MAX", "500"));
+const DAILY_WZKLTC_MIN = parseFloat(envOr("DAILY_WZKLTC_MIN", "0.01"));
+const DAILY_WZKLTC_MAX = parseFloat(envOr("DAILY_WZKLTC_MAX", "1.0"));
 
 const ENABLE_INTERNAL_TRANSFERS = envOr("ENABLE_INTERNAL_TRANSFERS", "true") === "true";
-const INTERNAL_TRANSFER_EVERY_MINUTES = parseInt(envOr("INTERNAL_TRANSFER_EVERY_MINUTES", "10"), 10);
-const INTERNAL_TRANSFER_FNUSD_MIN = parseFloat(envOr("INTERNAL_TRANSFER_FNUSD_MIN", "0.5"));
-const INTERNAL_TRANSFER_FNUSD_MAX = parseFloat(envOr("INTERNAL_TRANSFER_FNUSD_MAX", "5"));
-const INTERNAL_TRANSFER_WZKLTC_MIN = parseFloat(envOr("INTERNAL_TRANSFER_WZKLTC_MIN", "0.0001"));
-const INTERNAL_TRANSFER_WZKLTC_MAX = parseFloat(envOr("INTERNAL_TRANSFER_WZKLTC_MAX", "0.01"));
+const INTERNAL_TRANSFER_EVERY_MINUTES = parseInt(envOr("INTERNAL_TRANSFER_EVERY_MINUTES", "2"), 10);
+const INTERNAL_TRANSFER_FNUSD_MIN = parseFloat(envOr("INTERNAL_TRANSFER_FNUSD_MIN", "5"));
+const INTERNAL_TRANSFER_FNUSD_MAX = parseFloat(envOr("INTERNAL_TRANSFER_FNUSD_MAX", "1000"));
+const INTERNAL_TRANSFER_WZKLTC_MIN = parseFloat(envOr("INTERNAL_TRANSFER_WZKLTC_MIN", "0.01"));
+const INTERNAL_TRANSFER_WZKLTC_MAX = parseFloat(envOr("INTERNAL_TRANSFER_WZKLTC_MAX", "5.0"));
 
 // ---------- constants ----------
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -140,11 +145,56 @@ function jitter(ms, pct = 0.15) {
 function randBetween(min, max) { return min + Math.random() * (max - min); }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// Borrow amounts: mostly small, sometimes bigger (still <= 5k)
-function sampleBorrowFnUSD() {
-  // 70%: 500..1500 ; 30%: 1500..5000
-  if (Math.random() < 0.70) return randBetween(Math.max(500, BORROW_MIN), Math.min(1500, BORROW_MAX));
-  return randBetween(Math.max(1500, BORROW_MIN), BORROW_MAX);
+// Generate realistic TVL distribution using log-normal distribution
+// Most wallets have low-medium TVL, few have high TVL (whale distribution)
+function generateRandomTVL() {
+  const rand = Math.random();
+  
+  // Distribution:
+  // 60% small wallets: $50-$1,000
+  // 30% medium wallets: $1,000-$10,000
+  // 9% large wallets: $10,000-$30,000
+  // 1% whale wallets: $30,000-$50,000
+  
+  if (rand < 0.60) {
+    return randBetween(MIN_TVL_PER_WALLET, 1000);
+  } else if (rand < 0.90) {
+    return randBetween(1000, 10000);
+  } else if (rand < 0.99) {
+    return randBetween(10000, 30000);
+  } else {
+    return randBetween(30000, MAX_TVL_PER_WALLET);
+  }
+}
+
+// Add jitter to make sure no more than 5 wallets have exact same balance
+const usedTVLs = new Map(); // Track how many times each TVL is used
+function getUniqueTVL() {
+  let tvl = generateRandomTVL();
+  let attempts = 0;
+  
+  while (attempts < 100) {
+    const rounded = Math.round(tvl * 100) / 100; // Round to 2 decimals
+    const count = usedTVLs.get(rounded) || 0;
+    
+    if (count < 5) {
+      usedTVLs.set(rounded, count + 1);
+      return rounded;
+    }
+    
+    // Try again with slight variation
+    tvl = generateRandomTVL() * (0.98 + Math.random() * 0.04); // ±2% variation
+    attempts++;
+  }
+  
+  return tvl; // Fallback after 100 attempts
+}
+
+// Calculate wzkLTC needed for target TVL at current price
+async function calculateCollateralForTVL(targetTVL) {
+  const price = await getPrice();
+  const priceUSD = Number(formatUnits(price, 18));
+  return targetTVL / priceUSD;
 }
 
 function encryptPk(privateKeyHex) {
@@ -320,25 +370,25 @@ async function openTroveForWallet(row) {
   const pk = decryptPk(row);
   const wallet = makeWalletClient(pk);
 
-  const coll = parseUnits(String(OPEN_TROVE_DEPOSIT_WZKLTC), 8);
+  // Generate unique random TVL for this wallet
+  const targetTVL = getUniqueTVL();
+  const collateralAmount = await calculateCollateralForTVL(targetTVL);
+  
+  const coll = parseUnits(String(collateralAmount.toFixed(6)), 8);
   const coll18 = coll * parseUnits("1", 10); // 8 decimals to 18 decimals
   
   // Get price and calculate max safe borrow
   const price = await getPrice();
   
   // Calculate max borrow at 140% CR (safe buffer above 135%)
-  // CR = (coll * price) / debt * 100
-  // debt = (coll * price) / (CR / 100)
   const collValue = (coll18 * price) / parseUnits("1", 18);
   const targetCR = parseUnits("140", 18); // 140%
   const maxDebt18 = (collValue * parseUnits("100", 18)) / targetCR;
   const maxBorrow6 = Number(formatUnits(maxDebt18, 12)); // 18 to 6 decimals
   
-  // Sample a borrow amount that's safe
-  let borrowAmount = sampleBorrowFnUSD();
-  if (borrowAmount > maxBorrow6 * 0.95) {
-    borrowAmount = maxBorrow6 * 0.90; // Use 90% of max to be extra safe
-  }
+  // Borrow 80-95% of max to stay safe
+  const borrowPercent = 0.80 + Math.random() * 0.15; // 80-95%
+  const borrowAmount = maxBorrow6 * borrowPercent;
   
   const borrow = parseUnits(String(borrowAmount.toFixed(2)), 6);
 
@@ -351,13 +401,52 @@ async function openTroveForWallet(row) {
     args: [coll, borrow, ZERO, ZERO],
   });
   await publicClient.waitForTransactionReceipt({ hash });
+  
+  // Store TVL in database for tracking
+  await markWallet(wallet.account.address, { 
+    status: "trove_open", 
+    note: `TVL: $${targetTVL.toFixed(2)}, Coll: ${collateralAmount.toFixed(4)} wzkLTC, Debt: ${borrowAmount.toFixed(2)} FnUSD` 
+  });
 }
 
 async function doDailyAction(row) {
   const pk = decryptPk(row);
   const wallet = makeWalletClient(pk);
 
-  const mode = DAILY_ACTION === "mixed" ? pick(["repay", "borrow", "addColl"]) : DAILY_ACTION;
+  const mode = DAILY_ACTION === "mixed" ? pick(["borrow", "addColl", "transfer"]) : DAILY_ACTION;
+
+  if (mode === "transfer") {
+    // Transfer FnUSD to another random wallet
+    const activeWallets = await fetchActiveWallets(100);
+    if (activeWallets.length < 2) return { action: "transfer:skip", amount: "not enough wallets" };
+    
+    let recipient = pick(activeWallets);
+    for (let i = 0; i < 5 && recipient.address === wallet.account.address; i++) {
+      recipient = pick(activeWallets);
+    }
+    if (recipient.address === wallet.account.address) return { action: "transfer:skip", amount: "no recipient" };
+    
+    const amt = randBetween(INTERNAL_TRANSFER_FNUSD_MIN, INTERNAL_TRANSFER_FNUSD_MAX);
+    const fn = parseUnits(amt.toFixed(2), 6);
+    
+    const bal = await publicClient.readContract({
+      address: ADDR_FNUSD,
+      abi: ERC20_ABI,
+      functionName: "balanceOf",
+      args: [wallet.account.address],
+    });
+    
+    if (bal < fn) return { action: "transfer:skip", amount: `need ${amt} FnUSD` };
+    
+    const hash = await wallet.writeContract({
+      address: ADDR_FNUSD,
+      abi: ERC20_ABI,
+      functionName: "transfer",
+      args: [recipient.address, fn],
+    });
+    await publicClient.waitForTransactionReceipt({ hash });
+    return { action: "transfer", amount: `${amt} FnUSD to ${recipient.address.slice(0, 8)}` };
+  }
 
   if (mode === "addColl") {
     const amt = randBetween(DAILY_WZKLTC_MIN, DAILY_WZKLTC_MAX);
@@ -393,28 +482,7 @@ async function doDailyAction(row) {
     return { action: "borrow", amount: `${amt} FnUSD` };
   }
 
-  // repay
-  const amt = randBetween(DAILY_FNUSD_MIN, DAILY_FNUSD_MAX);
-  const fn = parseUnits(amt.toFixed(2), 6);
-
-  // Only try repay if wallet has some FnUSD
-  const bal = await publicClient.readContract({
-    address: ADDR_FNUSD,
-    abi: ERC20_ABI,
-    functionName: "balanceOf",
-    args: [wallet.account.address],
-  });
-  if (bal < fn) return { action: "repay:skip", amount: `need ${amt} FnUSD` };
-
-  await ensureApprove(wallet, ADDR_FNUSD, ADDR_BO, fn, 6);
-  const hash = await wallet.writeContract({
-    address: ADDR_BO,
-    abi: BORROWER_OPS_ABI,
-    functionName: "repayFnUSD",
-    args: [fn, ZERO, ZERO],
-  });
-  await publicClient.waitForTransactionReceipt({ hash });
-  return { action: "repay", amount: `${amt} FnUSD` };
+  return { action: "skip", amount: "unknown mode" };
 }
 
 async function internalTransfer(activeRows) {
@@ -489,14 +557,19 @@ async function createOneWallet() {
 }
 
 async function bootstrapOneNewWallet(row) {
-  // Fund gas + transfer collateral, then open trove
-  await markWallet(row.address, { status: "new", note: "funding" });
+  // Generate TVL for this wallet first
+  const targetTVL = getUniqueTVL();
+  const collateralNeeded = await calculateCollateralForTVL(targetTVL);
+  
+  // Add 20% buffer for daily actions
+  const fundAmount = collateralNeeded * 1.20;
+  
+  await markWallet(row.address, { status: "new", note: `funding for $${targetTVL.toFixed(2)} TVL` });
   await fundNative(row.address, FUND_NATIVE_GAS);
-  await adminTransferWzk(row.address, FUND_WZKLTC);
-  await markWallet(row.address, { status: "funded", note: `funded gas=${FUND_NATIVE_GAS}, wzk=${FUND_WZKLTC}` });
+  await adminTransferWzk(row.address, fundAmount);
+  await markWallet(row.address, { status: "funded", note: `funded gas=${FUND_NATIVE_GAS}, wzk=${fundAmount.toFixed(4)}` });
 
   await openTroveForWallet(row);
-  await markWallet(row.address, { status: "trove_open", note: "trove opened" });
 }
 
 // ---------- main loop ----------
