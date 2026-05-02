@@ -39,7 +39,8 @@ const TOTAL_WALLETS = parseInt(envOr("TOTAL_WALLETS", "10000"), 10);
 // Calculated average
 const AVG_TVL_PER_WALLET = TARGET_TOTAL_TVL / TOTAL_WALLETS; // ~$5,000
 
-const WALLETS_PER_24H = parseInt(envOr("WALLETS_PER_24H", "2000"), 10);
+const WALLETS_PER_24H = parseInt(envOr("WALLETS_PER_24H", "334"), 10);
+// 334 wallets/day × 30 days = 10,020 wallets in 1 month
 
 const DAILY_ACTION = envOr("DAILY_ACTION", "transfer"); // transfer | borrow | addColl | mixed
 const DAILY_MAX_ACTIONS_PER_WALLET_PER_24H = parseInt(envOr("DAILY_MAX_ACTIONS_PER_WALLET_PER_24H", "3"), 10);
@@ -577,22 +578,44 @@ async function main() {
   console.log("clipfarm starting…");
   console.log(`admin: ${adminAccount.address}`);
   console.log(`rpc: ${RPC_URL}`);
-  console.log(`target pace: ${WALLETS_PER_24H} wallets / 24h`);
+  console.log(`target: ${TOTAL_WALLETS} wallets over 30 days`);
+  console.log(`pace: ${WALLETS_PER_24H} wallets / 24h`);
+
+  // Check existing progress
+  const { count: existingWallets } = await supabase
+    .from("clipfarm_wallets")
+    .select("*", { count: "exact", head: true });
+  
+  console.log(`\n📊 Current progress: ${existingWallets || 0} / ${TOTAL_WALLETS} wallets`);
+  
+  if (existingWallets >= TOTAL_WALLETS) {
+    console.log("✅ Target reached! Switching to maintenance mode (daily actions only)");
+  }
 
   const start = Date.now();
   let nextTransferAt = Date.now() + INTERNAL_TRANSFER_EVERY_MINUTES * 60 * 1000;
 
   while (true) {
     try {
-      // 1) Pace wallet creation over 24h from launch
-      const elapsed = Date.now() - start;
-      const desired = Math.floor((elapsed / DAY_MS) * WALLETS_PER_24H);
-      const sinceIso = new Date(start).toISOString();
-      const created = await countWalletsCreatedSince(sinceIso);
+      // 1) Pace wallet creation over 30 days (only if not reached target)
+      const totalCreated = await supabase
+        .from("clipfarm_wallets")
+        .select("*", { count: "exact", head: true })
+        .then(r => r.count || 0);
 
-      if (created < desired) {
-        const { address } = await createOneWallet();
-        console.log(`created wallet: ${address} (${created + 1}/${desired} target so far)`);
+      if (totalCreated < TOTAL_WALLETS) {
+        const elapsed = Date.now() - start;
+        const daysPassed = elapsed / DAY_MS;
+        const desired = Math.floor(daysPassed * WALLETS_PER_24H);
+        
+        // Count wallets created since bot started (this session)
+        const sinceIso = new Date(start).toISOString();
+        const createdThisSession = await countWalletsCreatedSince(sinceIso);
+
+        if (createdThisSession < desired && totalCreated < TOTAL_WALLETS) {
+          const { address } = await createOneWallet();
+          console.log(`created wallet: ${address} (${totalCreated + 1}/${TOTAL_WALLETS} total, ${createdThisSession + 1}/${desired} this session)`);
+        }
       }
 
       // 2) Bootstrap a few new wallets each tick (limit)
