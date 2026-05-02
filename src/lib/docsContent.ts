@@ -20,7 +20,7 @@ export const docsSections: DocSection[] = [
     id: "introduction",
     title: "Introduction",
     group: "Introduction",
-    content: `Welcome to the user guide for **FENUS** — borrow **FnUSD** using **wzkLTC** as collateral through a single position called a **Trove**.
+    content: `Welcome to the user guide for **FENUS** - borrow **FnUSD** using **wzkLTC** as collateral through a single position called a **Trove**.
 
 This documentation is written for anyone using the app. It focuses on **what to do in the interface**, not smart contracts or code.
 
@@ -63,9 +63,9 @@ Read in order from top to bottom, or jump to a topic.
 |---|---|
 | **Trove** | Your personal loan position: collateral locked + FnUSD owed. Represented as an NFT you own |
 | **Trove NFT** | The ERC721 token representing your Trove position. Transferring this NFT transfers your entire position |
-| **wzkLTC** | Wrapped zkLitecoin — the ERC-20 collateral token you deposit |
+| **wzkLTC** | Wrapped zkLitecoin - the ERC-20 collateral token you deposit |
 | **FnUSD** | Stablecoin you borrow and must repay to unwind |
-| **Collateral ratio (CR)** | Value of your collateral divided by your debt — **FENUS uses 135%** as what you must maintain; higher is safer |
+| **Collateral ratio (CR)** | Value of your collateral divided by your debt - **FENUS uses 135%** as what you must maintain; higher is safer |
 | **Liquidation** | If CR falls too low, the position can be cleared by the protocol |
 | **Redistribution / Default Pool** | After liquidations, Trove holders can **earn fees** from that activity |
 
@@ -88,7 +88,7 @@ These docs intentionally skip contract addresses, ABIs, and deployment detail. U
 | Requirement | Notes |
 |---|---|
 | Compatible wallet | Use a wallet supported by the app's **Connect** flow (e.g. typical browser wallets) |
-| Correct network | Switch your wallet to the network the app expects — transactions fail on the wrong chain |
+| Correct network | Switch your wallet to the network the app expects - transactions fail on the wrong chain |
 | Tokens | **wzkLTC** for collateral; **FnUSD** when repaying or closing (you receive FnUSD when you borrow) |
 
 ---
@@ -135,7 +135,7 @@ Tip: If you have a **very small** amount of wzkLTC, the app will show it with ex
 | Stage | What you see |
 |---|---|
 | Approving | The app may ask you to **approve** **wzkLTC** spending once before deposits |
-| Pending | Wait for block confirmation — duration depends on the chain |
+| Pending | Wait for block confirmation - duration depends on the chain |
 | Success | A confirmation message and often a link to a block explorer |
 
 If something fails, read the error shown in the app; common causes are insufficient balance, ratio too low, or wrong network.`,
@@ -159,7 +159,7 @@ When your wallet is connected, you'll see three headline numbers:
 | Field | Meaning |
 |---|---|
 | **wzkLTC balance** | wzkLTC tokens in your wallet (not yet deposited into a Trove) |
-| **FnUSD balance** | Stablecoin in your wallet — used to repay debt or close |
+| **FnUSD balance** | Stablecoin in your wallet - used to repay debt or close |
 | **LTC price** | Oracle reference price shown by the app (for mental math and ratios) |
 
 ### Precision (important)
@@ -187,7 +187,7 @@ If you already have an active Trove, the Dashboard summarizes it:
 |---|---|
 | **Collateral** | How much **wzkLTC** is locked in your Trove |
 | **Debt** | How much **FnUSD** you owe (including fees already baked into protocol accounting where applicable) |
-| **Collateral ratio** | Collateral value ÷ debt — keep **≥ 135%** |
+| **Collateral ratio** | Collateral value ÷ debt - keep **≥ 135%** |
 | **Liquidation price** | Approximate **wzkLTC** price at which your position becomes unsafe |
 
 Use **Manage Trove** to jump to the Trove screen for deposits, withdrawals, borrow, repay, or close.
@@ -239,7 +239,7 @@ The **Dashboard** surfaces four related lines:
     group: "Using the App",
     content: `The **Faucet** gives you **test wzkLTC** so you can try opening and managing a Trove without bringing your own collateral.
 
-Availability depends on deployment — some production environments may hide or disable it.
+Availability depends on deployment - some production environments may hide or disable it.
 
 ---
 
@@ -286,7 +286,7 @@ Typical payout on test setups: **1,000 wzkLTC** per successful claim (confirm on
 
 | Issue | What to check |
 |---|---|
-| Button disabled | Cooldown timer — wait until it shows ready |
+| Button disabled | Cooldown timer - wait until it shows ready |
 | Request failed | Network connection; whether faucet backend is reachable |
 | Wrong network | Switch to the chain the app expects |`,
   },
@@ -300,13 +300,13 @@ Typical payout on test setups: **1,000 wzkLTC** per successful claim (confirm on
 
 ## One sentence
 
-You **lock wzkLTC** as collateral and **mint FnUSD** as debt — then you manage that position until you **repay** and optionally **close**.
+You **lock wzkLTC** as collateral and **mint FnUSD** as debt - then you manage that position until you **repay** and optionally **close**.
 
 ---
 
 ## Trove as an NFT
 
-Your Trove is not just data in a contract — it's an **ERC721 NFT** that you own:
+Your Trove is not just data in a contract - it's an **ERC721 NFT** that you own:
 
 | Feature | Benefit |
 |---|---|
@@ -324,7 +324,7 @@ Your Trove is not just data in a contract — it's an **ERC721 NFT** that you ow
 | Rule | Implication |
 |---|---|
 | Single active Trove per address | You cannot open a second Trove from the same wallet |
-| Already open | Use **Add**, **Remove**, **Borrow**, **Repay**, **Transfer**, **Close** — not **Open** again |
+| Already open | Use **Add**, **Remove**, **Borrow**, **Repay**, **Transfer**, **Close** - not **Open** again |
 
 ---
 
@@ -343,7 +343,7 @@ All Trove actions live under **\`/app/trove\`** with tabs:
 
 | Tab | Plain meaning |
 |---|---|
-| **Open** | Create the Trove (first time only) — mints your NFT |
+| **Open** | Create the Trove (first time only) - mints your NFT |
 | **Add** | Deposit more collateral |
 | **Remove** | Withdraw collateral (if safe) |
 | **Borrow** | Mint more FnUSD |
@@ -378,7 +378,7 @@ The NFT represents your entire position and will appear in your wallet (MetaMask
 |---|---|
 | Wallet | Connected |
 | Collateral | Enough **wzkLTC** in your wallet |
-| Existing Trove | None — only one Trove per wallet |
+| Existing Trove | None - only one Trove per wallet |
 | Ratio | Opening position must meet the protocol **minimum collateral ratio** |
 
 ---
@@ -396,7 +396,7 @@ The NFT represents your entire position and will appear in your wallet (MetaMask
 
 | Line | Meaning |
 |---|---|
-| **Collateral ratio** | Safety of the position after open — must stay at or above the minimum |
+| **Collateral ratio** | Safety of the position after open - must stay at or above the minimum |
 | **Liquidation price** | Rough wzkLTC price level where liquidation becomes relevant |
 | **Origination fee** | One-time fee on the borrowed amount at open |
 | **Total debt at open** | Borrow amount plus origination fee |
@@ -408,7 +408,7 @@ The NFT represents your entire position and will appear in your wallet (MetaMask
 | Item | Typical value |
 |---|---|
 | Origination fee | **0.5%** of the borrowed FnUSD |
-| Interest | **0% APR** — no ongoing interest shown in app |
+| Interest | **0% APR** - no ongoing interest shown in app |
 
 ---
 
@@ -418,7 +418,7 @@ The NFT represents your entire position and will appear in your wallet (MetaMask
 |---|---|
 | 1 | Go to **Trove** → tab **Open** |
 | 2 | Enter collateral and borrow amounts |
-| 3 | Confirm preview — fix warnings if ratio is too low |
+| 3 | Confirm preview - fix warnings if ratio is too low |
 | 4 | Approve **wzkLTC** if the app asks (first time) |
 | 5 | Submit **Open Trove** and confirm in wallet |
 
@@ -430,7 +430,7 @@ The NFT represents your entire position and will appear in your wallet (MetaMask
 |---|---|
 | "Already have an open Trove" | Use manage tabs instead of Open |
 | Ratio too low | Increase collateral or reduce borrow until preview passes |
-| Transaction rejected | Slippage/network/gas — retry or check wallet |
+| Transaction rejected | Slippage/network/gas - retry or check wallet |
 
 ---
 
@@ -486,7 +486,7 @@ Use when you want **wzkLTC back** in your wallet while keeping the Trove open.
 |---|---|
 | 1 | **Trove** → tab **Remove** |
 | 2 | Enter **Remove wzkLTC** amount |
-| 3 | Check preview — ratio must stay **valid** |
+| 3 | Check preview - ratio must stay **valid** |
 | 4 | Submit **Remove Collateral** |
 
 | Effect | Detail |
@@ -530,7 +530,7 @@ Use when you want **wzkLTC back** in your wallet while keeping the Trove open.
 |---|---|
 | 1 | **Trove** → tab **Borrow** |
 | 2 | Enter **Borrow FnUSD** amount |
-| 3 | Confirm preview — ratio must remain **above** minimum |
+| 3 | Confirm preview - ratio must remain **above** minimum |
 | 4 | Submit **Borrow More** |
 
 | Effect | Detail |
@@ -566,7 +566,7 @@ Use when you want **wzkLTC back** in your wallet while keeping the Trove open.
 
 ---
 
-## Borrow vs repay — summary
+## Borrow vs repay - summary
 
 | | Borrow | Repay |
 |---|---|---|
@@ -596,7 +596,7 @@ You can repay in full or in part on the **Repay** tab; **Close** also requires y
     group: "Trove",
     content: `## What is a Trove NFT?
 
-Your Trove is represented as an **NFT (Non-Fungible Token)** that you own in your wallet. This NFT is more than just a collectible — it represents your entire debt position including:
+Your Trove is represented as an **NFT (Non-Fungible Token)** that you own in your wallet. This NFT is more than just a collectible - it represents your entire debt position including:
 
 - All your collateral (wzkLTC)
 - All your debt (FnUSD)
@@ -607,10 +607,10 @@ Your Trove is represented as an **NFT (Non-Fungible Token)** that you own in you
 
 Using NFTs for Troves provides several benefits:
 
-1. **Lower gas costs** — 12-25% cheaper than traditional storage
-2. **Visible in your wallet** — See your Trove in MetaMask, OpenSea, etc.
-3. **Transferable** — You can transfer your entire position to another address
-4. **Composable** — Use your Trove NFT in other DeFi protocols
+1. **Lower gas costs** - 12-25% cheaper than traditional storage
+2. **Visible in your wallet** - See your Trove in MetaMask, OpenSea, etc.
+3. **Transferable** - You can transfer your entire position to another address
+4. **Composable** - Use your Trove NFT in other DeFi protocols
 
 ## How to Transfer Your Trove
 
@@ -674,7 +674,7 @@ If you have a healthy Trove with good collateral ratio, you might sell it to som
 
 ### 2. Gifting
 
-You can gift a Trove to family or friends — great for teaching DeFi with real assets.
+You can gift a Trove to family or friends - great for teaching DeFi with real assets.
 
 ### 3. Portfolio Management
 
@@ -684,17 +684,17 @@ Consolidate positions across multiple wallets by transferring all Troves to your
 
 The transfer system includes several safety checks:
 
-- ✅ **Address validation** — Must be a valid Ethereum address
-- ✅ **No self-transfers** — Cannot transfer to yourself
-- ✅ **Recipient check** — Recipient cannot already have a Trove
-- ✅ **Safe transfer** — Uses ERC721 standard \`safeTransferFrom\`
-- ✅ **Clear warnings** — UI shows exactly what's being transferred
+- ✅ **Address validation** - Must be a valid Ethereum address
+- ✅ **No self-transfers** - Cannot transfer to yourself
+- ✅ **Recipient check** - Recipient cannot already have a Trove
+- ✅ **Safe transfer** - Uses ERC721 standard \`safeTransferFrom\`
+- ✅ **Clear warnings** - UI shows exactly what's being transferred
 
 ## Common Questions
 
 **Can I cancel a transfer?** No. Once confirmed on the blockchain, the transfer is permanent.
 
-**Can I transfer part of my Trove?** No. The NFT represents the entire position — everything or nothing.
+**Can I transfer part of my Trove?** No. The NFT represents the entire position - everything or nothing.
 
 **What happens to my debt?** The debt transfers to the recipient. You are no longer responsible for it.
 
@@ -708,11 +708,11 @@ Your Trove NFT will appear in MetaMask (NFTs tab), OpenSea, any NFT marketplace 
 
 ## Best Practices
 
-1. **Double-check addresses** — Always verify the recipient address
-2. **Coordinate with recipient** — Make sure they understand they're receiving debt
-3. **Check their wallet** — Ensure they don't already have a Trove
-4. **Document the transfer** — Keep records for tax purposes
-5. **Test with small amounts first** — If possible, practice on testnet`,
+1. **Double-check addresses** - Always verify the recipient address
+2. **Coordinate with recipient** - Make sure they understand they're receiving debt
+3. **Check their wallet** - Ensure they don't already have a Trove
+4. **Document the transfer** - Keep records for tax purposes
+5. **Test with small amounts first** - If possible, practice on testnet`,
   },
   {
     id: "closing-a-trove",
@@ -769,9 +769,9 @@ After closing, you can open a new Trove if you want (which will mint a new NFT w
 
 | Item | Expected result |
 |---|---|
-| Trove | Position cleared — no active Trove until you **Open** again |
+| Trove | Position cleared - no active Trove until you **Open** again |
 | Wallet | **FnUSD** reduced by debt paid; **wzkLTC** increased by returned collateral |
-| NFT | **Trove NFT burned** — it will disappear from your wallet and NFT marketplaces |
+| NFT | **Trove NFT burned** - it will disappear from your wallet and NFT marketplaces |
 
 ---
 
@@ -796,7 +796,7 @@ This is why the debt amount might be higher than what you originally borrowed.
 
 ---
 
-## Close vs repay — quick distinction
+## Close vs repay - quick distinction
 
 | | Repay | Close |
 |---|---|---|
@@ -817,8 +817,8 @@ This is why the debt amount might be higher than what you originally borrowed.
 | Concept | Meaning |
 |---|---|
 | **Collateral ratio** | (Value of your **wzkLTC** in USD) ÷ (Your **FnUSD** debt) |
-| Higher ratio | Safer — more collateral per dollar borrowed |
-| Lower ratio | Riskier — closer to liquidation |
+| Higher ratio | Safer - more collateral per dollar borrowed |
+| Lower ratio | Riskier - closer to liquidation |
 
 The app labels regions such as **Safe**, **Moderate**, **Risky**, and **Below minimum** based on ratio bands.
 
@@ -826,7 +826,7 @@ The app labels regions such as **Safe**, **Moderate**, **Risky**, and **Below mi
 
 ## Key protocol numbers
 
-**FENUS targets a 135% collateral ratio** — that is the number to remember.
+**FENUS targets a 135% collateral ratio** - that is the number to remember.
 
 | Term | Value | Plain meaning |
 |---|---|---|
@@ -877,13 +877,13 @@ The Trove screen shows an **LTC/USD oracle** feed. Ratio and liquidation hints d
 | Situation | Effect |
 |---|---|
 | Price loading | Preview may show **Loading…** or N/A |
-| Stale / down oracle | Transactions may fail — try later |`,
+| Stale / down oracle | Transactions may fail - try later |`,
   },
   {
     id: "pools",
     title: "Pools & Liquidity",
     group: "Beyond Borrowing",
-    content: `The **Pools** screen points to **external venues** where you can supply liquidity using **FnUSD** and other assets — for example **FnUSD / wzkLTC** or **FnUSD / USDC** on **Addax**.
+    content: `The **Pools** screen points to **external venues** where you can supply liquidity using **FnUSD** and other assets - for example **FnUSD / wzkLTC** or **FnUSD / USDC** on **Addax**.
 
 ---
 
@@ -892,7 +892,7 @@ The Trove screen shows an **LTC/USD oracle** feed. Ratio and liquidation hints d
 | Activity | Where | Purpose |
 |---|---|---|
 | Borrow FnUSD against wzkLTC | **Trove** | Collateralized debt |
-| Earn fees on token pairs | **Pools** → external DEX | Liquidity provision — different product |
+| Earn fees on token pairs | **Pools** → external DEX | Liquidity provision - different product |
 
 ---
 
