@@ -1,12 +1,16 @@
 # Dashboard & balances
 
-The **Dashboard** is the home screen after you open the app (`/app`). It answers: *what do I hold*, *what is my Trove*, and *where do I go next*.
+The **Dashboard** is the home screen after you open the app (`/app`). It answers three questions fast:
+
+- What do I hold?
+- What is my Trove right now?
+- What should I do next?
 
 ---
 
 ## Wallet overview strip
 
-When your wallet is connected, you typically see three headline numbers:
+When your wallet is connected, you’ll see three headline numbers:
 
 | Field | Meaning |
 |-------|---------|
@@ -14,11 +18,15 @@ When your wallet is connected, you typically see three headline numbers:
 | **FnUSD balance** | Stablecoin in your wallet — used to repay debt or close |
 | **LTC price** | Oracle reference price shown by the app (for mental math and ratios) |
 
+### Precision (important)
+
+FENUS shows **small non-zero balances** with extra precision when needed. So if you have “a little bit” of wzkLTC, it won’t get rounded down to `0.00`.
+
 ---
 
 ## Empty collateral hint
 
-If you are connected but **wzkLTC** reads **0**, the app may show a reminder to visit the **Faucet** so you can obtain test collateral before opening a Trove.
+If you are connected and your **wzkLTC wallet balance is truly zero**, the app may show a reminder to visit the **Faucet** so you can obtain test collateral before opening a Trove.
 
 | Situation | Suggested action |
 |-----------|------------------|
@@ -73,3 +81,12 @@ The **Dashboard** surfaces four related lines (labels match the app):
 | Does this replace managing your ratio? | **No.** Extra fees don’t remove liquidation risk from **your** Trove. |
 
 Use **View Pools** from this card when you want liquidity venues; core safety still lives under **Manage Trove**.
+
+---
+
+## Quick troubleshooting
+
+| Symptom | What to check |
+|--------|----------------|
+| Balance looks wrong | Make sure your wallet is on the **correct network**, then refresh once. |
+| Shows `0` but you’re sure you have funds | Confirm the token is **wzkLTC** (not another LTC wrapper) and that you’re viewing the same wallet address. |

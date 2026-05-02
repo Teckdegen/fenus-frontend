@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import "dotenv/config";
 
 const WZKLITECOIN = "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec";
-const AMOUNT      = ethers.parseUnits("10000000", 8); // 10,000,000 WzkLTC (8 decimals)
+const AMOUNT      = ethers.parseUnits("100000000", 8); // 100,000,000 WzkLTC (8 decimals)
 
 const ABI = [
   "function adminMint(address to, uint256 amount) external",
@@ -17,7 +17,7 @@ async function main() {
   console.log("  Mint WzkLTC — LitVM LiteForge");
   console.log("══════════════════════════════════════════");
   console.log(`  To      : ${deployer.address}`);
-  console.log(`  Amount  : 10,000,000 WzkLTC`);
+  console.log(`  Amount  : 100,000,000 WzkLTC`);
 
   const before = await token.balanceOf(deployer.address);
   console.log(`  Balance before: ${ethers.formatUnits(before, 8)} WzkLTC`);

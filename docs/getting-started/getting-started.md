@@ -1,6 +1,6 @@
 # Getting started
 
-This page explains how you enter the app and where each main screen lives.
+This page explains how you enter the app, what you need, and where each main screen lives.
 
 ---
 
@@ -46,6 +46,8 @@ The app groups features into a small set of sections:
 | 1 | Faucet | Claim **wzkLTC** if you start with zero collateral |
 | 2 | Trove → **Open** | Deposit **wzkLTC**, choose how much **FnUSD** to mint |
 | 3 | Dashboard | Monitor collateral, debt, ratio, and liquidation price |
+
+Tip: If you have a **very small** amount of wzkLTC, the app will show it with extra decimals instead of rounding it down to `0.00`.
 
 ---
 
