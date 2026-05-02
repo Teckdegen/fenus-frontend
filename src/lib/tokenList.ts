@@ -22,7 +22,7 @@ export const FENUS_TOKEN_LIST = {
     {
       chainId:  4441,
       address:  CONTRACTS.FnUSD,
-      name:     "Fenus Dollar",
+      name:     "FnUSD",
       symbol:   "FnUSD",
       decimals: 6,
       logoURI:  FNUSD_IMAGE_URL,

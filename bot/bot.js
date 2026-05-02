@@ -3,6 +3,16 @@
  * ═══════════════════════════════
  * Single-file liquidation watcher. Dependencies: ethers + dotenv.
  *
+ * Default chain — LitVM LiteForge (override via .env):
+ * ┌─────────────────┬──────────────────────────────────────────────────────────┐
+ * │ Network name    │ LitVM LiteForge                                           │
+ * │ Chain ID        │ 4441                                                      │
+ * │ Gas token       │ zkLTC                                                     │
+ * │ RPC (HTTP)      │ https://liteforge.rpc.caldera.xyz/http                   │
+ * │ RPC (WebSocket) │ wss://liteforge.rpc.caldera.xyz/ws                       │
+ * │ Block explorer  │ https://liteforge.explorer.caldera.xyz                   │
+ * └─────────────────┴──────────────────────────────────────────────────────────┘
+ *
  * How it works:
  * 1. On startup, walks SortedTroves (tail → head) and indexes active Trove owners.
  * 2. Every new block: reads last good price + Multicall-batched getCurrentICR for all Troves.
@@ -15,9 +25,11 @@
  * This bot scans every block — never skip scans based on price equality alone.
  *
  * Setup:
- *   cp .env.example .env
- *   npm install
- *   npm start
+ *   cd bot && cp .env.example .env && npm install
+ *   npm start                    ← from bot/
+ *   # or from repo root:
+ *   node bot.js                  ← uses root bot.js shim → bot/.env + bot/node_modules
+ *   npm run liquidation-bot      ← same (see root package.json)
  */
 
 import { ethers } from "ethers";
@@ -31,8 +43,33 @@ function required(key) {
   return v;
 }
 
+/** LitVM LiteForge defaults — set RPC_WS / RPC_HTTP / CHAIN_ID / etc. in .env to override */
+const LITFORGE = {
+  NETWORK_NAME: "LitVM LiteForge",
+  CHAIN_ID: 4441,
+  GAS_TOKEN: "zkLTC",
+  RPC_WS: "wss://liteforge.rpc.caldera.xyz/ws",
+  RPC_HTTP: "https://liteforge.rpc.caldera.xyz/http",
+  BLOCK_EXPLORER: "https://liteforge.explorer.caldera.xyz",
+};
+
+function explorerTxUrl(base, hash) {
+  const b = (base || "").replace(/\/$/, "");
+  if (!b || !hash) return "";
+  return `${b}/tx/${hash}`;
+}
+
 const CONFIG = {
-  RPC_WS: required("RPC_WS"),
+  NETWORK_NAME: process.env.NETWORK_NAME || LITFORGE.NETWORK_NAME,
+  CHAIN_ID: parseInt(process.env.CHAIN_ID || String(LITFORGE.CHAIN_ID), 10),
+  GAS_TOKEN: process.env.GAS_TOKEN || LITFORGE.GAS_TOKEN,
+  RPC_WS: process.env.RPC_WS || LITFORGE.RPC_WS,
+  RPC_HTTP: process.env.RPC_HTTP || LITFORGE.RPC_HTTP,
+  BLOCK_EXPLORER: (
+    process.env.BLOCK_EXPLORER_URL ||
+    process.env.BLOCK_EXPLORER ||
+    LITFORGE.BLOCK_EXPLORER
+  ).replace(/\/$/, ""),
   PRIVATE_KEY: required("PRIVATE_KEY"),
   TROVE_MANAGER_ADDRESS: required("TROVE_MANAGER_ADDRESS"),
   SORTED_TROVES_ADDRESS: required("SORTED_TROVES_ADDRESS"),
@@ -220,11 +257,30 @@ class LiquidationBot {
 
   async start() {
     log.info("FENUS Liquidation Bot starting");
+    log.info(
+      " Network :",
+      CONFIG.NETWORK_NAME,
+      "| chainId",
+      CONFIG.CHAIN_ID,
+      "| gas",
+      CONFIG.GAS_TOKEN
+    );
+    log.info(" RPC WS  :", CONFIG.RPC_WS);
+    log.info(" RPC HTTP:", CONFIG.RPC_HTTP);
+    log.info(" Explorer:", CONFIG.BLOCK_EXPLORER);
+
+    const net = await this.provider.getNetwork();
+    if (Number(net.chainId) !== CONFIG.CHAIN_ID) {
+      log.warn(
+        ` Connected chainId ${net.chainId} ≠ configured ${CONFIG.CHAIN_ID} — check RPC endpoints`
+      );
+    }
+
     log.info(" Wallet :", this.signer.address);
     log.info(" TroveMgr:", CONFIG.TROVE_MANAGER_ADDRESS);
 
     const bal = await this.provider.getBalance(this.signer.address);
-    log.info(" Balance :", ethers.formatEther(bal), "(native gas token)");
+    log.info(" Balance :", ethers.formatEther(bal), `(${CONFIG.GAS_TOKEN})`);
     if (bal < ethers.parseEther("0.01")) log.warn("Low gas balance — top up soon");
 
     log.info("Building Trove index…");
@@ -370,6 +426,8 @@ class LiquidationBot {
         ...(await this._feeOverrides()),
       });
       log.info(" tx", tx.hash);
+      const ex = explorerTxUrl(CONFIG.BLOCK_EXPLORER, tx.hash);
+      if (ex) log.info(" explorer", ex);
       const receipt = await tx.wait();
       log.info(" OK block", receipt.blockNumber, "| gas", receipt.gasUsed.toString());
       this.stats.liquidations++;
@@ -395,6 +453,8 @@ class LiquidationBot {
           ...(await this._feeOverrides()),
         });
         log.info(" tx", tx.hash);
+        const exb = explorerTxUrl(CONFIG.BLOCK_EXPLORER, tx.hash);
+        if (exb) log.info(" explorer", exb);
         const receipt = await tx.wait();
         log.info(" OK block", receipt.blockNumber, "|", chunk.length, "liquidated | gas", receipt.gasUsed.toString());
         this.stats.liquidations += chunk.length;

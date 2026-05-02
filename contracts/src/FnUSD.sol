@@ -21,7 +21,7 @@ contract FnUSD is ERC20, IFnUSD {
 
     error NotAuthorized();
 
-    constructor(IAddressesRegistry _registry) ERC20("Fenus Dollar", "FnUSD") {
+    constructor(IAddressesRegistry _registry) ERC20("FnUSD", "FnUSD") {
         registry = _registry;
     }
 
@@ -43,7 +43,7 @@ contract FnUSD is ERC20, IFnUSD {
     // Compatible with OpenSea, Uniswap token lists, and most modern wallets.
     function contractURI() external pure returns (string memory) {
         return string(abi.encodePacked(
-            '{"name":"Fenus Dollar",'
+            '{"name":"FnUSD",'
             '"symbol":"FnUSD",'
             '"decimals":6,'
             '"description":"FnUSD is the USD-pegged stablecoin of the FENUS protocol on LitVM LiteForge. Mint FnUSD by depositing WzkLTC as collateral.",'

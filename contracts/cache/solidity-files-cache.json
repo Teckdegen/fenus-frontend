@@ -1198,8 +1198,8 @@
       ]
     },
     "C:\\Users\\divin\\OneDrive\\Desktop\\FENUS CDP APP\\contracts\\src\\FnUSD.sol": {
-      "lastModificationDate": 1777675281361,
-      "contentHash": "0dcbfb859d68b8360b62217509a693a3",
+      "lastModificationDate": 1777712143109,
+      "contentHash": "e894b7cfe6de31cdad3a3072bcdf0595",
       "sourceName": "src/FnUSD.sol",
       "solcConfig": {
         "version": "0.8.24",
