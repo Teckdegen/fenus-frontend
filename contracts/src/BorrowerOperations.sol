@@ -202,7 +202,7 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
 
     // closeTrove — repay full debt including accrued interest, get all collateral back.
     // If the user is short by dust (sub-1 FnUSD from accrued interest), the protocol
-    // mints the difference from treasury so users are never stuck by rounding.
+    // mints the difference so users are never stuck by rounding.
     function closeTrove() external override nonReentrant {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         _requireActive(a);
@@ -210,21 +210,22 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         ITroveManager tm = ITroveManager(a.troveManager);
         (uint256 debt, uint256 coll18,) = tm.getEntireDebtAndColl(msg.sender);
 
-        uint256 repay6    = Decimals.from18RoundUp(debt);
-        uint256 balance6  = IFnUSD(a.fnUSD).balanceOf(msg.sender);
+        // Convert debt to 6-dec for balance check (round up to cover truncation)
+        uint256 repay6   = Decimals.from18RoundUp(debt);
+        uint256 balance6 = IFnUSD(a.fnUSD).balanceOf(msg.sender);
 
         if (balance6 < repay6) {
-            // Calculate shortfall in 18-dec
-            uint256 shortfall6  = repay6 - balance6;
+            uint256 shortfall6 = repay6 - balance6;
+            // Only cover dust — less than 1 FnUSD (1e6 in 6-dec)
+            if (shortfall6 > 1e6) revert InsufficientFnUSDBalance();
+            // Mint exact 6-dec shortfall scaled to 18-dec for the mint call
             uint256 shortfall18 = Decimals.to18(shortfall6);
-
-            // Only cover dust (less than 1 FnUSD). Larger shortfalls must repay first.
-            if (shortfall18 > 1e18) revert InsufficientFnUSDBalance();
-
-            // Mint dust to user from protocol — covers sub-cent interest rounding
             IFnUSD(a.fnUSD).mint(msg.sender, shortfall18);
+            // Recalculate debt after mint (interest may have ticked)
+            (debt, coll18,) = tm.getEntireDebtAndColl(msg.sender);
         }
 
+        // Burn exact 18-dec debt
         IFnUSD(a.fnUSD).burn(msg.sender, debt);
         tm.closeTrove(msg.sender);
         ISortedTroves(a.sortedTroves).remove(msg.sender);

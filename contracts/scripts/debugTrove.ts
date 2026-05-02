@@ -4,11 +4,11 @@ import "dotenv/config";
 
 const ADDRESSES = {
   WzkLTC:             "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec",
-  FnUSD:              "0x18133333D7d43CD651D2432C14Fa98D95D46b34c",
-  BorrowerOperations: "0x804a416219c77559F4c0285C96Eaa9207BD27583",
-  TroveManager:       "0x7Fdb194D18AfCc3B108779F56D0a2Cf5c3086F82",
-  ActivePool:         "0xC05a0d9Edd9dEFa5e6821938837afFE1a4133AF8",
-  PriceFeed:          "0x09E1D75E698d9Bc96829687e3d8d1908D4a8d077",
+  FnUSD:              "0x46FFA2E7f162112729A49F80e307a1863DB6d4A3",
+  BorrowerOperations: "0xe6A045525C053259e096d2c48973856D9f06143f",
+  TroveManager:       "0x29fb2e1d2903e931fA024Ab8577bbfc801947463",
+  ActivePool:         "0xc1873d1852960b56805f150B5b14F9976630c6B8",
+  PriceFeed:          "0x7284C0Dd0389436F2A47bC4BbDc600c7f004625E",
 };
 
 const ERC20_ABI = [
