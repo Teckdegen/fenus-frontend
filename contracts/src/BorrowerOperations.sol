@@ -70,7 +70,8 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
 
         uint256 fnUSDAmount18 = Decimals.to18(fnUSDAmount6);
         uint256 fee18         = (fnUSDAmount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
-        uint256 netDebt       = fnUSDAmount18 + fee18;
+        uint256 amountToMint  = fnUSDAmount18 - fee18; // User receives amount minus fee
+        uint256 netDebt       = amountToMint; // Debt is only what user receives
 
         (uint256 price, bool isLive) = IPriceFeed(a.priceFeed).fetchPrice();
         if (!isLive) revert PriceFeedDown();
@@ -87,8 +88,8 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         uint256 nicr = LiquityMath._computeNominalCR(coll18, netDebt);
         ISortedTroves(a.sortedTroves).insert(msg.sender, nicr, upperHint, lowerHint);
 
-        IFnUSD(a.fnUSD).mint(msg.sender, fnUSDAmount18);
-        if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18);
+        IFnUSD(a.fnUSD).mint(msg.sender, amountToMint); // Mint amount minus fee to user
+        if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18); // Mint fee to treasury
 
         uint256 tokenId = troveNFT.ownerToTokenId(msg.sender);
         emit TroveOpened(msg.sender, tokenId, coll18, netDebt);
@@ -150,14 +151,15 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
 
         uint256 amount18 = Decimals.to18(fnUSDAmount6);
         uint256 fee18    = (amount18 * Constants.ORIGINATION_FEE) / Constants.DECIMAL_PRECISION;
-        uint256 netNew   = amount18 + fee18;
+        uint256 amountToMint = amount18 - fee18; // User receives amount minus fee
+        uint256 netNew   = amountToMint; // Debt increase is only what user receives
 
         ITroveManager(a.troveManager).adjustTrove(msg.sender, 0, int256(netNew));
         _requireICRAboveBuffer(a);
 
         IActivePool(a.activePool).increaseDebt(netNew);
-        IFnUSD(a.fnUSD).mint(msg.sender, amount18);
-        if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18);
+        IFnUSD(a.fnUSD).mint(msg.sender, amountToMint); // Mint amount minus fee to user
+        if (fee18 > 0) IFnUSD(a.fnUSD).mint(a.treasury, fee18); // Mint fee to treasury
         _reInsert(a, upperHint, lowerHint);
 
         emit FnUSDBorrowed(msg.sender, amount18);
