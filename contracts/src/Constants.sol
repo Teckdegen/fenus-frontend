@@ -17,8 +17,8 @@ library Constants {
 
     // No minimum debt — users can deposit and borrow any amount.
 
-    // Fixed annual interest rate — all Troves pay 1%. Not user-configurable.
-    uint256 internal constant ANNUAL_INTEREST_RATE = 1e16; // 1%
+    // Zero interest — protocol charges no carrying cost on Troves.
+    // Revenue comes from origination fees, redemption fees, and liquidation surplus.
 
     // Liquidation collateral distribution.
     // When a Trove is liquidated:

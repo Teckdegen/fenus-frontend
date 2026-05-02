@@ -1,15 +1,9 @@
 // Debug script — checks the state of the protocol after a trove open attempt
 import { ethers } from "hardhat";
 import "dotenv/config";
+import { loadLiteforgeDeployment } from "./loadDeployment";
 
-const ADDRESSES = {
-  WzkLTC:             "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec",
-  FnUSD:              "0xa695566aa57925a2b6922c3b9334933E25535666",
-  BorrowerOperations: "0xBCF1D8725a3887443367653C11D1325d3CE6cCd2",
-  TroveManager:       "0x58FaE462817f96dE68EE912241C7ec82F796BC33",
-  ActivePool:         "0x36EEfA533F059cC3895642803388FBA0d42407a6",
-  PriceFeed:          "0x69e8D6E7f2E50FA4399ee98d13188C8029E9Ee00",
-};
+const ADDRESSES = loadLiteforgeDeployment();
 
 const ERC20_ABI = [
   "function balanceOf(address) view returns (uint256)",
@@ -19,7 +13,7 @@ const TM_ABI = [
   "function getTroveStatus(address) view returns (uint8)",
   "function getTroveColl(address) view returns (uint256)",
   "function getTroveDebt(address) view returns (uint256)",
-  "function getEntireDebtAndColl(address) view returns (uint256 debt, uint256 coll, uint256 pendingInterest)",
+  "function getEntireDebtAndColl(address) view returns (uint256 debt, uint256 coll)",
   "function getTroveOwnersCount() view returns (uint256)",
 ];
 const AP_ABI = [
@@ -61,15 +55,15 @@ async function main() {
   const troveStatus = await tm.getTroveStatus(user);
   const troveColl   = await tm.getTroveColl(user);
   const troveDebt   = await tm.getTroveDebt(user);
-  const [entireDebt, entireColl, pendingInterest] = await tm.getEntireDebtAndColl(user);
+  const [entireDebt, entireColl] = await tm.getEntireDebtAndColl(user);
   const troveCount  = await tm.getTroveOwnersCount();
 
   console.log(`\n── Trove State ──`);
   console.log(`  Status          : ${troveStatus} (0=NonExistent, 1=Active, 2=ClosedByOwner)`);
   console.log(`  Recorded coll   : ${ethers.formatUnits(troveColl, 18)} (18-dec)`);
   console.log(`  Recorded debt   : ${ethers.formatUnits(troveDebt, 18)} FnUSD`);
-  console.log(`  Entire debt     : ${ethers.formatUnits(entireDebt, 18)} FnUSD (incl. interest)`);
-  console.log(`  Pending interest: ${ethers.formatUnits(pendingInterest, 18)} FnUSD`);
+  console.log(`  Entire debt     : ${ethers.formatUnits(entireDebt, 18)} FnUSD`);
+  console.log(`  Entire coll     : ${ethers.formatUnits(entireColl, 18)} (18-dec)`);
   console.log(`  Total Troves    : ${troveCount}`);
 
   // ── Active Pool ───────────────────────────────────────────────────────────

@@ -13,6 +13,8 @@ import {LiquityMath} from "./libraries/LiquityMath.sol";
 import {Decimals} from "./libraries/Decimals.sol";
 
 // TroveManager — core accounting engine for all Troves.
+// Zero interest: trove debt grows only through user-initiated borrows / fees,
+// never automatically over time.
 contract TroveManager is ITroveManager, ReentrancyGuard {
     IAddressesRegistry public immutable registry;
 
@@ -20,8 +22,6 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         uint256 debt;
         uint256 coll;
         uint256 stake;
-        uint256 annualInterestRate;
-        uint256 lastInterestTime;
         uint256 rewardSnapColl;
         uint256 rewardSnapDebt;
         Status  status;
@@ -35,14 +35,11 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     uint256 public L_debt;
     uint256 public totalStakes;
 
-    uint256 private constant MAX_INTEREST_PERIOD = 10 * 365 days;
-
-    event TroveOpened(address indexed owner, uint256 debt, uint256 coll, uint256 annualRate);
+    event TroveOpened(address indexed owner, uint256 debt, uint256 coll);
     event TroveUpdated(address indexed owner, uint256 debt, uint256 coll, uint256 stake, uint8 operation);
     event TroveLiquidated(address indexed owner, uint256 debt, uint256 coll, uint8 liquidationMode);
     event TroveClosed(address indexed owner, Status status);
     event Liquidation(uint256 liquidatedDebt, uint256 liquidatedColl, uint256 surplusColl);
-    event InterestAccrued(address indexed owner, uint256 interest);
 
     error NotAuthorized();
     error TroveNotActive();
@@ -77,21 +74,20 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     function getTroveStatus(address owner) external view override returns (Status) { return troves[owner].status; }
     function getTroveColl(address owner) external view override returns (uint256) { return troves[owner].coll; }
     function getTroveDebt(address owner) external view override returns (uint256) { return troves[owner].debt; }
-    function getTroveAnnualInterestRate(address owner) external view override returns (uint256) { return troves[owner].annualInterestRate; }
 
     function getCurrentICR(address owner, uint256 price) external view override returns (uint256) {
-        (uint256 debt, uint256 coll,) = _getEntireDebtAndColl(owner);
+        (uint256 debt, uint256 coll) = _getEntireDebtAndColl(owner);
         return LiquityMath._computeCR(coll, debt, price);
     }
 
     function getNominalICR(address owner) external view override returns (uint256) {
-        (uint256 debt, uint256 coll,) = _getEntireDebtAndColl(owner);
+        (uint256 debt, uint256 coll) = _getEntireDebtAndColl(owner);
         return LiquityMath._computeNominalCR(coll, debt);
     }
 
     function getEntireDebtAndColl(address owner)
         external view override
-        returns (uint256 debt, uint256 coll, uint256 pendingInterest)
+        returns (uint256 debt, uint256 coll)
     {
         return _getEntireDebtAndColl(owner);
     }
@@ -102,22 +98,20 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         if (troves[owner].status == Status.Active) revert TroveAlreadyExists();
 
         TroveData storage t = troves[owner];
-        t.debt               = debt;
-        t.coll               = coll;
-        t.annualInterestRate = Constants.ANNUAL_INTEREST_RATE;
-        t.lastInterestTime   = block.timestamp;
-        t.status             = Status.Active;
-        t.rewardSnapColl     = L_coll;
-        t.rewardSnapDebt     = L_debt;
+        t.debt           = debt;
+        t.coll           = coll;
+        t.status         = Status.Active;
+        t.rewardSnapColl = L_coll;
+        t.rewardSnapDebt = L_debt;
 
         uint256 stake = _computeStake(coll);
         t.stake      = stake;
-        totalStakes  += stake;
+        totalStakes += stake;
 
         _troveIndex[owner] = troveOwners.length;
         troveOwners.push(owner);
 
-        emit TroveOpened(owner, debt, coll, Constants.ANNUAL_INTEREST_RATE);
+        emit TroveOpened(owner, debt, coll);
         emit TroveUpdated(owner, debt, coll, stake, 0);
     }
 
@@ -128,7 +122,6 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         TroveData storage t = troves[owner];
         if (t.status != Status.Active) revert TroveNotActive();
 
-        _accrueInterest(owner, a);
         _applyPendingRewards(owner);
 
         if (collDelta > 0) t.coll += uint256(collDelta);
@@ -156,8 +149,6 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         TroveData storage t = troves[owner];
         if (t.status != Status.Active) revert TroveNotActive();
-
-        _accrueInterest(owner, a);
 
         totalStakes -= t.stake;
         t.stake      = 0;
@@ -197,7 +188,6 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
             TroveData storage t = troves[owner];
             if (t.status != Status.Active) continue;
 
-            _accrueInterest(owner, a);
             _applyPendingRewards(owner);
 
             uint256 icr = LiquityMath._computeCR(t.coll, t.debt, price);
@@ -244,14 +234,11 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
                 L_debt += (debtForHolders * Constants.DECIMAL_PRECISION) / totalStakes;
             }
 
-            // LP portion + 80% treasury surplus → treasury (routes to Addax)
+            // LP portion + 80% treasury surplus → treasury
             uint256 toTreasury = collForLP + collForTreasury;
             if (toTreasury > 0) {
                 IActivePool(a.activePool).sendCollateral(a.treasury, toTreasury);
             }
-
-            // No burn — FnUSD debt absorbed by LP supply sent to Addax
-            // No bot payment — protocol keeps everything
 
             totalLiquidatedDebt += debt;
             totalLiquidatedColl += coll;
@@ -277,28 +264,6 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
     function baseRate() external pure override returns (uint256) { return 0; }
     function getRedemptionFeeRate() external pure override returns (uint256) { return Constants.REDEMPTION_FEE_FLOOR; }
     function getRedemptionRateWithDecay() external pure override returns (uint256) { return Constants.REDEMPTION_FEE_FLOOR; }
-
-    // ─── Interest accrual ─────────────────────────────────────────────────────
-
-    function _accrueInterest(address owner, IAddressesRegistry.Addresses memory a) internal {
-        TroveData storage t = troves[owner];
-        if (t.status != Status.Active) return;
-
-        uint256 elapsed = block.timestamp - t.lastInterestTime;
-        if (elapsed == 0) return;
-        if (elapsed > MAX_INTEREST_PERIOD) elapsed = MAX_INTEREST_PERIOD;
-
-        uint256 interest = (t.debt * t.annualInterestRate * elapsed)
-            / (Constants.DECIMAL_PRECISION * Constants.SECONDS_PER_YEAR);
-
-        if (interest == 0) return;
-
-        t.debt            += interest;
-        t.lastInterestTime = block.timestamp;
-
-        IFnUSD(a.fnUSD).mint(a.treasury, interest);
-        emit InterestAccrued(owner, interest);
-    }
 
     // ─── Redistribution ───────────────────────────────────────────────────────
 
@@ -340,20 +305,14 @@ contract TroveManager is ITroveManager, ReentrancyGuard {
 
     function _getEntireDebtAndColl(address owner)
         internal view
-        returns (uint256 debt, uint256 coll, uint256 pendingInterest)
+        returns (uint256 debt, uint256 coll)
     {
         TroveData storage t = troves[owner];
 
         uint256 pendingColl = (t.stake * (L_coll - t.rewardSnapColl)) / Constants.DECIMAL_PRECISION;
         uint256 pendingDebt = (t.stake * (L_debt - t.rewardSnapDebt)) / Constants.DECIMAL_PRECISION;
 
-        uint256 elapsed = block.timestamp - t.lastInterestTime;
-        if (elapsed > MAX_INTEREST_PERIOD) elapsed = MAX_INTEREST_PERIOD;
-
-        pendingInterest = (t.debt * t.annualInterestRate * elapsed)
-            / (Constants.DECIMAL_PRECISION * Constants.SECONDS_PER_YEAR);
-
-        debt = t.debt + pendingDebt + pendingInterest;
+        debt = t.debt + pendingDebt;
         coll = t.coll + pendingColl;
     }
 }

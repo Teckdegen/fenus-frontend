@@ -2,8 +2,9 @@
 // This populates lastGoodPrice so BorrowerOperations can use it.
 import { ethers } from "hardhat";
 import "dotenv/config";
+import { loadLiteforgeDeployment } from "./loadDeployment";
 
-const PRICE_FEED = "0x00081D91D90c2D980793543f9ED67124229dAeE2";
+const PRICE_FEED = loadLiteforgeDeployment().PriceFeed;
 
 const ABI = [
   "function fetchPrice() external returns (uint256 price18, bool isLive)",

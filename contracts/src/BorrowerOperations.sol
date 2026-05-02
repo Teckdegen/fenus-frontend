@@ -200,32 +200,20 @@ contract BorrowerOperations is IBorrowerOperations, ReentrancyGuard {
         emit FnUSDRepaid(msg.sender, amount18);
     }
 
-    // closeTrove — repay full debt including accrued interest, get all collateral back.
-    // If the user is short by dust (sub-1 FnUSD from accrued interest), the protocol
-    // mints the difference so users are never stuck by rounding.
+    // closeTrove — burn recorded trove debt only (Liquity-style): pending
+    // redistribution debt is forgiven on close; collateral still includes pending
+    // redistribution gains via getEntireDebtAndColl (coll only).
     function closeTrove() external override nonReentrant {
         IAddressesRegistry.Addresses memory a = registry.addresses();
         _requireActive(a);
 
         ITroveManager tm = ITroveManager(a.troveManager);
-        (uint256 debt, uint256 coll18,) = tm.getEntireDebtAndColl(msg.sender);
+        uint256 debt = tm.getTroveDebt(msg.sender);
+        (, uint256 coll18) = tm.getEntireDebtAndColl(msg.sender);
 
-        // Convert debt to 6-dec for balance check (round up to cover truncation)
-        uint256 repay6   = Decimals.from18RoundUp(debt);
-        uint256 balance6 = IFnUSD(a.fnUSD).balanceOf(msg.sender);
+        uint256 repay6 = Decimals.from18RoundUp(debt);
+        if (IFnUSD(a.fnUSD).balanceOf(msg.sender) < repay6) revert InsufficientFnUSDBalance();
 
-        if (balance6 < repay6) {
-            uint256 shortfall6 = repay6 - balance6;
-            // Only cover dust — less than 1 FnUSD (1e6 in 6-dec)
-            if (shortfall6 > 1e6) revert InsufficientFnUSDBalance();
-            // Mint exact 6-dec shortfall scaled to 18-dec for the mint call
-            uint256 shortfall18 = Decimals.to18(shortfall6);
-            IFnUSD(a.fnUSD).mint(msg.sender, shortfall18);
-            // Recalculate debt after mint (interest may have ticked)
-            (debt, coll18,) = tm.getEntireDebtAndColl(msg.sender);
-        }
-
-        // Burn exact 18-dec debt
         IFnUSD(a.fnUSD).burn(msg.sender, debt);
         tm.closeTrove(msg.sender);
         ISortedTroves(a.sortedTroves).remove(msg.sender);

@@ -1,8 +1,9 @@
-// Closes the deployer's Trove — uses the dust-fix BorrowerOperations
+// Closes the deployer's Trove — BorrowerOperations from latest liteforge deployment
 import { ethers } from "hardhat";
 import "dotenv/config";
+import { loadLiteforgeDeployment } from "./loadDeployment";
 
-const BO = "0xBCF1D8725a3887443367653C11D1325d3CE6cCd2";
+const BO = loadLiteforgeDeployment().BorrowerOperations;
 const ABI = ["function closeTrove() external"];
 
 async function main() {

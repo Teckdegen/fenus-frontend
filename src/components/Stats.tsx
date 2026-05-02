@@ -3,6 +3,7 @@ import { useReadContract } from "wagmi";
 import { formatUnits } from "viem";
 import MuxVideo from "./MuxVideo";
 import { CONTRACTS } from "@/lib/contracts";
+import { DIA_ADAPTER } from "@/lib/oracles";
 
 // ─── ABIs ─────────────────────────────────────────────────────────────────────
 const FNUSD_ABI = [
@@ -27,7 +28,6 @@ const DIA_ABI = [
     ] },
 ] as const;
 
-const DIA_ADAPTER   = "0x45dDa5d881BD2C917976CCfde74fFd6f6412da29" as const;
 // Blockscout API on LiteForge explorer — returns holders_count for a token
 const EXPLORER_API  = "https://liteforge.explorer.caldera.xyz/api/v2/tokens";
 

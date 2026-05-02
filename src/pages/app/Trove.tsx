@@ -11,7 +11,6 @@ import { TxSuccessModal } from "@/components/app/TxSuccessModal";
 const MCR             = 1.30;
 const BUFFER          = 1.35;
 const ORIGINATION_FEE = 0.005;
-const ANNUAL_RATE     = 0.01;
 const EXPLORER        = "https://liteforge.explorer.caldera.xyz/tx/";
 
 const TABS = ["Open", "Add", "Remove", "Borrow", "Repay", "Close"] as const;
@@ -98,13 +97,14 @@ const Trove = () => {
 
   const {
     wzkLTCBalance, wzkLTCBalanceFull, fnUSDBalance, fnUSDBalanceFull, priceNum,
-    hasTrove, troveColl: existingCollStr, troveDebt: existingDebtStr,
+    hasTrove, troveColl: existingCollStr, troveCollClose, troveDebt: existingDebtStr,
     isConnected, address,
   } = useBalances();
 
   const actions = useTroveActions(address as `0x${string}` | undefined);
 
   const existingColl = parseFloat(existingCollStr.replace(/,/g, "")) || 0;
+  const closeColl      = parseFloat(troveCollClose.replace(/,/g, "")) || existingColl;
   const existingDebt = parseFloat(existingDebtStr.replace(/,/g, "")) || 0;
   const price        = priceNum;
   const priceLoaded  = price > 0;
@@ -117,14 +117,12 @@ const Trove = () => {
     if (!coll && !borrow) return null;
     const fee      = borrow * ORIGINATION_FEE;
     const totalDebt = borrow + fee;
-    const int6m    = totalDebt * ANNUAL_RATE / 2;
-    const int1y    = totalDebt * ANNUAL_RATE;
     const collUSD  = priceLoaded ? coll * price : null;
     const ratio    = collUSD !== null && totalDebt > 0 ? collUSD / totalDebt : null;
     const liqPrice = totalDebt > 0 && coll > 0 ? (totalDebt * MCR) / coll : null;
     const ratioOk  = ratio !== null ? ratio >= BUFFER : true;
     const canOpen  = coll > 0 && borrow > 0 && ratioOk;
-    return { coll, borrow, fee, totalDebt, collUSD, ratio, liqPrice, canOpen, int6m, int1y };
+    return { coll, borrow, fee, totalDebt, collUSD, ratio, liqPrice, canOpen };
   }, [collInput, borrowInput, price, priceLoaded]);
 
   const addCalc = useMemo(() => {
@@ -325,21 +323,6 @@ const Trove = () => {
                     <span className="tabular-nums font-medium">{openCalc.totalDebt.toFixed(2)} FnUSD</span>
                   </div>
                 </div>
-                <div className="px-4 py-3 space-y-2">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-1">Interest projections (1% APR)</p>
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-muted-foreground">After 6 months</span>
-                    <span className="tabular-nums">+{openCalc.int6m.toFixed(2)} FnUSD</span>
-                  </div>
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-muted-foreground">After 1 year</span>
-                    <span className="tabular-nums">+{openCalc.int1y.toFixed(2)} FnUSD</span>
-                  </div>
-                  <div className="flex justify-between text-[11px]">
-                    <span className="text-muted-foreground">Debt after 1 year</span>
-                    <span className="tabular-nums font-medium">{(openCalc.totalDebt + openCalc.int1y).toFixed(2)} FnUSD</span>
-                  </div>
-                </div>
                 {openCalc.ratio !== null && openCalc.ratio < BUFFER && openCalc.ratio > 0 && (
                   <div className="px-4 py-3 flex items-start gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400 mt-0.5" />
@@ -474,10 +457,6 @@ const Trove = () => {
                 <span className="text-muted-foreground">Outstanding debt</span>
                 <span className="tabular-nums">{existingDebt.toFixed(2)} FnUSD</span>
               </div>
-              <div className="flex justify-between text-[11px]">
-                <span className="text-muted-foreground">Accrued interest</span>
-                <span className="tabular-nums text-muted-foreground/60">included above</span>
-              </div>
               <div className="border-t border-border/40 pt-2 flex justify-between text-sm font-medium">
                 <span>Total to repay</span>
                 <span className="tabular-nums">{existingDebt.toFixed(2)} FnUSD</span>
@@ -487,13 +466,13 @@ const Trove = () => {
               <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">What you receive</p>
               <div className="flex justify-between text-[11px]">
                 <span className="text-muted-foreground">Collateral returned</span>
-                <span className="tabular-nums">{existingColl.toFixed(4)} zkLTC</span>
+                <span className="tabular-nums">{closeColl.toFixed(4)} zkLTC</span>
               </div>
               {priceLoaded && (
                 <div className="flex justify-between text-[11px]">
                   <span className="text-muted-foreground">Value at current price</span>
                   <span className="tabular-nums">
-                    ${(existingColl * price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    ${(closeColl * price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                   </span>
                 </div>
               )}
@@ -517,7 +496,7 @@ const Trove = () => {
       <div>
         <SectionLabel>Protocol Terms</SectionLabel>
         <Card className="p-5">
-          <Row label="Interest Rate"         value="1.00% APR"   hint="Fixed — accrues continuously to treasury" />
+          <Row label="Interest Rate"         value="0% APR"      hint="No carrying cost on your Trove" />
           <Row label="Origination Fee"       value="0.50%"       hint="One-time on each borrow, goes to treasury" />
           <Row label="Liquidation threshold" value="130%"        hint="Below this your Trove is liquidated by the bot" />
           <Row label="Minimum ratio"         value="135%"        hint="Required for all operations" />

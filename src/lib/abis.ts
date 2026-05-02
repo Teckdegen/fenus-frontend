@@ -20,7 +20,7 @@ export const TROVE_MANAGER_ABI = [
   "function getTroveDebt(address owner) view returns (uint256)",
   "function getCurrentICR(address owner, uint256 price) view returns (uint256)",
   "function getNominalICR(address owner) view returns (uint256)",
-  "function getEntireDebtAndColl(address owner) view returns (uint256 debt, uint256 coll, uint256 pendingInterest)",
+  "function getEntireDebtAndColl(address owner) view returns (uint256 debt, uint256 coll)",
   "function getTroveOwnersCount() view returns (uint256)",
   "function liquidate(address owner) external",
   "function batchLiquidate(address[] calldata owners) external",

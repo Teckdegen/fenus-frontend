@@ -24,7 +24,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 //
 // PRIMARY_ORACLE   : Chainlink-style zkLTC/USD price feed address on your chain
 // FALLBACK_ORACLE  : Secondary oracle (set to address(0) if none available yet)
-// TREASURY         : Your treasury wallet — receives fees, interest, liquidation surplus
+// TREASURY         : Your treasury wallet — receives origination fees, redemption fees, liquidation surplus
 // DEPLOYER         : The wallet running this script (msg.sender)
 //
 // Set via environment variables:

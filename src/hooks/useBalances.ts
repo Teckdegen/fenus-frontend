@@ -1,6 +1,7 @@
 import { useAccount, useReadContract } from "wagmi";
 import { formatUnits } from "viem";
 import { CONTRACTS } from "@/lib/contracts";
+import { DIA_ADAPTER } from "@/lib/oracles";
 
 const ERC20_ABI = [
   { name: "balanceOf", type: "function", stateMutability: "view",
@@ -18,6 +19,9 @@ const TROVE_MANAGER_ABI = [
   { name: "getTroveDebt", type: "function", stateMutability: "view",
     inputs: [{ name: "owner", type: "address" }],
     outputs: [{ name: "", type: "uint256" }] },
+  { name: "getEntireDebtAndColl", type: "function", stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }],
+    outputs: [{ name: "debt", type: "uint256" }, { name: "coll", type: "uint256" }] },
 ] as const;
 
 const DIA_ADAPTER_ABI = [
@@ -38,8 +42,6 @@ const DEFAULT_POOL_ABI = [
   { name: "getDebt", type: "function", stateMutability: "view",
     inputs: [], outputs: [{ name: "", type: "uint256" }] },
 ] as const;
-
-const DIA_ADAPTER = "0x45dDa5d881BD2C917976CCfde74fFd6f6412da29" as const;
 
 // ─── Format helpers ───────────────────────────────────────────────────────────
 
@@ -118,6 +120,16 @@ export function useBalances() {
     query: { enabled, refetchInterval: 10_000 },
   });
 
+  const hasTroveActive = enabled && troveStatus === 1;
+
+  const { data: entireDebtAndColl } = useReadContract({
+    address: CONTRACTS.TroveManager as `0x${string}`,
+    abi: TROVE_MANAGER_ABI,
+    functionName: "getEntireDebtAndColl",
+    args: [address!],
+    query: { enabled: hasTroveActive, refetchInterval: 10_000 },
+  });
+
   const { data: defaultPoolColl } = useReadContract({
     address: CONTRACTS.DefaultPool as `0x${string}`,
     abi: DEFAULT_POOL_ABI,
@@ -137,6 +149,7 @@ export function useBalances() {
   const collNum  = troveColl ? parseFloat(formatUnits(troveColl, 18)) : 0;
   const debtNum  = troveDebt ? parseFloat(formatUnits(troveDebt, 18)) : 0;
   const hasTrove = troveStatus === 1;
+  const entireColl = entireDebtAndColl?.[1];
 
   const collUSD  = priceNum > 0 ? collNum * priceNum : 0;
   const ratio    = debtNum > 0 && collUSD > 0 ? collUSD / debtNum : null;
@@ -160,6 +173,8 @@ export function useBalances() {
 
     // Trove
     troveColl:       fmt(troveColl, 18, 4),
+    // Collateral returned on close (recorded + pending redistribution)
+    troveCollClose:  fmt(entireColl ?? troveColl, 18, 4),
     troveDebt:       fmt(troveDebt, 18, 2),
     troveCollUSD:    collUSD > 0 ? `$${compact(collUSD)}` : "$0.00",
     troveRatio:      ratio    ? `${(ratio * 100).toFixed(1)}%` : "N/A",
