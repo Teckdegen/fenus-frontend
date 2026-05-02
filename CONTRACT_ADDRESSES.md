@@ -28,16 +28,16 @@ Decimals: 8
 
 ### FnUSD (FENUS Stablecoin)
 ```
-Address: 0x70598601C48Fac26021bcD0923D46b0DaC531805
+Address: 0xf23Ce7D43C68081CAcFd7808C0F2a0E4EB0E77BA
 Symbol: FnUSD
 Decimals: 6
 ```
-[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0x70598601C48Fac26021bcD0923D46b0DaC531805)
+[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0xf23Ce7D43C68081CAcFd7808C0F2a0E4EB0E77BA)
 
 **Add to MetaMask:**
 1. Open MetaMask
 2. Click "Import tokens"
-3. Paste: `0x70598601C48Fac26021bcD0923D46b0DaC531805`
+3. Paste: `0xf23Ce7D43C68081CAcFd7808C0F2a0E4EB0E77BA`
 4. Symbol: `FnUSD`
 5. Decimals: `6`
 
@@ -47,10 +47,10 @@ Decimals: 6
 
 ### AddressesRegistry
 ```
-Address: 0xf3f045Fe91B67Bcb4c9Df5447b1D66e2ddFc57bb
+Address: 0xe7D160Ae857E31bae8d73cAc396fAA7a4f13639b
 Status: FROZEN (immutable)
 ```
-[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0xf3f045Fe91B67Bcb4c9Df5447b1D66e2ddFc57bb)
+[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0xe7D160Ae857E31bae8d73cAc396fAA7a4f13639b)
 
 ---
 
@@ -58,21 +58,21 @@ Status: FROZEN (immutable)
 
 ### TroveNFT
 ```
-Address: 0xA90174a7d5E81BF978556199adBc807192Be9D35
+Address: 0xEAa8E5d7073B19920e0B6230e9292BC8b3644230
 ```
-[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0xA90174a7d5E81BF978556199adBc807192Be9D35)
+[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0xEAa8E5d7073B19920e0B6230e9292BC8b3644230)
 
 ### TroveManager
 ```
-Address: 0xB38f16ff0867C1e259DF5748e4968137Bf9cfd6E
+Address: 0xEBfc68D3B550dd463D4fEB4b781F903243D2BF06
 ```
-[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0xB38f16ff0867C1e259DF5748e4968137Bf9cfd6E)
+[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0xEBfc68D3B550dd463D4fEB4b781F903243D2BF06)
 
 ### BorrowerOperations
 ```
-Address: 0xA5F87D6bD60E9c8f73941607271Fe5459b925D17
+Address: 0x5153d5De995B625a871a75d91b856E55158c362B
 ```
-[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0xA5F87D6bD60E9c8f73941607271Fe5459b925D17)
+[View on Explorer](https://liteforge.explorer.caldera.xyz/address/0x5153d5De995B625a871a75d91b856E55158c362B)
 
 ---
 
@@ -80,22 +80,22 @@ Address: 0xA5F87D6bD60E9c8f73941607271Fe5459b925D17
 
 ### ActivePool
 ```
-Address: 0xDeE77B76B024F869dD20f9714952C7eB4D322bb7
+Address: 0xE777202A752Dcbb59808aE7EcAA70BE7fB74a1CA
 ```
 
 ### DefaultPool
 ```
-Address: 0x8eDC567AaB95D94DC343331A710b2c534b98dAd6
+Address: 0xD52b23aAEF6809ac0816407756195e26f12a00a7
 ```
 
 ### CollSurplusPool
 ```
-Address: 0x05d844E4bA8c2Ee9EBC007eEADdF5d0fFfC5C87A
+Address: 0x74c3261c55B931AE70Cd59EF4f2Ae75A55efC013
 ```
 
 ### GasPool
 ```
-Address: 0xf14eD1b63EF380BF1d32C49fbA43b2871f194Fef
+Address: 0xcC8fd6D9E1Fe2f031c42A15a891e638424672ff8
 ```
 
 ---
@@ -104,17 +104,17 @@ Address: 0xf14eD1b63EF380BF1d32C49fbA43b2871f194Fef
 
 ### PriceFeed
 ```
-Address: 0x9EDBD4C9E1FaE7349AA2144aca53234ddC6B703B
+Address: 0x509D2EFdBFB2A32B1C419e4afAdbe4AB6B838a31
 ```
 
 ### SortedTroves
 ```
-Address: 0x54Bcd281AbB992DD408f928b29137cfDefAE63Cd
+Address: 0xF8ff4235EaAe0fafD4B5c3AE3c656E0aED17686D
 ```
 
 ### CollateralRegistry
 ```
-Address: 0x2CDB666907620E0ff086A5Ae3AB1989C15bEE769
+Address: 0x255fBB977dAd56Faea71539B4494f632c228556f
 ```
 
 ---
@@ -123,12 +123,12 @@ Address: 0x2CDB666907620E0ff086A5Ae3AB1989C15bEE769
 
 ### RedemptionHelper
 ```
-Address: 0x0Cab690660aF3f8CDd93B2550C62f35Be2B24386
+Address: 0x7aa3657faFA72F07561e4F8909acb15aD023B17D
 ```
 
 ### HintHelpers
 ```
-Address: 0x93ce297Ab9Fa9a7a1FcAAdb25C6CF8cb42c51ad4
+Address: 0xA76a666B8158a369173AF07e41230F3624EB7B7C
 ```
 
 ---
@@ -161,4 +161,4 @@ Address: 0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df
 ---
 
 **Last Updated:** May 2, 2026  
-**Version:** 3.0.0 (Fresh NFT System)
+**Version:** 4.0.0 (Fixed Fee Logic - Debt = Amount Received)

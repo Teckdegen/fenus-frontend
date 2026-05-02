@@ -1,29 +1,30 @@
-// Auto-generated — do not edit manually
+// Auto-generated - do not edit manually
 // Network: liteforge | ChainId: 4441
-// Deployed: 2026-05-02T21:20:22.950Z
+// Deployed: 2026-05-02T22:54:52.468Z
 // AddressesRegistry: FROZEN (immutable)
+// WzkLTC: KEPT FROM PREVIOUS DEPLOYMENT
 
 export const CONTRACTS = {
   "network": "liteforge",
   "chainId": 4441,
-  "deployedAt": "2026-05-02T21:20:22.952Z",
+  "deployedAt": "2026-05-02T22:54:52.537Z",
   "deployer": "0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df",
   "treasury": "0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df",
-  "AddressesRegistry": "0xf3f045Fe91B67Bcb4c9Df5447b1D66e2ddFc57bb",
+  "AddressesRegistry": "0xe7D160Ae857E31bae8d73cAc396fAA7a4f13639b",
   "WzkLTC": "0xb474BcBAAdB14109937d20f826BE51f36318DC16",
-  "FnUSD": "0x70598601C48Fac26021bcD0923D46b0DaC531805",
-  "PriceFeed": "0x9EDBD4C9E1FaE7349AA2144aca53234ddC6B703B",
-  "ActivePool": "0xDeE77B76B024F869dD20f9714952C7eB4D322bb7",
-  "DefaultPool": "0x8eDC567AaB95D94DC343331A710b2c534b98dAd6",
-  "CollSurplusPool": "0x05d844E4bA8c2Ee9EBC007eEADdF5d0fFfC5C87A",
-  "GasPool": "0xf14eD1b63EF380BF1d32C49fbA43b2871f194Fef",
-  "SortedTroves": "0x54Bcd281AbB992DD408f928b29137cfDefAE63Cd",
-  "TroveManager": "0xB38f16ff0867C1e259DF5748e4968137Bf9cfd6E",
-  "TroveNFT": "0xA90174a7d5E81BF978556199adBc807192Be9D35",
-  "BorrowerOperations": "0xA5F87D6bD60E9c8f73941607271Fe5459b925D17",
-  "RedemptionHelper": "0x0Cab690660aF3f8CDd93B2550C62f35Be2B24386",
-  "HintHelpers": "0x93ce297Ab9Fa9a7a1FcAAdb25C6CF8cb42c51ad4",
-  "CollateralRegistry": "0x2CDB666907620E0ff086A5Ae3AB1989C15bEE769"
+  "FnUSD": "0xf23Ce7D43C68081CAcFd7808C0F2a0E4EB0E77BA",
+  "PriceFeed": "0x509D2EFdBFB2A32B1C419e4afAdbe4AB6B838a31",
+  "ActivePool": "0xE777202A752Dcbb59808aE7EcAA70BE7fB74a1CA",
+  "DefaultPool": "0xD52b23aAEF6809ac0816407756195e26f12a00a7",
+  "CollSurplusPool": "0x74c3261c55B931AE70Cd59EF4f2Ae75A55efC013",
+  "GasPool": "0xcC8fd6D9E1Fe2f031c42A15a891e638424672ff8",
+  "SortedTroves": "0xF8ff4235EaAe0fafD4B5c3AE3c656E0aED17686D",
+  "TroveManager": "0xEBfc68D3B550dd463D4fEB4b781F903243D2BF06",
+  "TroveNFT": "0xEAa8E5d7073B19920e0B6230e9292BC8b3644230",
+  "BorrowerOperations": "0x5153d5De995B625a871a75d91b856E55158c362B",
+  "RedemptionHelper": "0x7aa3657faFA72F07561e4F8909acb15aD023B17D",
+  "HintHelpers": "0xA76a666B8158a369173AF07e41230F3624EB7B7C",
+  "CollateralRegistry": "0x255fBB977dAd56Faea71539B4494f632c228556f"
 } as const;
 
 export type ContractName = keyof typeof CONTRACTS;
