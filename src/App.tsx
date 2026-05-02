@@ -13,6 +13,7 @@ import Trove from "./pages/app/Trove.tsx";
 import Transfer from "./pages/app/Transfer.tsx";
 import Pools from "./pages/app/Pools.tsx";
 import Faucet from "./pages/app/Faucet.tsx";
+import Docs from "./pages/Docs.tsx";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/docs" element={<Docs />} />
             <Route path="/app" element={<AppLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="trove" element={<Trove />} />
