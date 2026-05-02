@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useReadContract } from "wagmi";
 import { formatUnits } from "viem";
 import MuxVideo from "./MuxVideo";
@@ -5,7 +6,7 @@ import { CONTRACTS } from "@/lib/contracts";
 
 // ─── ABIs ─────────────────────────────────────────────────────────────────────
 const FNUSD_ABI = [
-  { name: "totalSupply",   type: "function", stateMutability: "view",
+  { name: "totalSupply", type: "function", stateMutability: "view",
     inputs: [], outputs: [{ name: "", type: "uint256" }] },
 ] as const;
 
@@ -26,9 +27,10 @@ const DIA_ABI = [
     ] },
 ] as const;
 
-const DIA_ADAPTER = "0x45dDa5d881BD2C917976CCfde74fFd6f6412da29" as const;
+const DIA_ADAPTER   = "0x45dDa5d881BD2C917976CCfde74fFd6f6412da29" as const;
+// Blockscout API on LiteForge explorer — returns holders_count for a token
+const EXPLORER_API  = "https://liteforge.explorer.caldera.xyz/api/v2/tokens";
 
-// ─── Compact number formatter ─────────────────────────────────────────────────
 function compact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
@@ -37,7 +39,9 @@ function compact(n: number): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const Stats = () => {
-  // FnUSD total supply (6 decimals) — this IS FnUSD minted
+  const [holders, setHolders] = useState<number | null>(null);
+
+  // FnUSD total supply
   const { data: totalSupply } = useReadContract({
     address: CONTRACTS.FnUSD as `0x${string}`,
     abi: FNUSD_ABI,
@@ -45,7 +49,7 @@ const Stats = () => {
     query: { refetchInterval: 30_000 },
   });
 
-  // ActivePool collateral (18-dec internal WzkLTC) — used for TVL
+  // ActivePool collateral for TVL
   const { data: poolColl } = useReadContract({
     address: CONTRACTS.ActivePool as `0x${string}`,
     abi: ACTIVE_POOL_ABI,
@@ -61,10 +65,32 @@ const Stats = () => {
     query: { refetchInterval: 30_000 },
   });
 
+  // Fetch FnUSD holder count from Blockscout explorer API
+  useEffect(() => {
+    const fnUSDAddress = CONTRACTS.FnUSD.toLowerCase();
+    const url = `${EXPLORER_API}/${fnUSDAddress}`;
+
+    const fetchHolders = async () => {
+      try {
+        const res  = await fetch(url);
+        const data = await res.json();
+        // Blockscout returns holders_count as a string
+        const count = parseInt(data?.holders_count ?? data?.holders ?? "0");
+        if (!isNaN(count)) setHolders(count);
+      } catch {
+        // silently fail — shows 0
+      }
+    };
+
+    fetchHolders();
+    const id = setInterval(fetchHolders, 60_000); // refresh every minute
+    return () => clearInterval(id);
+  }, []);
+
   // ── Derived ──────────────────────────────────────────────────────────────
-  const priceUSD   = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
-  const collNum    = poolColl ? parseFloat(formatUnits(poolColl, 18)) : 0;
-  const tvlUSD     = priceUSD > 0 ? collNum * priceUSD : 0;
+  const priceUSD    = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
+  const collNum     = poolColl ? parseFloat(formatUnits(poolColl, 18)) : 0;
+  const tvlUSD      = priceUSD > 0 ? collNum * priceUSD : 0;
   const fnUSDMinted = totalSupply ? parseFloat(formatUnits(totalSupply, 6)) : 0;
 
   const stats = [
@@ -76,6 +102,10 @@ const Stats = () => {
       label: "FnUSD Minted",
       value: fnUSDMinted > 0 ? compact(fnUSDMinted) : "0",
     },
+    {
+      label: "FnUSD Holders",
+      value: holders !== null ? compact(holders) : "0",
+    },
   ];
 
   return (
@@ -86,7 +116,7 @@ const Stats = () => {
       />
       <div className="absolute inset-0 bg-background/50" />
 
-      <div className="relative z-10 mx-auto grid max-w-4xl grid-cols-1 gap-16 px-6 sm:grid-cols-2 sm:gap-8">
+      <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 sm:grid-cols-3 sm:gap-8">
         {stats.map((s) => (
           <div key={s.label} className="text-center">
             <p className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
