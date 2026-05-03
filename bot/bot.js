@@ -88,6 +88,23 @@ const CONFIG = {
   GAS_SINGLE_FALLBACK: BigInt(process.env.GAS_SINGLE_FALLBACK || "800000"),
   /** Fallback gas per batchLiquidate() if estimateGas fails. */
   GAS_BATCH_FALLBACK: BigInt(process.env.GAS_BATCH_FALLBACK || "5000000"),
+  
+  // ─── Peg Keeper Config ──────────────────────────────────────────────────────
+  ENABLE_PEG_KEEPER: process.env.ENABLE_PEG_KEEPER === "true",
+  FNUSD_ADDRESS: process.env.FNUSD_ADDRESS,
+  AUSDC_ADDRESS: process.env.AUSDC_ADDRESS,
+  POOL_ADDRESS: process.env.POOL_ADDRESS,
+  ROUTER_ADDRESS: process.env.ROUTER_ADDRESS,
+  BORROWER_OPS_ADDRESS: process.env.BORROWER_OPS_ADDRESS,
+  WZKLITECOIN_ADDRESS: process.env.WZKLITECOIN_ADDRESS,
+  TARGET_PRICE: parseFloat(process.env.TARGET_PRICE || "1.0"),
+  UPPER_THRESHOLD: parseFloat(process.env.UPPER_THRESHOLD || "1.02"),
+  LOWER_THRESHOLD: parseFloat(process.env.LOWER_THRESHOLD || "0.98"),
+  MIN_TRADE_AMOUNT: parseFloat(process.env.MIN_TRADE_AMOUNT || "100"),
+  MAX_TRADE_AMOUNT: parseFloat(process.env.MAX_TRADE_AMOUNT || "10000"),
+  PEG_CHECK_INTERVAL: parseInt(process.env.PEG_CHECK_INTERVAL || "60", 10),
+  ENABLE_AUTO_BORROW: process.env.ENABLE_AUTO_BORROW === "true",
+  ENABLE_AUTO_REPAY: process.env.ENABLE_AUTO_REPAY === "true",
 };
 
 // ─── Logger ───────────────────────────────────────────────────────────────────
@@ -174,6 +191,31 @@ const MULTICALL3_ABI = [
 ];
 const MULTICALL3_ADDR = "0xcA11bde05977b3631167028862bE2a173976CA11";
 
+// ─── Peg Keeper ABIs ──────────────────────────────────────────────────────────
+
+const ERC20_ABI = [
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function decimals() view returns (uint8)",
+];
+
+const POOL_ABI = [
+  "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)",
+  "function token0() view returns (address)",
+  "function token1() view returns (address)",
+];
+
+const ROUTER_ABI = [
+  "function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] path, address to, uint256 deadline) returns (uint256[] amounts)",
+  "function getAmountsOut(uint256 amountIn, address[] path) view returns (uint256[] amounts)",
+];
+
+const BORROWER_OPS_ABI = [
+  "function withdrawFnUSD(uint256 fnUSDAmount6, address upperHint, address lowerHint) external",
+  "function repayFnUSD(uint256 fnUSDAmount6, address upperHint, address lowerHint) external",
+];
+
 /** TroveManager Constants.MCR — 130% — keep in sync with contracts/src/Constants.sol */
 const MCR = ethers.parseEther("1.3");
 const DANGER_ZONE = ethers.parseEther("1.45");
@@ -183,6 +225,253 @@ const OP_OPEN = 0;
 const OP_ADJUST = 1;
 const OP_CLOSE = 2;
 const OP_LIQ = 4;
+
+// ─── PegKeeper ────────────────────────────────────────────────────────────────
+
+class PegKeeper {
+  constructor(provider, signer) {
+    this.provider = provider;
+    this.signer = signer;
+    this.lastCheck = 0;
+    this.stats = { trades: 0, borrows: 0, repays: 0, errors: 0 };
+    
+    if (!CONFIG.ENABLE_PEG_KEEPER) return;
+    
+    this.fnusd = new ethers.Contract(CONFIG.FNUSD_ADDRESS, ERC20_ABI, signer);
+    this.ausdc = new ethers.Contract(CONFIG.AUSDC_ADDRESS, ERC20_ABI, signer);
+    this.pool = new ethers.Contract(CONFIG.POOL_ADDRESS, POOL_ABI, provider);
+    this.router = new ethers.Contract(CONFIG.ROUTER_ADDRESS, ROUTER_ABI, signer);
+    this.borrowerOps = new ethers.Contract(CONFIG.BORROWER_OPS_ADDRESS, BORROWER_OPS_ABI, signer);
+  }
+
+  async checkAndMaintainPeg() {
+    if (!CONFIG.ENABLE_PEG_KEEPER) return;
+    
+    const now = Date.now();
+    if (now - this.lastCheck < CONFIG.PEG_CHECK_INTERVAL * 1000) return;
+    this.lastCheck = now;
+
+    try {
+      const price = await this.getFnUSDPrice();
+      if (price === null) {
+        log.warn("PegKeeper: Could not fetch FnUSD price");
+        return;
+      }
+
+      log.info(`PegKeeper: FnUSD = $${price.toFixed(4)}`);
+
+      if (price > CONFIG.UPPER_THRESHOLD) {
+        log.info(`PegKeeper: Price too high ($${price.toFixed(4)} > $${CONFIG.UPPER_THRESHOLD}) - selling FnUSD`);
+        await this.sellFnUSD(price);
+      } else if (price < CONFIG.LOWER_THRESHOLD) {
+        log.info(`PegKeeper: Price too low ($${price.toFixed(4)} < $${CONFIG.LOWER_THRESHOLD}) - buying FnUSD`);
+        await this.buyFnUSD(price);
+      }
+    } catch (e) {
+      log.error("PegKeeper error:", e.message);
+      this.stats.errors++;
+    }
+  }
+
+  async getFnUSDPrice() {
+    try {
+      const [reserve0, reserve1] = await this.pool.getReserves();
+      const token0 = await this.pool.token0();
+      
+      let fnusdReserve, ausdcReserve;
+      if (token0.toLowerCase() === CONFIG.FNUSD_ADDRESS.toLowerCase()) {
+        fnusdReserve = Number(ethers.formatUnits(reserve0, 6));
+        ausdcReserve = Number(ethers.formatUnits(reserve1, 6));
+      } else {
+        fnusdReserve = Number(ethers.formatUnits(reserve1, 6));
+        ausdcReserve = Number(ethers.formatUnits(reserve0, 6));
+      }
+
+      if (fnusdReserve === 0) return null;
+      return ausdcReserve / fnusdReserve;
+    } catch (e) {
+      log.warn("PegKeeper: Error fetching price:", e.message);
+      return null;
+    }
+  }
+
+  async sellFnUSD(currentPrice) {
+    try {
+      // Check FnUSD balance
+      const balance = await this.fnusd.balanceOf(this.signer.address);
+      const balanceNum = Number(ethers.formatUnits(balance, 6));
+      
+      if (balanceNum < CONFIG.MIN_TRADE_AMOUNT) {
+        if (CONFIG.ENABLE_AUTO_BORROW) {
+          log.info(`PegKeeper: Low FnUSD balance (${balanceNum.toFixed(2)}) - borrowing more`);
+          await this.borrowFnUSD(CONFIG.MAX_TRADE_AMOUNT);
+          return;
+        } else {
+          log.warn(`PegKeeper: Insufficient FnUSD balance (${balanceNum.toFixed(2)}) - skipping`);
+          return;
+        }
+      }
+
+      // Calculate trade amount
+      const deviation = currentPrice - CONFIG.TARGET_PRICE;
+      const tradeAmount = Math.min(
+        Math.max(deviation * 10000, CONFIG.MIN_TRADE_AMOUNT),
+        CONFIG.MAX_TRADE_AMOUNT,
+        balanceNum
+      );
+
+      const amountIn = ethers.parseUnits(tradeAmount.toFixed(2), 6);
+      const amountOutMin = ethers.parseUnits((tradeAmount * 0.995).toFixed(2), 6); // 0.5% slippage
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + 300);
+
+      // Approve if needed
+      await this.ensureApproval(this.fnusd, CONFIG.ROUTER_ADDRESS, amountIn);
+
+      // Swap
+      log.info(`PegKeeper: Selling ${tradeAmount.toFixed(2)} FnUSD for aUSDC`);
+      const tx = await this.router.swapExactTokensForTokens(
+        amountIn,
+        amountOutMin,
+        [CONFIG.FNUSD_ADDRESS, CONFIG.AUSDC_ADDRESS],
+        this.signer.address,
+        deadline,
+        await this._feeOverrides()
+      );
+      
+      const receipt = await tx.wait();
+      log.info(`PegKeeper: Sold FnUSD - tx ${tx.hash}`);
+      this.stats.trades++;
+    } catch (e) {
+      log.error("PegKeeper: Sell failed:", e.message);
+      this.stats.errors++;
+    }
+  }
+
+  async buyFnUSD(currentPrice) {
+    try {
+      // Check aUSDC balance
+      const balance = await this.ausdc.balanceOf(this.signer.address);
+      const balanceNum = Number(ethers.formatUnits(balance, 6));
+      
+      if (balanceNum < CONFIG.MIN_TRADE_AMOUNT) {
+        log.warn(`PegKeeper: Insufficient aUSDC balance (${balanceNum.toFixed(2)}) - skipping`);
+        return;
+      }
+
+      // Calculate trade amount
+      const deviation = CONFIG.TARGET_PRICE - currentPrice;
+      const tradeAmount = Math.min(
+        Math.max(deviation * 10000, CONFIG.MIN_TRADE_AMOUNT),
+        CONFIG.MAX_TRADE_AMOUNT,
+        balanceNum
+      );
+
+      const amountIn = ethers.parseUnits(tradeAmount.toFixed(2), 6);
+      const amountOutMin = ethers.parseUnits((tradeAmount * 0.995).toFixed(2), 6); // 0.5% slippage
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + 300);
+
+      // Approve if needed
+      await this.ensureApproval(this.ausdc, CONFIG.ROUTER_ADDRESS, amountIn);
+
+      // Swap
+      log.info(`PegKeeper: Buying ${tradeAmount.toFixed(2)} FnUSD with aUSDC`);
+      const tx = await this.router.swapExactTokensForTokens(
+        amountIn,
+        amountOutMin,
+        [CONFIG.AUSDC_ADDRESS, CONFIG.FNUSD_ADDRESS],
+        this.signer.address,
+        deadline,
+        await this._feeOverrides()
+      );
+      
+      const receipt = await tx.wait();
+      log.info(`PegKeeper: Bought FnUSD - tx ${tx.hash}`);
+      this.stats.trades++;
+
+      // Optionally repay debt if we have excess FnUSD
+      if (CONFIG.ENABLE_AUTO_REPAY) {
+        await this.maybeRepayDebt();
+      }
+    } catch (e) {
+      log.error("PegKeeper: Buy failed:", e.message);
+      this.stats.errors++;
+    }
+  }
+
+  async borrowFnUSD(amount) {
+    try {
+      const amountToMint = ethers.parseUnits(amount.toFixed(2), 6);
+      log.info(`PegKeeper: Borrowing ${amount.toFixed(2)} FnUSD`);
+      
+      const tx = await this.borrowerOps.withdrawFnUSD(
+        amountToMint,
+        ethers.ZeroAddress,
+        ethers.ZeroAddress,
+        await this._feeOverrides()
+      );
+      
+      await tx.wait();
+      log.info(`PegKeeper: Borrowed FnUSD - tx ${tx.hash}`);
+      this.stats.borrows++;
+    } catch (e) {
+      log.error("PegKeeper: Borrow failed:", e.message);
+      this.stats.errors++;
+    }
+  }
+
+  async maybeRepayDebt() {
+    try {
+      const balance = await this.fnusd.balanceOf(this.signer.address);
+      const balanceNum = Number(ethers.formatUnits(balance, 6));
+      
+      // If we have more than 2x MAX_TRADE_AMOUNT, repay some
+      if (balanceNum > CONFIG.MAX_TRADE_AMOUNT * 2) {
+        const repayAmount = balanceNum - CONFIG.MAX_TRADE_AMOUNT;
+        const amountToRepay = ethers.parseUnits(repayAmount.toFixed(2), 6);
+        
+        log.info(`PegKeeper: Repaying ${repayAmount.toFixed(2)} FnUSD debt`);
+        
+        // Approve if needed
+        await this.ensureApproval(this.fnusd, CONFIG.BORROWER_OPS_ADDRESS, amountToRepay);
+        
+        const tx = await this.borrowerOps.repayFnUSD(
+          amountToRepay,
+          ethers.ZeroAddress,
+          ethers.ZeroAddress,
+          await this._feeOverrides()
+        );
+        
+        await tx.wait();
+        log.info(`PegKeeper: Repaid debt - tx ${tx.hash}`);
+        this.stats.repays++;
+      }
+    } catch (e) {
+      log.error("PegKeeper: Repay failed:", e.message);
+      this.stats.errors++;
+    }
+  }
+
+  async ensureApproval(token, spender, amount) {
+    const allowance = await token.allowance(this.signer.address, spender);
+    if (allowance >= amount) return;
+    
+    log.info(`PegKeeper: Approving ${spender}`);
+    const tx = await token.approve(spender, ethers.MaxUint256);
+    await tx.wait();
+  }
+
+  async _feeOverrides() {
+    const fee = await this.provider.getFeeData();
+    const over = {};
+    if (fee.maxFeePerGas != null && fee.maxPriorityFeePerGas != null) {
+      over.maxFeePerGas = (fee.maxFeePerGas * 110n) / 100n;
+      over.maxPriorityFeePerGas = (fee.maxPriorityFeePerGas * 110n) / 100n;
+    } else if (fee.gasPrice != null) {
+      over.gasPrice = (fee.gasPrice * 110n) / 100n;
+    }
+    return over;
+  }
+}
 
 // ─── Bot ──────────────────────────────────────────────────────────────────────
 
@@ -198,6 +487,9 @@ class LiquidationBot {
     this._listenersAttached = false;
     this._shuttingDown = false;
     this._wsReconnecting = false;
+    
+    // Initialize PegKeeper
+    this.pegKeeper = new PegKeeper(this.provider, this.signer);
   }
 
   _initProviderAndContracts() {
@@ -287,6 +579,17 @@ class LiquidationBot {
     await this.fullSync();
     log.info("Indexed", this.store.size(), "active Troves");
 
+    if (CONFIG.ENABLE_PEG_KEEPER) {
+      log.info("PegKeeper: ENABLED");
+      log.info(" Target  :", `$${CONFIG.TARGET_PRICE}`);
+      log.info(" Range   :", `$${CONFIG.LOWER_THRESHOLD} - $${CONFIG.UPPER_THRESHOLD}`);
+      log.info(" Trade   :", `$${CONFIG.MIN_TRADE_AMOUNT} - $${CONFIG.MAX_TRADE_AMOUNT}`);
+      log.info(" Pool    :", CONFIG.POOL_ADDRESS);
+      log.info(" Router  :", CONFIG.ROUTER_ADDRESS);
+    } else {
+      log.info("PegKeeper: DISABLED");
+    }
+
     this.subscribeEvents();
     this.provider.on("block", (n) => this.onBlock(n));
     this._listenersAttached = true;
@@ -340,6 +643,13 @@ class LiquidationBot {
     }
 
     this.lastPrice = price;
+
+    // Check and maintain FnUSD peg
+    if (CONFIG.ENABLE_PEG_KEEPER) {
+      await this.pegKeeper.checkAndMaintainPeg().catch((e) => 
+        log.warn("PegKeeper check failed:", e.message)
+      );
+    }
 
     if (this.isScanning) return;
     this.isScanning = true;
@@ -585,7 +895,10 @@ class LiquidationBot {
     } catch {
       /* ignore */
     }
-    log.info("Shutdown. Stats:", JSON.stringify(this.stats));
+    log.info("Shutdown. Liquidation Stats:", JSON.stringify(this.stats));
+    if (CONFIG.ENABLE_PEG_KEEPER) {
+      log.info("PegKeeper Stats:", JSON.stringify(this.pegKeeper.stats));
+    }
   }
 }
 

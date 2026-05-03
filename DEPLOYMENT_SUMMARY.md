@@ -1,244 +1,112 @@
-# 🚀 Deployment Summary - NFT System with Transfer Feature
-
-## ✅ Completed Tasks
-
-### 1. Token Name Update
-- ✅ Changed from "Wrapped zkLitecoin" to "WzkLTC"
-- ✅ Ticker remains "wzkLTC"
-- ✅ Updated in WzkLTC.sol contract
-
-### 2. NFT System Deployment
-Successfully deployed to **liteforge network (chainId: 4441)**:
-
-```
-TroveNFT:           0xC6f5F0692C57BdCdbeb92A0928B7372B0e40D065
-TroveManager:       0x7886a09D9D004Bc0a9cc167f769bCA582c3FFe15
-BorrowerOperations: 0xC4b78665883C72a0C88cAE0157502CCCbB78DeFF
-```
-
-### 3. Code Changes
-- ✅ Removed all em dashes (─) from code
-- ✅ Replaced with equals signs (=)
-- ✅ Updated Solidity compiler to 0.8.26 with Cancun EVM
-- ✅ Fixed compilation issues
-
-### 4. Frontend Updates
-- ✅ Updated `src/lib/contracts.ts` with new addresses
-- ✅ Added Transfer tab to Trove management
-- ✅ Created `useTroveNFT` hook for NFT operations
-- ✅ Updated balance display logic
-
-### 5. Documentation
-- ✅ Created comprehensive transfer guide
-- ✅ Updated all trove documentation
-- ✅ Added NFT explanations throughout
-- ✅ Updated glossary and navigation
-
-### 6. Git Push
-- ✅ Committed all changes
-- ✅ Pushed to GitHub (main branch)
-- ✅ Commit hash: `75ecf88`
-
-## 📊 Gas Savings
-
-| Operation | Old System | NFT System | Savings |
-|-----------|-----------|-----------|---------|
-| Open Trove | 160k gas | 140k gas | **12.5%** |
-| Close Trove | 80k gas | 60k gas | **25%** |
-| Liquidate | 100k gas | 90k gas | **10%** |
-
-## 🎯 New Features
-
-### NFT Representation
-- Each Trove is an ERC721 NFT
-- Visible in MetaMask, OpenSea, etc.
-- Token ID assigned on creation
-- Burned when trove closes
-
-### Transfer Functionality
-- Transfer entire position to another address
-- Includes all debt and collateral
-- Safety checks prevent errors
-- Clear warnings in UI
-
-### Better Storage
-- No expensive address arrays
-- Minimal storage writes
-- Uses tokenId as key
-- Uniswap V3 style architecture
-
-## 📝 Contract Addresses
-
-### New Contracts (NFT System)
-```
-TroveNFT:           0xC6f5F0692C57BdCdbeb92A0928B7372B0e40D065
-TroveManager:       0x7886a09D9D004Bc0a9cc167f769bCA582c3FFe15
-BorrowerOperations: 0xC4b78665883C72a0C88cAE0157502CCCbB78DeFF
-```
-
-### Existing Contracts (Unchanged)
-```
-AddressesRegistry:  0xbE63a640395295b3A49228d5920796fB94690E8E
-WzkLTC:             0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec
-FnUSD:              0x39d3861C1E60823b95f545f41dD3cb45f1f529AD
-PriceFeed:          0x0B3c8318327a775Bc8d67cF6B996408DBae1b62D
-ActivePool:         0x60cebB7639eF69a1889602d1b8441390fAF59A56
-DefaultPool:        0x3ca147c8f183468EFC6b67A783A71d2c12f094d3
-CollSurplusPool:    0x042c42e51006E49dbBb1A42061868CC64B0469a0
-GasPool:            0xb50b0F1Fb8299Fd51aC3C84b3841C8177dF708D5
-SortedTroves:       0xD12Eb5F67C3823a15A722d629E6EB79a0f045Ce6
-RedemptionHelper:   0x39EF4E7412f9220435016A0B51F048FFa7424473
-HintHelpers:        0xCa4D74D08AB440529f4fa1c10B552F3242C6aFD7
-CollateralRegistry: 0x240d8A34C4E9350Cf23f4145191e8312D62e1fA0
-```
-
-## 🔧 Technical Details
-
-### Compiler Settings
-```typescript
-solidity: {
-  version: "0.8.26",
-  settings: {
-    optimizer: { enabled: true, runs: 200 },
-    evmVersion: "cancun",
-    viaIR: true,
-  },
-}
-```
-
-### Network Configuration
-```
-Network: liteforge
-RPC: https://liteforge.rpc.caldera.xyz/http
-Chain ID: 4441
-```
-
-## 📚 Documentation Files
-
-### New Documentation
-- `docs/trove/transferring-your-trove.md` - Complete transfer guide
-- `TRANSFER_FEATURE.md` - Feature overview
-- `DOCUMENTATION_UPDATES.md` - Doc changes summary
-- `contracts/NFT_STORAGE_UPGRADE.md` - Technical details
-- `DEPLOYMENT_SUMMARY.md` - This file
-
-### Updated Documentation
-- `docs/index.md` - Added NFT glossary
-- `docs/SUMMARY.md` - Added transfer section
-- `docs/trove/what-is-a-trove.md` - NFT explanation
-- `docs/trove/opening-a-trove.md` - NFT minting
-- `docs/trove/closing-a-trove.md` - NFT burning
-
-## 🎨 UI Changes
-
-### New Components
-- Transfer tab in Trove management
-- NFT token ID display
-- Transfer warnings and validation
-- Address input with checks
-
-### Updated Components
-- Balance display (fixed small amounts)
-- Debt display (includes redistribution)
-- Tab navigation (added Transfer)
-
-## 🔐 Security Features
-
-### Transfer Safety
-- ✅ Cannot transfer to self
-- ✅ Cannot transfer to address with existing trove
-- ✅ Address validation
-- ✅ Uses `safeTransferFrom` (ERC721 standard)
-- ✅ Clear warnings about debt transfer
-
-### Contract Safety
-- ✅ ReentrancyGuard on all state-changing functions
-- ✅ Access control (only BorrowerOperations can mint/burn)
-- ✅ Input validation
-- ✅ Safe math operations
-
-## 📦 Files Changed
-
-### Contracts (169 files)
-- Modified: 3 core contracts
-- Created: 1 new contract (TroveNFT)
-- Updated: All artifacts and typechain types
-
-### Frontend (10 files)
-- Modified: 3 hooks
-- Created: 1 new hook (useTroveNFT)
-- Updated: 1 page (Trove.tsx)
-- Updated: 1 config (contracts.ts)
-
-### Documentation (6 files)
-- Created: 4 new docs
-- Updated: 5 existing docs
-
-## 🚀 Next Steps
-
-### For Users
-1. Connect wallet to app
-2. Open a trove (receives NFT)
-3. Check MetaMask NFT tab
-4. Use Transfer tab to transfer positions
-5. Close trove (burns NFT)
-
-### For Developers
-1. Frontend is already updated
-2. Test all features on testnet
-3. Monitor gas costs
-4. Collect user feedback
-5. Add dynamic NFT metadata (optional)
-
-## 📊 Statistics
-
-```
-Total Files Changed: 169
-Lines Added: 9,802
-Lines Deleted: 1,210
-Commits: 1
-Branches: main
-Remote: GitHub
-```
-
-## ✨ Key Benefits
-
-1. **Lower Costs** - 12-25% gas savings
-2. **Better UX** - NFTs visible in wallets
-3. **Transferable** - Sell/gift positions
-4. **Composable** - Use in other DeFi protocols
-5. **Cleaner Code** - No em dashes, better structure
-6. **Well Documented** - Complete user guides
-
-## 🎉 Success Metrics
-
-- ✅ All contracts deployed successfully
-- ✅ Frontend updated with new addresses
-- ✅ Documentation complete and comprehensive
-- ✅ Code cleaned (no em dashes)
-- ✅ Git pushed to remote
-- ✅ Zero compilation errors
-- ✅ All features working
-
-## 🔗 Links
-
-- **GitHub Repo**: https://github.com/Teckdegen/fenus-frontend
-- **Latest Commit**: 75ecf88
-- **Network**: LitVM LiteForge (chainId 4441)
-- **Block Explorer**: https://liteforge.explorer.caldera.xyz
-
-## 📞 Support
-
-If you encounter any issues:
-1. Check the documentation
-2. Verify contract addresses
-3. Test on testnet first
-4. Check transaction on block explorer
-5. Contact support if needed
+# FENUS Protocol - Fresh Deployment Summary
+**Date:** May 3, 2026  
+**Network:** LitVM LiteForge (Chain ID: 4441)  
+**Deployer:** 0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df
 
 ---
 
-**Deployment Date**: May 2, 2026  
-**Deployed By**: 0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df  
-**Status**: ✅ Complete and Live  
-**Version**: 2.0.0 (NFT System)
+## ✅ Deployment Status: COMPLETE
+
+All contracts have been successfully deployed and the AddressesRegistry is **FROZEN** (immutable).
+
+---
+
+## 📋 Contract Addresses
+
+| Contract | Address | Status |
+|----------|---------|--------|
+| **AddressesRegistry** | `0xAE3A7af98cfE48910cCf5495d3ADcAb37026eeDf` | 🔒 FROZEN |
+| **WzkLTC** | `0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec` | ✅ Existing (NOT redeployed) |
+| **FnUSD** | `0x219F2AC287458cD58aB46ABd3cfbe451728323f4` | ✅ New |
+| **PriceFeed** | `0x39992B70D9C36902aeE699185E94d021BDa94ab6` | ✅ New |
+| **ActivePool** | `0x164f3C4F3f3a047c5005fAFABE9e0b1227BC8a0B` | ✅ New |
+| **DefaultPool** | `0x8b72d0FfDa721f9E62eC9a0ae5A35273961cD3F0` | ✅ New |
+| **CollSurplusPool** | `0xb29fEf2f09229C9f77e9528185AB204d19668Af7` | ✅ New |
+| **GasPool** | `0xdA00c1C3d32e5B59E7a9b85dfAa47592C77CCA25` | ✅ New |
+| **SortedTroves** | `0x992630fb5e0Cf7E040D5063564B181fa4b2eee0d` | ✅ New |
+| **TroveNFT** | `0x3A856810c38a0446692c8C44400A09Dc9bAA519f` | ✅ New |
+| **TroveManager** | `0xD001F1E7CB690C12E191bf7Aa1c3B6332D92a8B4` | ✅ New |
+| **BorrowerOperations** | `0x70ae94769345031F7fC9C611d8bC822bCFcfB111` | ✅ New |
+| **RedemptionHelper** | `0x693054a3FEacEd02345D47Fe19EeF5719f473035` | ✅ New |
+| **HintHelpers** | `0xac4506c363430c90A1dc25d452778f10737aabC0` | ✅ New |
+| **CollateralRegistry** | `0x23D5e06576FCA811F5da9594491972C085B83490` | ✅ New |
+
+---
+
+## 🔧 What Was Updated
+
+### 1. **Contracts (Redeployed)**
+- ✅ All contracts except WzkLTC were redeployed
+- ✅ WzkLTC kept from previous deployment (as requested)
+- ✅ AddressesRegistry frozen with all new addresses
+- ✅ WzkLTC registered as collateral with 130% MCR
+
+### 2. **Frontend (`src/lib/contracts.ts`)**
+- ✅ Auto-updated with all new contract addresses
+- ✅ All hooks and components use CONTRACTS import
+- ✅ No manual updates needed
+
+### 3. **Bot Configuration**
+- ✅ `bot/.env` updated with new addresses
+- ✅ `bot/.env.example` updated with new addresses
+- ✅ PegKeeper configuration included
+
+### 4. **Contracts Environment**
+- ✅ `contracts/.env` updated with new AddressesRegistry
+
+---
+
+## 🎯 Key Changes from Previous Deployment
+
+1. **Fee Logic Fixed**: Fee is now deducted from what user receives, not added to debt
+2. **Constructor Updates**: All pool contracts now use constructors instead of init()
+3. **PegKeeper Integrated**: Bot now includes FnUSD peg maintenance functionality
+4. **Deployment Script**: Fixed to use correct constructor arguments
+
+---
+
+## 🚀 Next Steps
+
+### For Frontend:
+1. Test the UI with new contract addresses
+2. Verify Trove operations (open, borrow, repay, close)
+3. Check faucet functionality
+
+### For Liquidation Bot:
+1. Update `bot/.env` with your private key
+2. Run: `cd bot && npm start`
+3. Bot will monitor for liquidations automatically
+
+### For PegKeeper (Optional):
+1. Set `ENABLE_PEG_KEEPER=true` in `bot/.env`
+2. Add Addax pool and router addresses
+3. Add aUSDC token address
+4. Bot will maintain FnUSD at $1 peg
+
+---
+
+## 📝 Important Notes
+
+- **AddressesRegistry is FROZEN**: Cannot be changed, immutable forever
+- **WzkLTC unchanged**: Existing tokens and balances preserved
+- **All other contracts are NEW**: Previous FnUSD and Troves are on old contracts
+- **Treasury**: All fees go to `0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df`
+
+---
+
+## 🔗 Network Information
+
+- **Network**: LitVM LiteForge
+- **Chain ID**: 4441
+- **RPC HTTP**: https://liteforge.rpc.caldera.xyz/http
+- **RPC WebSocket**: wss://liteforge.rpc.caldera.xyz/ws
+- **Explorer**: https://liteforge.explorer.caldera.xyz
+- **Gas Token**: zkLTC
+
+---
+
+## ✅ Verification
+
+All contracts deployed successfully and verified on-chain. Frontend automatically synchronized with new addresses.
+
+**Deployment Log**: See `contracts/deployment.log` for full deployment details.
