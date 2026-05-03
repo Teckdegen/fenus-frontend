@@ -1,14 +1,84 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { docsSections, docsGroups } from "@/lib/docsContent";
 import { cn } from "@/lib/utils";
-import { Book, ChevronRight, Menu, X, ArrowLeft } from "lucide-react";
+import { Book, ChevronRight, Menu, X, ArrowLeft, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
+
+interface SearchResult {
+  sectionId: string;
+  sectionTitle: string;
+  group: string;
+  snippet: string;
+}
+
+const getSearchResults = (query: string): SearchResult[] => {
+  if (!query || query.length < 2) return [];
+  const q = query.toLowerCase();
+  const results: SearchResult[] = [];
+
+  for (const section of docsSections) {
+    const content = section.content.toLowerCase();
+    const titleMatch = section.title.toLowerCase().includes(q);
+    const contentIdx = content.indexOf(q);
+
+    if (titleMatch || contentIdx !== -1) {
+      let snippet = "";
+      if (contentIdx !== -1) {
+        const start = Math.max(0, contentIdx - 40);
+        const end = Math.min(content.length, contentIdx + query.length + 80);
+        const raw = section.content.slice(start, end).replace(/[#*`|_\->\[\]]/g, "").replace(/\n/g, " ");
+        snippet = (start > 0 ? "…" : "") + raw.trim() + (end < content.length ? "…" : "");
+      } else {
+        snippet = section.content.slice(0, 100).replace(/[#*`|_\->\[\]]/g, "").replace(/\n/g, " ").trim() + "…";
+      }
+
+      results.push({
+        sectionId: section.id,
+        sectionTitle: section.title,
+        group: section.group,
+        snippet,
+      });
+    }
+  }
+  return results;
+};
 
 const Docs = () => {
   const [activeSection, setActiveSection] = useState(docsSections[0].id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const searchResults = useMemo(() => getSearchResults(searchQuery), [searchQuery]);
+
+  // Keyboard shortcut: Ctrl/Cmd + K
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  const handleSelectResult = useCallback((sectionId: string) => {
+    setActiveSection(sectionId);
+    setSearchOpen(false);
+    setSearchQuery("");
+    window.scrollTo(0, 0);
+  }, []);
 
   const currentDoc = docsSections.find((s) => s.id === activeSection) ?? docsSections[0];
 
