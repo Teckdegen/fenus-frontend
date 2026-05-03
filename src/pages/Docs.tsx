@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { docsSections, docsGroups } from "@/lib/docsContent";
@@ -14,54 +14,15 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 
-interface SearchResult {
-  sectionId: string;
-  sectionTitle: string;
-  group: string;
-  snippet: string;
-}
-
-const getSearchResults = (query: string): SearchResult[] => {
-  if (!query || query.length < 2) return [];
-  const q = query.toLowerCase();
-  const results: SearchResult[] = [];
-
-  for (const section of docsSections) {
-    const content = section.content.toLowerCase();
-    const titleMatch = section.title.toLowerCase().includes(q);
-    const contentIdx = content.indexOf(q);
-
-    if (titleMatch || contentIdx !== -1) {
-      let snippet = "";
-      if (contentIdx !== -1) {
-        const start = Math.max(0, contentIdx - 40);
-        const end = Math.min(content.length, contentIdx + query.length + 80);
-        const raw = section.content.slice(start, end).replace(/[#*`|_\->\[\]]/g, "").replace(/\n/g, " ");
-        snippet = (start > 0 ? "…" : "") + raw.trim() + (end < content.length ? "…" : "");
-      } else {
-        snippet = section.content.slice(0, 100).replace(/[#*`|_\->\[\]]/g, "").replace(/\n/g, " ").trim() + "…";
-      }
-
-      results.push({
-        sectionId: section.id,
-        sectionTitle: section.title,
-        group: section.group,
-        snippet,
-      });
-    }
-  }
-  return results;
-};
-
 const Docs = () => {
   const [activeSection, setActiveSection] = useState(docsSections[0].id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const searchResults = useMemo(() => getSearchResults(searchQuery), [searchQuery]);
+  const currentDoc = docsSections.find((s) => s.id === activeSection) ?? docsSections[0];
 
-  // Keyboard shortcut: Ctrl/Cmd + K
+  // Keyboard shortcut for search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -73,14 +34,20 @@ const Docs = () => {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const handleSelectResult = useCallback((sectionId: string) => {
-    setActiveSection(sectionId);
-    setSearchOpen(false);
-    setSearchQuery("");
-    window.scrollTo(0, 0);
-  }, []);
-
-  const currentDoc = docsSections.find((s) => s.id === activeSection) ?? docsSections[0];
+  // Search results
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return docsSections
+      .filter((s) => s.title.toLowerCase().includes(q) || s.content.toLowerCase().includes(q))
+      .map((s) => {
+        const idx = s.content.toLowerCase().indexOf(q);
+        const snippet = idx >= 0
+          ? "..." + s.content.slice(Math.max(0, idx - 40), idx + 60).replace(/\n/g, " ") + "..."
+          : "";
+        return { ...s, snippet };
+      });
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -103,48 +70,51 @@ const Docs = () => {
           <div className="ml-auto">
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-accent/30 hover:bg-accent text-muted-foreground text-sm transition-colors"
+              className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-muted-foreground/50 transition-colors"
             >
-              <Search className="w-4 h-4" />
-              <span className="hidden sm:inline">Search docs…</span>
-              <kbd className="hidden md:inline-flex items-center gap-0.5 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
+              <Search className="w-3.5 h-3.5" />
+              <span>Search docs...</span>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-border bg-accent px-1.5 py-0.5 text-[10px] font-mono">
                 ⌘K
               </kbd>
             </button>
           </div>
         </div>
-
-        {/* Search Dialog */}
-        <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-          <CommandInput
-            placeholder="Search docs…"
-            value={searchQuery}
-            onValueChange={setSearchQuery}
-          />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            {searchResults.length > 0 && (
-              <CommandGroup heading={`${searchResults.length} result${searchResults.length > 1 ? "s" : ""}`}>
-                {searchResults.map((r) => (
-                  <CommandItem
-                    key={r.sectionId}
-                    value={r.sectionId + " " + r.sectionTitle}
-                    onSelect={() => handleSelectResult(r.sectionId)}
-                    className="flex flex-col items-start gap-1 cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground font-medium">{r.group}</span>
-                      <ChevronRight className="w-3 h-3 text-muted-foreground" />
-                      <span className="font-medium text-foreground">{r.sectionTitle}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{r.snippet}</p>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </CommandDialog>
       </header>
+
+      {/* Search Dialog */}
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <CommandInput
+          placeholder="Search docs..."
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+        />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          {searchResults.length > 0 && (
+            <CommandGroup heading="Results">
+              {searchResults.map((result) => (
+                <CommandItem
+                  key={result.id}
+                  onSelect={() => {
+                    setActiveSection(result.id);
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                    window.scrollTo(0, 0);
+                  }}
+                  className="flex flex-col items-start gap-1 cursor-pointer"
+                >
+                  <span className="text-xs text-muted-foreground">{result.group}</span>
+                  <span className="font-medium text-foreground">{result.title}</span>
+                  {result.snippet && (
+                    <span className="text-xs text-muted-foreground line-clamp-1">{result.snippet}</span>
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+        </CommandList>
+      </CommandDialog>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
@@ -200,9 +170,9 @@ const Docs = () => {
           />
         )}
 
-        {/* Content */}
+        {/* Content - full width */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-6 py-10 lg:px-12">
+          <div className="w-full px-6 py-10 sm:px-10 md:px-16 lg:px-24 xl:px-32">
             <h1 className="text-3xl lg:text-4xl font-bold mb-8 tracking-tight">
               {currentDoc.title}
             </h1>
