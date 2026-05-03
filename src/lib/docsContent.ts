@@ -884,7 +884,7 @@ The Trove screen shows an **LTC/USD oracle** feed. Ratio and liquidation hints d
     id: "pools",
     title: "Pools & Liquidity",
     group: "Beyond Borrowing",
-    content: `The **Pools** screen points to **external venues** where you can supply liquidity using **FnUSD** and other assets for example **FnUSD / wzkLTC** or **FnUSD / USDC** on **Addax**.
+    content: `The **Pools** screen points to **external venues** where you can supply liquidity using **FnUSD** and other assets for example **FnUSD / wzkLTC** or **FnUSD / aUSDC** on **Addax**.
 
 ---
 
@@ -914,7 +914,7 @@ Each row links out to the venue's website.
 | Pair | Venue | Notes |
 |---|---|---|
 | FnUSD / wzkLTC | Addax | Opens in new tab from app |
-| FnUSD / USDC | Addax | Stable pairing |
+| FnUSD / aUSDC | Addax | Stable pairing |
 
 APR and TVL in the app may show **0** until pools are live or wired to live stats.
 

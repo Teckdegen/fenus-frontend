@@ -18,7 +18,7 @@ const Docs = () => {
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="flex items-center h-14 px-4 gap-3">
           <button
-            className="lg:hidden p-1.5 rounded-md hover:bg-accent transition-colors"
+            className="p-1.5 rounded-md hover:bg-accent transition-colors"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -37,7 +37,7 @@ const Docs = () => {
         {/* Sidebar */}
         <aside
           className={cn(
-            "fixed lg:static inset-y-14 left-0 z-40 w-72 border-r border-border bg-background overflow-y-auto transition-transform duration-200 lg:translate-x-0 shrink-0",
+            "fixed inset-y-14 left-0 z-40 w-72 border-r border-border bg-background overflow-y-auto transition-transform duration-200 shrink-0",
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           )}
         >
@@ -79,10 +79,10 @@ const Docs = () => {
           </nav>
         </aside>
 
-        {/* Overlay for mobile */}
+        {/* Overlay */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+            className="fixed inset-0 z-30 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           />
         )}

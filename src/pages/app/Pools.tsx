@@ -12,9 +12,9 @@ const pools = [
     url: "https://addax.finance",
   },
   {
-    pair: "FnUSD / USDC",
+    pair: "FnUSD / aUSDC",
     token0: "FnUSD",
-    token1: "USDC",
+    token1: "aUSDC",
     venue: "Addax",
     tvl: "$0",
     apr: "0.00%",

@@ -11,7 +11,7 @@ export const TOKEN_IMAGES: Record<string, string> = {
   zkLTC:  WZKLITECOIN_IMAGE_URL,
   WzkLTC: WZKLITECOIN_IMAGE_URL,
   FnUSD:  FNUSD_IMAGE_URL,
-  USDC:   FNUSD_IMAGE_URL,
+  aUSDC:  FNUSD_IMAGE_URL,
 };
 
 // Reusable token icon — real image if available, gradient fallback otherwise
