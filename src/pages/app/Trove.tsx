@@ -110,6 +110,20 @@ const Trove = () => {
   const priceLoaded  = price > 0;
   const busy         = actions.status === "approving" || actions.status === "pending";
 
+  // Auto-fill borrow amount at 140% CR when collateral is entered
+  const handleCollateralChange = (value: string) => {
+    setCollInput(value);
+    actions.reset();
+    
+    // Auto-fill borrow amount if collateral is entered and price is loaded
+    const coll = parseFloat(value) || 0;
+    if (coll > 0 && priceLoaded && !borrowInput) {
+      const collUSD = coll * price;
+      const suggestedBorrow = collUSD / 1.4; // 140% CR
+      setBorrowInput(suggestedBorrow.toFixed(2));
+    }
+  };
+
   // ── Calculations ────────────────────────────────────────────────────────────
   const openCalc = useMemo(() => {
     const coll   = parseFloat(collInput)   || 0;
@@ -291,7 +305,7 @@ const Trove = () => {
           ) : (
             <div className="space-y-3">
             <TokenInput label="Deposit wzkLTC" symbol="wzkLTC" balance={wzkLTCBalanceFull}
-              value={collInput} onChange={(v) => { setCollInput(v); actions.reset(); }} />
+              value={collInput} onChange={handleCollateralChange} />
             <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
               value={borrowInput} onChange={(v) => { setBorrowInput(v); actions.reset(); }} />
 
