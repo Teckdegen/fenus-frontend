@@ -1,16 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { docsSections, docsGroups } from "@/lib/docsContent";
 import { cn } from "@/lib/utils";
-import { Book, ChevronRight, Menu, X, ArrowLeft } from "lucide-react";
+import { Book, ChevronRight, Menu, X, ArrowLeft, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
 
 const Docs = () => {
   const [activeSection, setActiveSection] = useState(docsSections[0].id);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const currentDoc = docsSections.find((s) => s.id === activeSection) ?? docsSections[0];
+
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
+  // Search results
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return docsSections
+      .filter((s) => s.title.toLowerCase().includes(q) || s.content.toLowerCase().includes(q))
+      .map((s) => {
+        const idx = s.content.toLowerCase().indexOf(q);
+        const snippet = idx >= 0
+          ? "..." + s.content.slice(Math.max(0, idx - 40), idx + 60).replace(/\n/g, " ") + "..."
+          : "";
+        return { ...s, snippet };
+      });
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -30,8 +67,54 @@ const Docs = () => {
             <Book className="w-5 h-5 text-muted-foreground" />
             <span className="font-semibold text-sm tracking-wide">FENUS Docs</span>
           </div>
+          <div className="ml-auto">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-muted-foreground/50 transition-colors"
+            >
+              <Search className="w-3.5 h-3.5" />
+              <span>Search docs...</span>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded border border-border bg-accent px-1.5 py-0.5 text-[10px] font-mono">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
         </div>
       </header>
+
+      {/* Search Dialog */}
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <CommandInput
+          placeholder="Search docs..."
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+        />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          {searchResults.length > 0 && (
+            <CommandGroup heading="Results">
+              {searchResults.map((result) => (
+                <CommandItem
+                  key={result.id}
+                  onSelect={() => {
+                    setActiveSection(result.id);
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                    window.scrollTo(0, 0);
+                  }}
+                  className="flex flex-col items-start gap-1 cursor-pointer"
+                >
+                  <span className="text-xs text-muted-foreground">{result.group}</span>
+                  <span className="font-medium text-foreground">{result.title}</span>
+                  {result.snippet && (
+                    <span className="text-xs text-muted-foreground line-clamp-1">{result.snippet}</span>
+                  )}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+        </CommandList>
+      </CommandDialog>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
@@ -87,9 +170,9 @@ const Docs = () => {
           />
         )}
 
-        {/* Content */}
+        {/* Content - full width */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-6 py-10 lg:px-12">
+          <div className="w-full px-6 py-10 sm:px-10 md:px-16 lg:px-24 xl:px-32">
             <h1 className="text-3xl lg:text-4xl font-bold mb-8 tracking-tight">
               {currentDoc.title}
             </h1>
