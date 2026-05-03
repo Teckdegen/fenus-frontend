@@ -115,14 +115,15 @@ const Trove = () => {
     const coll   = parseFloat(collInput)   || 0;
     const borrow = parseFloat(borrowInput) || 0;
     if (!coll && !borrow) return null;
-    const fee      = borrow * ORIGINATION_FEE;
-    const totalDebt = borrow + fee;
+    const fee         = borrow * ORIGINATION_FEE;
+    const amountToReceive = borrow - fee; // User receives borrow minus fee
+    const totalDebt   = amountToReceive;  // Debt is only what user receives
     const collUSD  = priceLoaded ? coll * price : null;
     const ratio    = collUSD !== null && totalDebt > 0 ? collUSD / totalDebt : null;
     const liqPrice = totalDebt > 0 && coll > 0 ? (totalDebt * MCR) / coll : null;
     const ratioOk  = ratio !== null ? ratio >= BUFFER : true;
     const canOpen  = coll > 0 && borrow > 0 && ratioOk;
-    return { coll, borrow, fee, totalDebt, collUSD, ratio, liqPrice, canOpen };
+    return { coll, borrow, fee, amountToReceive, totalDebt, collUSD, ratio, liqPrice, canOpen };
   }, [collInput, borrowInput, price, priceLoaded]);
 
   const addCalc = useMemo(() => {
@@ -147,12 +148,13 @@ const Trove = () => {
   const borrowCalc = useMemo(() => {
     const amt = parseFloat(moreInput) || 0;
     const fee = amt * ORIGINATION_FEE;
-    const newDebt = existingDebt + amt + fee;
+    const amountToReceive = amt - fee; // User receives amt minus fee
+    const newDebt = existingDebt + amountToReceive; // Debt increases by what user receives
     const collUSD = priceLoaded ? existingColl * price : null;
     const ratio   = collUSD !== null && newDebt > 0 ? collUSD / newDebt : null;
     const liqPrice = newDebt > 0 && existingColl > 0 ? (newDebt * MCR) / existingColl : null;
     const safe = ratio === null || ratio >= BUFFER;
-    return { newColl: existingColl, newDebt, ratio, liqPrice, safe, fee };
+    return { newColl: existingColl, newDebt, ratio, liqPrice, safe, fee, amountToReceive };
   }, [moreInput, existingColl, existingDebt, price, priceLoaded]);
 
   const repayCalc = useMemo(() => {
@@ -319,7 +321,11 @@ const Trove = () => {
                     <span className="tabular-nums">{openCalc.fee.toFixed(2)} FnUSD</span>
                   </div>
                   <div className="flex justify-between text-[11px]">
-                    <span className="text-muted-foreground">Total debt at open</span>
+                    <span className="text-muted-foreground">You will receive</span>
+                    <span className="tabular-nums font-medium">{openCalc.amountToReceive.toFixed(2)} FnUSD</span>
+                  </div>
+                  <div className="flex justify-between text-[11px]">
+                    <span className="text-muted-foreground">Your debt will be</span>
                     <span className="tabular-nums font-medium">{openCalc.totalDebt.toFixed(2)} FnUSD</span>
                   </div>
                 </div>
