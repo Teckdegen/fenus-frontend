@@ -424,11 +424,11 @@ const Trove = () => {
                   <span className="tabular-nums">0.00 FnUSD</span>
                 </div>
               )}
-              {existingDebt > 0 && parseFloat(fnUSDBalanceFull) < existingDebt && (
+              {existingDebt > 0 && repayInput && parseFloat(repayInput) > parseFloat(fnUSDBalanceFull) && (
                 <div className="flex items-start gap-1.5 mt-2 pt-2 border-t border-border/40">
                   <Info className="h-3 w-3 shrink-0 text-amber-500/80 mt-0.5" />
                   <p className="text-[10px] text-amber-500/80">
-                    Insufficient balance. You need {(existingDebt - parseFloat(fnUSDBalanceFull)).toFixed(2)} more FnUSD to repay in full.
+                    Insufficient balance. You need {(parseFloat(repayInput) - parseFloat(fnUSDBalanceFull)).toFixed(2)} more FnUSD.
                   </p>
                 </div>
               )}
