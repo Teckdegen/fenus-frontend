@@ -100,7 +100,50 @@ const Docs = () => {
             <Book className="w-5 h-5 text-muted-foreground" />
             <span className="font-semibold text-sm tracking-wide">FENUS Docs</span>
           </div>
+          <div className="ml-auto">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-accent/30 hover:bg-accent text-muted-foreground text-sm transition-colors"
+            >
+              <Search className="w-4 h-4" />
+              <span className="hidden sm:inline">Search docs…</span>
+              <kbd className="hidden md:inline-flex items-center gap-0.5 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
         </div>
+
+        {/* Search Dialog */}
+        <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+          <CommandInput
+            placeholder="Search docs…"
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+          />
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            {searchResults.length > 0 && (
+              <CommandGroup heading={`${searchResults.length} result${searchResults.length > 1 ? "s" : ""}`}>
+                {searchResults.map((r) => (
+                  <CommandItem
+                    key={r.sectionId}
+                    value={r.sectionId + " " + r.sectionTitle}
+                    onSelect={() => handleSelectResult(r.sectionId)}
+                    className="flex flex-col items-start gap-1 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground font-medium">{r.group}</span>
+                      <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                      <span className="font-medium text-foreground">{r.sectionTitle}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{r.snippet}</p>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </CommandDialog>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
