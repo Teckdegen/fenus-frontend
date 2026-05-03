@@ -92,6 +92,8 @@ const Trove = () => {
   const [removeInput, setRemoveInput] = useState("");
   const [moreInput,   setMoreInput]   = useState("");
   const [repayInput,  setRepayInput]  = useState("");
+  const [userEditedBorrow, setUserEditedBorrow] = useState(false);
+  const [showBorrowHint, setShowBorrowHint] = useState(false);
 
   const { open } = useAppKit();
 
@@ -110,18 +112,32 @@ const Trove = () => {
   const priceLoaded  = price > 0;
   const busy         = actions.status === "approving" || actions.status === "pending";
 
-  // Auto-fill borrow amount at 140% CR when collateral is entered
+  // Auto-fill borrow amount at 140% CR when collateral changes
   const handleCollateralChange = (value: string) => {
     setCollInput(value);
     actions.reset();
     
-    // Auto-fill borrow amount if collateral is entered and price is loaded
+    // Always auto-fill unless user has manually edited
     const coll = parseFloat(value) || 0;
-    if (coll > 0 && priceLoaded && !borrowInput) {
+    if (coll > 0 && priceLoaded && !userEditedBorrow) {
       const collUSD = coll * price;
       const suggestedBorrow = collUSD / 1.4; // 140% CR
       setBorrowInput(suggestedBorrow.toFixed(2));
+      setShowBorrowHint(true);
+      // Hide hint after 3 seconds
+      setTimeout(() => setShowBorrowHint(false), 3000);
+    } else if (coll === 0) {
+      setBorrowInput("");
+      setUserEditedBorrow(false);
     }
+  };
+
+  // Track when user manually edits borrow amount
+  const handleBorrowChange = (value: string) => {
+    setBorrowInput(value);
+    setUserEditedBorrow(true);
+    setShowBorrowHint(false);
+    actions.reset();
   };
 
   // ── Calculations ────────────────────────────────────────────────────────────
@@ -306,8 +322,19 @@ const Trove = () => {
             <div className="space-y-3">
             <TokenInput label="Deposit wzkLTC" symbol="wzkLTC" balance={wzkLTCBalanceFull}
               value={collInput} onChange={handleCollateralChange} />
-            <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
-              value={borrowInput} onChange={(v) => { setBorrowInput(v); actions.reset(); }} />
+            <div className="relative">
+              <TokenInput label="Borrow FnUSD" symbol="FnUSD" balance={fnUSDBalanceFull}
+                value={borrowInput} onChange={handleBorrowChange} />
+              {showBorrowHint && borrowInput && (
+                <div className="absolute -top-2 right-0 z-10 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="rounded-full bg-amber-500/90 px-3 py-1.5 shadow-lg backdrop-blur-sm">
+                    <p className="text-[10px] font-medium text-white whitespace-nowrap">
+                      💡 Auto-filled at 140% CR • You can edit this
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {openCalc && (
               <div className="rounded-2xl border border-border/60 bg-background/20 divide-y divide-border/40">
