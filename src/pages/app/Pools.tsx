@@ -36,24 +36,39 @@ const pools = [
 const Pools = () => {
   const [poolData, setPoolData] = useState<PoolData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPoolData = async () => {
       try {
+        console.log("Fetching pool data from:", ADDAX_API);
         const response = await fetch(ADDAX_API);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log("Pool data received:", data);
         
         if (data.pools && data.pools.length > 0) {
           const pool = data.pools[0];
-          setPoolData({
+          const poolInfo = {
             tvlUsd: pool.tvlUsd,
             volumeUsd: pool.volumeUsd,
             feesUsd: pool.feesUsd,
             swapCount: pool.swapCount,
-          });
+          };
+          console.log("Setting pool data:", poolInfo);
+          setPoolData(poolInfo);
+          setError(null);
+        } else {
+          setError("No pool data available");
         }
-      } catch (error) {
-        console.error("Failed to fetch pool data:", error);
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : "Failed to fetch pool data";
+        console.error("Error fetching pool data:", errorMsg);
+        setError(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -90,6 +105,11 @@ const Pools = () => {
       </div>
 
       <Card className="p-5">
+        {error && (
+          <div className="mb-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-500">
+            {error}
+          </div>
+        )}
         <Row 
           label="Total LP TVL" 
           value={loading ? "Loading..." : poolData ? formatUSD(poolData.tvlUsd) : "$0"} 
