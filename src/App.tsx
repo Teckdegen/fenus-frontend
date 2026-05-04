@@ -16,8 +16,6 @@ import Pools from "./pages/app/Pools.tsx";
 import Faucet from "./pages/app/Faucet.tsx";
 import Docs from "./pages/Docs.tsx";
 
-// Initialize Vercel Analytics
-inject();
 
 const queryClient = new QueryClient();
 
