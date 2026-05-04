@@ -28,7 +28,7 @@ const DIA_ABI = [
     ] },
 ] as const;
 
-// Blockscout API on LiteForge explorer — returns holders_count for a token
+// Blockscout API on LiteForge explorer — returns token_holders_count
 const EXPLORER_API  = "https://liteforge.explorer.caldera.xyz/api/v2/tokens";
 
 function compact(n: number): string {
@@ -68,17 +68,19 @@ const Stats = () => {
   // Fetch FnUSD holder count from Blockscout explorer API
   useEffect(() => {
     const fnUSDAddress = CONTRACTS.FnUSD.toLowerCase();
-    const url = `${EXPLORER_API}/${fnUSDAddress}`;
+    const countersUrl = `${EXPLORER_API}/${fnUSDAddress}/counters`;
 
     const fetchHolders = async () => {
       try {
-        const res  = await fetch(url);
+        const res  = await fetch(countersUrl);
         const data = await res.json();
-        // Blockscout returns holders_count as a string
-        const count = parseInt(data?.holders_count ?? data?.holders ?? "0");
-        if (!isNaN(count)) setHolders(count);
-      } catch {
-        // silently fail — shows 0
+        // Use the counters endpoint which has token_holders_count
+        const count = parseInt(data?.token_holders_count ?? "0");
+        if (!isNaN(count) && count > 0) {
+          setHolders(count);
+        }
+      } catch (err) {
+        console.error("Failed to fetch holders:", err);
       }
     };
 
