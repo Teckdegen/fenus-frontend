@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
-import { Card, Row, SectionLabel, TokenIcon, TOKEN_IMAGES } from "@/components/app/Shared";
+import { Card, Row, SectionLabel, TokenIcon } from "@/components/app/Shared";
 
 interface PoolData {
   tvlUsd: number;
