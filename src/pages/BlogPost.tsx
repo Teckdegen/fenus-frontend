@@ -3,8 +3,6 @@ import { ArrowLeft, Clock } from "lucide-react";
 import { getPostBySlug, allPosts } from "@/blog";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -71,18 +69,18 @@ const BlogPost = () => {
         </div>
 
         {/* Content */}
-        <div className="prose prose-invert prose-sm sm:prose-base max-w-none
-          prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:mb-5
-          prose-headings:font-display prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-foreground
-          prose-strong:text-foreground prose-strong:font-semibold
-          prose-a:text-foreground prose-a:underline prose-a:underline-offset-2
-          prose-table:text-sm prose-th:text-foreground prose-td:text-muted-foreground
-          prose-blockquote:border-l-foreground/20 prose-blockquote:text-muted-foreground
-          prose-code:text-foreground prose-code:bg-foreground/8 prose-code:rounded prose-code:px-1
-        ">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {post.content}
-          </ReactMarkdown>
+        <div className="space-y-6">
+          {post.content
+            .split("\n\n")
+            .filter((p) => p.trim())
+            .map((paragraph, i) => (
+              <p
+                key={i}
+                className="text-base sm:text-lg leading-[1.85] text-muted-foreground tracking-normal"
+              >
+                {paragraph.trim()}
+              </p>
+            ))}
         </div>
 
         {/* CTA */}
