@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
 import Navbar from "@/components/Navbar";
 import Stats from "@/components/Stats";
+import BlogPreview from "@/components/BlogPreview";
 
 const Index = () => {
   return (
@@ -11,6 +12,7 @@ const Index = () => {
       <Hero />
       <Stats />
       <HowItWorks />
+      <BlogPreview />
       <Footer />
     </main>
   );

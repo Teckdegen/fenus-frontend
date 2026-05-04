@@ -14,6 +14,8 @@ import Transfer from "./pages/app/Transfer.tsx";
 import Pools from "./pages/app/Pools.tsx";
 import Faucet from "./pages/app/Faucet.tsx";
 import Docs from "./pages/Docs.tsx";
+import Blog from "./pages/Blog.tsx";
+import BlogPost from "./pages/BlogPost.tsx";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/docs" element={<Docs />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/app" element={<AppLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="trove" element={<Trove />} />

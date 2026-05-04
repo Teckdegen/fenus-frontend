@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/fenus-logo.png";
 
 const sections = [
@@ -32,9 +33,9 @@ const Navbar = () => {
   }, []);
 
   return (
-    <header className="fixed top-8 left-1/2 z-50 w-[min(92%,520px)] -translate-x-1/2 sm:top-4">
+    <header className="fixed top-8 left-1/2 z-50 w-[min(92%,580px)] -translate-x-1/2 sm:top-4">
       <nav className="nav-pill flex items-center justify-between rounded-full px-2.5 py-1.5 sm:px-5 sm:py-2">
-        <a href="#" className="flex items-center gap-1.5 sm:gap-2">
+        <a href="/" className="flex items-center gap-1.5 sm:gap-2">
           <img src={logo} alt="FENUS" className="h-5 w-5 sm:h-7 sm:w-7" />
           <span className="font-display text-xs font-semibold tracking-tight sm:text-base">
             FENUS
@@ -58,9 +59,23 @@ const Navbar = () => {
               </li>
             );
           })}
+          <li>
+            <Link
+              to="/blog"
+              className="transition hover:text-foreground"
+            >
+              Blog
+            </Link>
+          </li>
         </ul>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
+          <Link
+            to="/app"
+            className="hidden sm:inline-flex items-center justify-center rounded-full bg-foreground px-4 py-1.5 text-xs font-semibold text-background hover:opacity-90 transition"
+          >
+            Launch App
+          </Link>
           <button
             type="button"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -95,6 +110,24 @@ const Navbar = () => {
                 </li>
               );
             })}
+            <li>
+              <Link
+                to="/blog"
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2 transition hover:bg-foreground/5 hover:text-foreground"
+              >
+                Blog
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/app"
+                onClick={() => setOpen(false)}
+                className="block rounded-lg px-3 py-2 transition hover:bg-foreground/5 hover:text-foreground font-medium"
+              >
+                Launch App →
+              </Link>
+            </li>
           </ul>
         </div>
       )}
