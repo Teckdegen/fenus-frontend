@@ -1,5 +1,23 @@
-import { ExternalLink } from "lucide-react";
-import { Card, Row, SectionLabel, TokenIcon, TOKEN_IMAGES } from "@/components/app/Shared";
+import { useEffect, useState } from "react";
+import { ExternalLink, Loader2 } from "lucide-react";
+import { Card, Row, SectionLabel, TokenIcon } from "@/components/app/Shared";
+
+const POOL_ADDRESS = "0xa299a878b7b696d966b3b69e7e3ed7bd4a050b26";
+const API_URL = `https://addax.finance/api/pools/${POOL_ADDRESS}`;
+
+interface PoolData {
+  tvlUsd: number;
+  volumeUsd: number;
+  feesUsd: number;
+  swapCount: number;
+}
+
+const fmt = (n: number, decimals = 2) =>
+  n >= 1_000_000
+    ? `$${(n / 1_000_000).toFixed(2)}M`
+    : n >= 1_000
+      ? `$${(n / 1_000).toFixed(2)}K`
+      : `$${n.toFixed(decimals)}`;
 
 const pools = [
   {
@@ -7,24 +25,43 @@ const pools = [
     token0: "FnUSD",
     token1: "aUSDC",
     venue: "Addax",
-    tvl: "$0",
-    apr: "0.00%",
-    url: "https://www.addax.finance/pools/0xa299a878b7b696d966b3b69e7e3ed7bd4a050b26",
-    status: "live",
+    url: `https://www.addax.finance/pools/${POOL_ADDRESS}`,
+    status: "live" as const,
+    isApi: true,
   },
   {
     pair: "FnUSD / wzkLTC",
     token0: "FnUSD",
     token1: "wzkLTC",
     venue: "Addax",
-    tvl: "$0",
-    apr: "0.00%",
     url: "#",
-    status: "coming-soon",
+    status: "coming-soon" as const,
+    isApi: false,
   },
 ];
 
 const Pools = () => {
+  const [data, setData] = useState<PoolData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then((r) => r.json())
+      .then((json) => {
+        const p = json.pools?.[0];
+        if (p) {
+          setData({
+            tvlUsd: p.tvlUsd,
+            volumeUsd: p.volumeUsd,
+            feesUsd: p.feesUsd,
+            swapCount: p.swapCount,
+          });
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
       <div className="px-1">
@@ -35,9 +72,19 @@ const Pools = () => {
       </div>
 
       <Card className="p-5">
-        <Row label="Total LP TVL"  value="$0" />
-        <Row label="24h Volume"    value="$0" />
-        <Row label="Your LP Value" value="$0" />
+        {loading ? (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <>
+            <Row label="Total LP TVL" value={data ? fmt(data.tvlUsd) : "$0"} />
+            <Row label="24h Volume" value={data ? fmt(data.volumeUsd) : "$0"} />
+            <Row label="24h Fees" value={data ? fmt(data.feesUsd, 4) : "$0"} />
+            <Row label="Total Swaps" value={data ? data.swapCount.toLocaleString() : "0"} />
+            <Row label="Your LP Value" value="$0" />
+          </>
+        )}
       </Card>
 
       <div>
@@ -50,8 +97,8 @@ const Pools = () => {
               target={p.status === "coming-soon" ? undefined : "_blank"}
               rel={p.status === "coming-soon" ? undefined : "noopener noreferrer"}
               className={`flex items-center justify-between rounded-2xl px-3 py-3.5 transition ${
-                p.status === "coming-soon" 
-                  ? "cursor-default opacity-60" 
+                p.status === "coming-soon"
+                  ? "cursor-default opacity-60"
                   : "hover:bg-foreground/[0.04]"
               }`}
               onClick={(e) => p.status === "coming-soon" && e.preventDefault()}
@@ -77,8 +124,19 @@ const Pools = () => {
                 {p.status !== "coming-soon" && (
                   <>
                     <div className="text-right">
-                      <p className="font-display text-sm tabular-nums">{p.apr} APR</p>
-                      <p className="text-[11px] tabular-nums text-muted-foreground">TVL {p.tvl}</p>
+                      {p.isApi && data ? (
+                        <>
+                          <p className="font-display text-sm tabular-nums">TVL {fmt(data.tvlUsd)}</p>
+                          <p className="text-[11px] tabular-nums text-muted-foreground">
+                            Vol {fmt(data.volumeUsd)}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-display text-sm tabular-nums">TVL $0</p>
+                          <p className="text-[11px] tabular-nums text-muted-foreground">Vol $0</p>
+                        </>
+                      )}
                     </div>
                     <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
                   </>
