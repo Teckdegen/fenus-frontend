@@ -10,7 +10,7 @@ interface PoolData {
 }
 
 const POOL_ADDRESS = "0xa299a878b7b696d966b3b69e7e3ed7bd4a050b26";
-const ADDAX_API = `https://addax.finance/api/pools/${POOL_ADDRESS}`;
+const ADDAX_API = `/api/addax-pool?address=${POOL_ADDRESS}`;
 
 const pools = [
   {
