@@ -5,13 +5,14 @@ import { ReactNode } from "react";
 // Also used in wallet metadata so wallets like MetaMask show the correct icons.
 export const WZKLITECOIN_IMAGE_URL = "https://www.image2url.com/r2/default/images/1777631633399-a83840bb-eef1-4386-8749-2007be4a5e87.jpg";
 export const FNUSD_IMAGE_URL       = "https://www.image2url.com/r2/default/images/1777632157848-482b63d8-a570-4f01-bc38-94ba9ebe0722.jpg";
+export const AUSDC_IMAGE_URL       = "https://www.image2url.com/r2/default/images/1777896428658-44c84ae0-4ff7-429d-8878-f5996c3156ae.jpg";
 
 export const TOKEN_IMAGES: Record<string, string> = {
   wzkLTC: WZKLITECOIN_IMAGE_URL,
   zkLTC:  WZKLITECOIN_IMAGE_URL,
   WzkLTC: WZKLITECOIN_IMAGE_URL,
   FnUSD:  FNUSD_IMAGE_URL,
-  aUSDC:  FNUSD_IMAGE_URL,
+  aUSDC:  AUSDC_IMAGE_URL,
 };
 
 // Reusable token icon — real image if available, gradient fallback otherwise
