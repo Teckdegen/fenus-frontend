@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "description": "FENUS CDP protocol smart contracts",
   "private": true,
+  "type": "module",
   "scripts": {
-    "compile":        "hardhat compile",
+    "compile": "hardhat compile",
     "deploy:testnet": "hardhat run scripts/deploy.ts --network liteforge",
-    "deploy:local":   "hardhat run scripts/deploy.ts --network localhost",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
     "test:pricefeed": "hardhat run scripts/testPriceFeed.ts --network liteforge",
-    "mint:wzklitecoin":  "hardhat run scripts/mintWzkLTC.ts --network liteforge",
-    "debug":             "hardhat run scripts/debugTrove.ts --network liteforge",
-    "seed:pricefeed":    "hardhat run scripts/seedPriceFeed.ts --network liteforge",
-    "node":           "hardhat node",
-    "clean":          "hardhat clean"
+    "mint:wzklitecoin": "hardhat run scripts/mintWzkLTC.ts --network liteforge",
+    "debug": "hardhat run scripts/debugTrove.ts --network liteforge",
+    "seed:pricefeed": "hardhat run scripts/seedPriceFeed.ts --network liteforge",
+    "node": "hardhat node",
+    "clean": "hardhat clean"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
@@ -22,6 +23,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "ethers": "^6.16.0"
   }
 }

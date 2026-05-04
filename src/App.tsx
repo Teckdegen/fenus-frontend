@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { inject } from "@vercel/analytics";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,9 +14,6 @@ import Transfer from "./pages/app/Transfer.tsx";
 import Pools from "./pages/app/Pools.tsx";
 import Faucet from "./pages/app/Faucet.tsx";
 import Docs from "./pages/Docs.tsx";
-
-// Initialize Vercel Analytics
-inject();
 
 const queryClient = new QueryClient();
 
