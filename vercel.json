@@ -16,6 +16,9 @@
       "dest": "/api/blog-meta?slug=$1"
     },
     {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
