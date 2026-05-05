@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useReadContract } from "wagmi";
 import { formatUnits } from "viem";
 import MuxVideo from "./MuxVideo";
@@ -28,9 +27,6 @@ const DIA_ABI = [
     ] },
 ] as const;
 
-// Blockscout API on LiteForge explorer — returns token_holders_count
-const EXPLORER_API  = "https://liteforge.explorer.caldera.xyz/api/v2/tokens";
-
 function compact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000)     return `${(n / 1_000).toFixed(1)}K`;
@@ -39,8 +35,6 @@ function compact(n: number): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const Stats = () => {
-  const [holders, setHolders] = useState<number | null>(null);
-
   // FnUSD total supply
   const { data: totalSupply } = useReadContract({
     address: CONTRACTS.FnUSD as `0x${string}`,
@@ -65,30 +59,6 @@ const Stats = () => {
     query: { refetchInterval: 30_000 },
   });
 
-  // Fetch FnUSD holder count from Blockscout explorer API
-  useEffect(() => {
-    const fnUSDAddress = CONTRACTS.FnUSD.toLowerCase();
-    const countersUrl = `${EXPLORER_API}/${fnUSDAddress}/counters`;
-
-    const fetchHolders = async () => {
-      try {
-        const res  = await fetch(countersUrl);
-        const data = await res.json();
-        // Use the counters endpoint which has token_holders_count
-        const count = parseInt(data?.token_holders_count ?? "0");
-        if (!isNaN(count) && count > 0) {
-          setHolders(count);
-        }
-      } catch (err) {
-        console.error("Failed to fetch holders:", err);
-      }
-    };
-
-    fetchHolders();
-    const id = setInterval(fetchHolders, 60_000); // refresh every minute
-    return () => clearInterval(id);
-  }, []);
-
   // ── Derived ──────────────────────────────────────────────────────────────
   const priceUSD    = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
   const collNum     = poolColl ? parseFloat(formatUnits(poolColl, 18)) : 0;
@@ -104,10 +74,6 @@ const Stats = () => {
       label: "FnUSD Minted",
       value: fnUSDMinted > 0 ? compact(fnUSDMinted) : "0",
     },
-    {
-      label: "FnUSD Holders",
-      value: holders !== null ? compact(holders) : "0",
-    },
   ];
 
   return (
@@ -118,7 +84,7 @@ const Stats = () => {
       />
       <div className="absolute inset-0 bg-background/50" />
 
-      <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 sm:grid-cols-3 sm:gap-8">
+      <div className="relative z-10 mx-auto grid max-w-6xl grid-cols-1 gap-16 px-6 sm:grid-cols-2 sm:gap-8 max-w-2xl">
         {stats.map((s) => (
           <div key={s.label} className="text-center">
             <p className="font-display text-xs uppercase tracking-[0.3em] text-muted-foreground">
