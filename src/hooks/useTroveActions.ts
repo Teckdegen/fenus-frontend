@@ -71,6 +71,8 @@ export interface TxResult {
   amount?: string;
   amount2?: string;
   txHash: string;
+  reverted?: boolean;
+  revertReason?: string;
 }
 
 export function useTroveActions(address: `0x${string}` | undefined) {
@@ -167,7 +169,15 @@ export function useTroveActions(address: `0x${string}` | undefined) {
 
       // Check if the transaction actually succeeded on-chain
       if (receipt.status === "reverted") {
-        setError("Transaction reverted on-chain. The price oracle may be temporarily unavailable. Please wait a few minutes and try again.");
+        // Show reverted state in the modal with the tx hash so user can inspect
+        setTxResult({
+          type,
+          amount,
+          amount2,
+          txHash: hash,
+          reverted: true,
+          revertReason: "The transaction was submitted but reverted on-chain. The price oracle may be temporarily unavailable. Please wait a few minutes and try again.",
+        });
         setStatus("error");
         return;
       }

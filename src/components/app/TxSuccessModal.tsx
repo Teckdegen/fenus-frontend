@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, ExternalLink, X } from "lucide-react";
+import { CheckCircle2, ExternalLink, X, AlertTriangle } from "lucide-react";
 
 const EXPLORER = "https://liteforge.explorer.caldera.xyz/tx/";
 
@@ -8,6 +8,8 @@ export interface TxSuccessData {
   amount?: string;     // e.g. "500.00 FnUSD"
   amount2?: string;    // e.g. "10.00 wzkLTC" (for two-sided ops)
   txHash: string;
+  reverted?: boolean;  // true if tx was mined but execution reverted
+  revertReason?: string;
 }
 
 interface Props {
@@ -31,6 +33,8 @@ export const TxSuccessModal = ({ data, onClose }: Props) => {
     setTimeout(onClose, 300);
   };
 
+  const isReverted = data.reverted === true;
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -52,21 +56,36 @@ export const TxSuccessModal = ({ data, onClose }: Props) => {
           <X className="h-3.5 w-3.5" />
         </button>
 
-        {/* Success icon — animated */}
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-foreground/10 ring-4 ring-foreground/20">
-          <CheckCircle2 className="h-10 w-10 text-foreground" strokeWidth={1.5} />
-        </div>
+        {/* Icon — success or reverted */}
+        {isReverted ? (
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10 ring-4 ring-red-500/20">
+            <AlertTriangle className="h-10 w-10 text-red-400" strokeWidth={1.5} />
+          </div>
+        ) : (
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-foreground/10 ring-4 ring-foreground/20">
+            <CheckCircle2 className="h-10 w-10 text-foreground" strokeWidth={1.5} />
+          </div>
+        )}
 
         {/* Title */}
         <div className="space-y-1">
           <p className="font-display text-xl font-semibold tracking-tight">
-            Transaction Confirmed
+            {isReverted ? "Transaction Reverted" : "Transaction Confirmed"}
           </p>
           <p className="text-sm text-muted-foreground">{data.type}</p>
         </div>
 
-        {/* Amount(s) */}
-        {(data.amount || data.amount2) && (
+        {/* Revert reason */}
+        {isReverted && (
+          <div className="w-full rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4 text-left">
+            <p className="text-[11px] text-red-300 leading-relaxed">
+              {data.revertReason || "The transaction was submitted but reverted on-chain. The price oracle may be temporarily unavailable. Please wait a few minutes and try again."}
+            </p>
+          </div>
+        )}
+
+        {/* Amount(s) — only show on success */}
+        {!isReverted && (data.amount || data.amount2) && (
           <div className="w-full rounded-2xl border border-border/60 bg-background/40 px-5 py-4 space-y-2">
             {data.amount && (
               <div className="flex items-center justify-between">
@@ -95,7 +114,9 @@ export const TxSuccessModal = ({ data, onClose }: Props) => {
           className="flex w-full items-center justify-between rounded-2xl border border-border/60 bg-background/40 px-5 py-3.5 transition hover:border-foreground/40 hover:bg-foreground/5"
         >
           <div className="text-left">
-            <p className="text-[11px] text-muted-foreground">Transaction</p>
+            <p className="text-[11px] text-muted-foreground">
+              {isReverted ? "Failed Transaction" : "Transaction"}
+            </p>
             <p className="font-mono text-xs text-foreground mt-0.5">
               {data.txHash.slice(0, 10)}…{data.txHash.slice(-8)}
             </p>
@@ -108,7 +129,7 @@ export const TxSuccessModal = ({ data, onClose }: Props) => {
           onClick={handleClose}
           className="w-full rounded-full bg-foreground py-3.5 text-sm font-semibold text-background transition hover:opacity-90 active:scale-[0.99]"
         >
-          Done
+          {isReverted ? "Try Again" : "Done"}
         </button>
       </div>
     </div>

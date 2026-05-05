@@ -1,5 +1,6 @@
 import { useAccount, useReadContract } from "wagmi";
 import { formatUnits } from "viem";
+import { useEffect, useState } from "react";
 import { CONTRACTS } from "@/lib/contracts";
 import { DIA_ADAPTER } from "@/lib/oracles";
 
@@ -75,6 +76,25 @@ export function useBalances() {
   const { address, isConnected } = useAccount();
   const enabled = isConnected && !!address;
 
+  // CoinGecko fallback price when DIA oracle is stale
+  const [cgPrice, setCgPrice] = useState<number>(0);
+  useEffect(() => {
+    const fetchCgPrice = async () => {
+      try {
+        const res = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=litecoin&vs_currencies=usd"
+        );
+        const data = await res.json();
+        if (data?.litecoin?.usd) setCgPrice(data.litecoin.usd);
+      } catch {
+        // silently fail
+      }
+    };
+    fetchCgPrice();
+    const id = setInterval(fetchCgPrice, 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   const { data: wzkLTCBal } = useReadContract({
     address: CONTRACTS.WzkLTC as `0x${string}`,
     abi: ERC20_ABI,
@@ -147,7 +167,9 @@ export function useBalances() {
   });
 
   // ─── Derived ──────────────────────────────────────────────────────────────
-  const priceNum = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
+  const diaPrice = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
+  // Use DIA on-chain price first, fall back to CoinGecko if oracle is stale
+  const priceNum = diaPrice > 0 ? diaPrice : cgPrice;
   const collNum  = troveColl ? parseFloat(formatUnits(troveColl, 18)) : 0;
   
   // Use ENTIRE debt (recorded + pending redistribution) for accurate display
