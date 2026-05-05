@@ -78,7 +78,15 @@ function TxStatus({ status, txHash, error }: { status: string; txHash: string; e
   if (status === "error") return (
     <div className="flex items-start gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3">
       <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400 mt-0.5" />
-      <p className="text-[11px] text-red-300">{error || "Transaction failed. Try again."}</p>
+      <div>
+        <p className="text-[11px] text-red-300">{error || "Transaction failed. Try again."}</p>
+        {txHash && (
+          <a href={`${EXPLORER}${txHash}`} target="_blank" rel="noopener noreferrer"
+            className="text-[10px] text-red-400/70 hover:text-red-400 underline mt-1 block">
+            View failed tx on explorer
+          </a>
+        )}
+      </div>
     </div>
   );
   return null;

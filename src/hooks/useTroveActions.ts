@@ -145,7 +145,10 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         gas: GAS.approve,
         ...fees,
       });
-      await pub.waitForTransactionReceipt({ hash });
+      const receipt = await pub.waitForTransactionReceipt({ hash });
+      if (receipt.status === "reverted") {
+        throw new Error("Approval transaction reverted. Please try again.");
+      }
     }
   }
 
@@ -160,7 +163,15 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     try {
       const hash = await fn();
       setTxHash(hash);
-      await pub.waitForTransactionReceipt({ hash });
+      const receipt = await pub.waitForTransactionReceipt({ hash });
+
+      // Check if the transaction actually succeeded on-chain
+      if (receipt.status === "reverted") {
+        setError("Transaction reverted on-chain. Your collateral ratio may be too low, or the price moved. Try again with a higher collateral ratio.");
+        setStatus("error");
+        return;
+      }
+
       setTxResult({ type, amount, amount2, txHash: hash });
       setStatus("success");
     } catch (e: any) {
