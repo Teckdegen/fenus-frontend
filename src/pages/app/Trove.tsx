@@ -121,7 +121,7 @@ const Trove = () => {
     const coll = parseFloat(value) || 0;
     if (coll > 0 && priceLoaded && !userEditedBorrow) {
       const collUSD = coll * price;
-      const suggestedBorrow = collUSD / 1.4; // 140% CR
+      const suggestedBorrow = collUSD / 1.5; // 150% CR — safe buffer above 135% minimum
       setBorrowInput(suggestedBorrow.toFixed(2));
       setShowBorrowHint(true);
       // Hide hint after 3 seconds
@@ -329,7 +329,7 @@ const Trove = () => {
                 <div className="absolute -top-2 right-0 z-10 animate-in fade-in slide-in-from-top-1 duration-200">
                   <div className="rounded-full bg-amber-500/90 px-3 py-1.5 shadow-lg backdrop-blur-sm">
                     <p className="text-[10px] font-medium text-white whitespace-nowrap">
-                      💡 Auto-filled at 140% CR • You can edit this
+                      💡 Auto-filled at 150% CR • You can edit this
                     </p>
                   </div>
                 </div>
