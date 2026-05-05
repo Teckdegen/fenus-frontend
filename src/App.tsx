@@ -13,6 +13,7 @@ import Trove from "./pages/app/Trove.tsx";
 import Transfer from "./pages/app/Transfer.tsx";
 import Pools from "./pages/app/Pools.tsx";
 import Faucet from "./pages/app/Faucet.tsx";
+import Admin from "./pages/app/Admin.tsx";
 import Docs from "./pages/Docs.tsx";
 import Blog from "./pages/Blog.tsx";
 import BlogPost from "./pages/BlogPost.tsx";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="transfer" element={<Transfer />} />
               <Route path="pools" element={<Pools />} />
               <Route path="faucet" element={<Faucet />} />
+              <Route path="admin" element={<Admin />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

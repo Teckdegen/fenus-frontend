@@ -1,8 +1,10 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { Wallet } from "lucide-react";
+import { Wallet, ShieldCheck } from "lucide-react";
 import { useAccount, useDisconnect } from "wagmi";
 import { useAppKit } from "@reown/appkit/react";
 import logo from "@/assets/fenus-logo.png";
+
+const ADMIN_WALLET = "0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df".toLowerCase();
 
 const nav = [
   { to: "/app",          end: true,  label: "Home"     },
@@ -26,6 +28,8 @@ const AppLayout = () => {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
 
+  const isAdmin = isConnected && address?.toLowerCase() === ADMIN_WALLET;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div
@@ -40,22 +44,41 @@ const AppLayout = () => {
             <span className="font-display text-sm font-semibold tracking-tight">FENUS</span>
           </NavLink>
 
-          {isConnected && address ? (
-            <button
-              onClick={() => open({ view: "Account" })}
-              className="flex items-center gap-2 rounded-full bg-foreground px-3.5 py-1.5 text-[11px] font-semibold text-background transition hover:opacity-90"
-            >
-              <span className="font-mono">{shorten(address)}</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => open()}
-              className="flex items-center gap-2 rounded-full bg-foreground px-3.5 py-1.5 text-[11px] font-semibold text-background transition hover:opacity-90"
-            >
-              <Wallet className="h-3 w-3" />
-              <span>Connect</span>
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Admin badge — only visible to admin wallet */}
+            {isAdmin && (
+              <NavLink
+                to="/app/admin"
+                className={({ isActive }) =>
+                  `flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition ${
+                    isActive
+                      ? "bg-amber-500/20 border-amber-500/40 text-amber-400"
+                      : "border-amber-500/30 text-amber-500/70 hover:text-amber-400 hover:border-amber-500/50"
+                  }`
+                }
+              >
+                <ShieldCheck className="h-3 w-3" />
+                Admin
+              </NavLink>
+            )}
+
+            {isConnected && address ? (
+              <button
+                onClick={() => open({ view: "Account" })}
+                className="flex items-center gap-2 rounded-full bg-foreground px-3.5 py-1.5 text-[11px] font-semibold text-background transition hover:opacity-90"
+              >
+                <span className="font-mono">{shorten(address)}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => open()}
+                className="flex items-center gap-2 rounded-full bg-foreground px-3.5 py-1.5 text-[11px] font-semibold text-background transition hover:opacity-90"
+              >
+                <Wallet className="h-3 w-3" />
+                <span>Connect</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
