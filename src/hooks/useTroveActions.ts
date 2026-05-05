@@ -167,7 +167,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
 
       // Check if the transaction actually succeeded on-chain
       if (receipt.status === "reverted") {
-        setError("Transaction reverted on-chain. Your collateral ratio may be too low, or the price moved. Try again with a higher collateral ratio.");
+        setError("Transaction reverted on-chain. The price oracle may be temporarily unavailable. Please wait a few minutes and try again.");
         setStatus("error");
         return;
       }

@@ -295,6 +295,16 @@ const Trove = () => {
         </span>
       </div>
 
+      {/* Oracle down warning */}
+      {!priceLoaded && (
+        <div className="flex items-start gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-400 mt-0.5" />
+          <p className="text-[11px] text-amber-300">
+            The price oracle is not responding. All transactions will fail until the oracle updates. Please wait a few minutes and refresh.
+          </p>
+        </div>
+      )}
+
       <Card className="p-4 space-y-4">
         {/* Tabs */}
         <div className="flex rounded-full bg-background/60 p-1 gap-0.5">
