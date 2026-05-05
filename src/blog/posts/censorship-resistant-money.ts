@@ -7,7 +7,7 @@ export const post = {
   excerpt:
     "The ability to freeze your money is not a bug in the traditional financial system. It is a feature. Decentralized stablecoins remove that feature entirely. Here is why that matters.",
   coverImage:
-    "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/4c814b8a-fc73-4d2d-aa17-5bb8173aa2fc/id-preview-590058f0--7a328caa-9712-4410-9686-e16566487502.lovable.app-1777075284326.png",
+    "https://www.image2url.com/r2/default/images/1777965422497-277a692b-898f-412c-bee9-b99f2fd1a317.png",
   content: `In February 2022, the Canadian government invoked the Emergencies Act to freeze the bank accounts of people who had donated to the trucker convoy protests. Within days, hundreds of accounts were frozen without court orders, without criminal charges, and without any due process. People who had given $50 to a political cause found their ability to access their own money suspended by government decree.
 
 In 2023, the Nigerian government froze the accounts of hundreds of activists and journalists who had participated in protests against police brutality. In 2021, the Indian government pressured payment processors to cut off donations to farmers protesting new agricultural laws. In 2020, PayPal froze the accounts of multiple political organizations it deemed controversial. These are not isolated incidents. They are examples of a pattern that repeats constantly across different countries, different governments, and different political contexts.
