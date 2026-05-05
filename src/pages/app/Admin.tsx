@@ -83,10 +83,24 @@ const Admin = () => {
 
   const isAdmin = isConnected && address?.toLowerCase() === ADMIN_WALLET;
 
-  // Redirect non-admin
+  // Redirect non-admin — fires on every render cycle
   useEffect(() => {
     if (isConnected && !isAdmin) navigate("/app");
   }, [isConnected, isAdmin, navigate]);
+
+  // Hard block — render nothing until admin status confirmed
+  // Prevents any flash of content before redirect fires
+  // Even if someone manipulates React state, this re-evaluates on every render
+  if (!isConnected || !isAdmin) {
+    return (
+      <div className="mx-auto w-full max-w-3xl pt-10">
+        <Card className="p-10 flex flex-col items-center text-center gap-3">
+          <Shield className="h-8 w-8 text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">Access restricted.</p>
+        </Card>
+      </div>
+    );
+  }
 
   // Get price from DIA
   const { data: diaData } = useReadContract({
@@ -216,19 +230,6 @@ const Admin = () => {
   };
 
   // ─── Render ───────────────────────────────────────────────────────────────
-
-  if (!isConnected) {
-    return (
-      <div className="mx-auto w-full max-w-3xl pt-10">
-        <Card className="p-10 flex flex-col items-center text-center gap-3">
-          <Shield className="h-8 w-8 text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">Connect your admin wallet to access this page.</p>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!isAdmin) return null;
 
   const liquidatable = troves.filter(t => t.liquidatable);
   const totalDebt    = troves.reduce((s, t) => s + t.debt, 0);
