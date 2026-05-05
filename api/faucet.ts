@@ -1,24 +1,27 @@
 // Vercel serverless function — faucet endpoint
 // POST /api/faucet  { address: "0x..." }
-// Mints 1000 WzkLTC to the requesting address using the admin wallet.
+// Transfers 1000 wzkLTC to the requesting address using the faucet wallet.
 // FAUCET_PRIVATE_KEY must be set in Vercel environment variables.
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createWalletClient, createPublicClient, http, parseUnits } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
-const RPC           = "https://liteforge.rpc.caldera.xyz/http";
-const WZKLITECOIN   = "0xb474BcBAAdB14109937d20f826BE51f36318DC16";
-const AMOUNT        = parseUnits("1000", 8); // 1000 WzkLTC (8 decimals)
-const COOLDOWN_MS   = 48 * 60 * 60 * 1000;
+const RPC         = "https://liteforge.rpc.caldera.xyz/http";
+const WZKLITECOIN = "0xb474BcBAAdB14109937d20f826BE51f36318DC16";
+const AMOUNT      = parseUnits("1000", 8); // 1000 wzkLTC (8 decimals)
 
-// In-memory cooldown store (resets on cold start — use KV store for production)
-const cooldowns = new Map<string, number>();
-
-const ADMIN_MINT_ABI = [
-  { name: "adminMint", type: "function", stateMutability: "nonpayable",
-    inputs: [{ name: "to", type: "address" }, { name: "amount", type: "uint256" }],
-    outputs: [] },
+const ERC20_TRANSFER_ABI = [
+  {
+    name: "transfer",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "to",     type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+  },
 ] as const;
 
 const chain = {
@@ -41,21 +44,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "Invalid address" });
   }
 
-  const key = address.toLowerCase();
-
-  // Check cooldown
-  const last = cooldowns.get(key) || 0;
-  const elapsed = Date.now() - last;
-  if (elapsed < COOLDOWN_MS) {
-    const remaining = Math.ceil((COOLDOWN_MS - elapsed) / 3600000);
-    return res.status(429).json({ error: `Cooldown active. Try again in ${remaining}h` });
-  }
-
   const privateKey = process.env.FAUCET_PRIVATE_KEY as `0x${string}`;
   if (!privateKey) return res.status(500).json({ error: "Faucet not configured" });
 
-  // Ensure private key has 0x prefix
-  const formattedKey = (privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`) as `0x${string}`;
+  const formattedKey = (privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`) as `0x${string}`;
 
   try {
     const account = privateKeyToAccount(formattedKey);
@@ -64,17 +56,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const hash = await wallet.writeContract({
       address: WZKLITECOIN as `0x${string}`,
-      abi: ADMIN_MINT_ABI,
-      functionName: "adminMint",
+      abi: ERC20_TRANSFER_ABI,
+      functionName: "transfer",
       args: [address as `0x${string}`, AMOUNT],
-      gas: BigInt(200_000),
+      gas: BigInt(100_000),
     });
 
     await pub.waitForTransactionReceipt({ hash });
-    cooldowns.set(key, Date.now());
 
     return res.status(200).json({ success: true, txHash: hash });
   } catch (e: any) {
-    return res.status(500).json({ error: e?.shortMessage || e?.message || "Mint failed" });
+    console.error("Faucet error:", e);
+    return res.status(500).json({ error: e?.shortMessage || e?.message || "Transfer failed" });
   }
 }

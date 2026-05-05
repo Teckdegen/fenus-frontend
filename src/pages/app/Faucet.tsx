@@ -1,46 +1,22 @@
-import { useState, useEffect } from "react";
-import { Droplets, CheckCircle2, Loader2, AlertTriangle, Wallet, Clock } from "lucide-react";
+import { useState } from "react";
+import { Droplets, CheckCircle2, Loader2, AlertTriangle, Wallet } from "lucide-react";
 import { useAppKit } from "@reown/appkit/react";
 import { Card, PrimaryButton, Row, SectionLabel, TokenIcon } from "@/components/app/Shared";
 import { useBalances } from "@/hooks/useBalances";
 import { TxSuccessModal } from "@/components/app/TxSuccessModal";
 
-const COOLDOWN_MS = 48 * 60 * 60 * 1000;
-const EXPLORER    = "https://liteforge.explorer.caldera.xyz/tx/";
-
-function getCooldownKey(addr: string) {
-  return `faucet_last_claim_${addr.toLowerCase()}`;
-}
-function getTimeLeft(addr: string): number {
-  const last = parseInt(localStorage.getItem(getCooldownKey(addr)) || "0");
-  return Math.max(0, COOLDOWN_MS - (Date.now() - last));
-}
-function formatTimeLeft(ms: number): string {
-  if (ms <= 0) return "Ready";
-  const h = Math.floor(ms / 3600000);
-  const m = Math.floor((ms % 3600000) / 60000);
-  return `${h}h ${m}m`;
-}
+const EXPLORER = "https://liteforge.explorer.caldera.xyz/tx/";
 
 const Faucet = () => {
   const { open } = useAppKit();
   const { isConnected, address, wzkLTCBalance } = useBalances();
 
-  const [status,   setStatus]   = useState<"idle" | "pending" | "success" | "error">("idle");
-  const [txHash,   setTxHash]   = useState("");
-  const [error,    setError]    = useState("");
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [status,    setStatus]    = useState<"idle" | "pending" | "success" | "error">("idle");
+  const [txHash,    setTxHash]    = useState("");
+  const [error,     setError]     = useState("");
   const [modalData, setModalData] = useState<{ type: string; amount: string; txHash: string } | null>(null);
 
-  // Update countdown every minute
-  useEffect(() => {
-    if (!address) return;
-    setTimeLeft(getTimeLeft(address));
-    const id = setInterval(() => setTimeLeft(getTimeLeft(address)), 60_000);
-    return () => clearInterval(id);
-  }, [address]);
-
-  const canClaim = isConnected && timeLeft === 0 && status !== "pending";
+  const canClaim = isConnected && status !== "pending";
   const busy     = status === "pending";
 
   const handleClaim = async () => {
@@ -56,8 +32,6 @@ const Faucet = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Faucet request failed");
       setTxHash(data.txHash);
-      localStorage.setItem(getCooldownKey(address), Date.now().toString());
-      setTimeLeft(COOLDOWN_MS);
       setStatus("success");
       setModalData({ type: "Faucet Claim", amount: "1,000 wzkLTC", txHash: data.txHash });
     } catch (e: any) {
@@ -71,7 +45,7 @@ const Faucet = () => {
       <div className="mx-auto w-full max-w-3xl space-y-6">
         <div className="px-1">
           <h1 className="font-display text-2xl font-semibold tracking-tight">Faucet</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Get 1,000 wzkLTC every 48 hours to test the protocol.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Get 1,000 wzkLTC to test the protocol.</p>
         </div>
         <Card className="p-10 flex flex-col items-center justify-center text-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/10">
@@ -94,7 +68,7 @@ const Faucet = () => {
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Faucet</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Get 1,000 wzkLTC every 48 hours to test the protocol.
+          Get 1,000 wzkLTC to test the protocol.
         </p>
       </div>
 
@@ -107,19 +81,10 @@ const Faucet = () => {
           </div>
         </div>
 
-        {timeLeft > 0 ? (
-          <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/20 px-4 py-2">
-            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-[11px] text-muted-foreground">
-              Next claim in <span className="font-medium text-foreground">{formatTimeLeft(timeLeft)}</span>
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/20 px-4 py-2">
-            <Droplets className="h-3.5 w-3.5 text-foreground/60" />
-            <span className="text-[11px] font-medium">Ready to claim</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/20 px-4 py-2">
+          <Droplets className="h-3.5 w-3.5 text-foreground/60" />
+          <span className="text-[11px] font-medium">Ready to claim</span>
+        </div>
 
         {status === "pending" && (
           <div className="flex items-center gap-2 w-full rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
@@ -151,8 +116,6 @@ const Faucet = () => {
         <PrimaryButton disabled={!canClaim || busy} onClick={handleClaim} className="px-16">
           {busy ? (
             <><Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />Sending…</>
-          ) : timeLeft > 0 ? (
-            `Available in ${formatTimeLeft(timeLeft)}`
           ) : (
             "Claim 1,000 wzkLTC"
           )}
@@ -164,9 +127,8 @@ const Faucet = () => {
         <Card className="p-5">
           <Row label="Your wzkLTC"  value={`${wzkLTCBalance} wzkLTC`} />
           <Row label="Amount"       value="1,000 wzkLTC per claim" />
-          <Row label="Cooldown"     value="48 hours per wallet" />
-          <Row label="No wallet tx" value="No gas needed to claim" hint="The faucet pays gas on your behalf" />
-          <Row label="Network"      value="LitVM LiteForge (testnet)" />
+          <Row label="No gas needed" value="Faucet pays gas on your behalf" />
+          <Row label="Network"      value="LitVM LiteForge" />
         </Card>
       </div>
 
