@@ -1,4 +1,5 @@
 import { post as censorshipResistant } from "./posts/censorship-resistant-money";
+import { post as completeGuide } from "./posts/complete-guide-to-fenus";
 
 // Other posts are ready but will be released one by one
 // import { post as whyFenus } from "./posts/why-fenus";
@@ -12,6 +13,7 @@ import { post as censorshipResistant } from "./posts/censorship-resistant-money"
 // import { post as whyStablecoinsMatter } from "./posts/why-stablecoins-matter-defi";
 
 export const allPosts = [
+  completeGuide,
   censorshipResistant,
 ];
 

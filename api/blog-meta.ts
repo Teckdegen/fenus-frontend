@@ -12,6 +12,12 @@ const posts: Record<string, {
   coverImage: string;
   tags: string[];
 }> = {
+  "complete-guide-to-fenus": {
+    title: "The Complete Guide to FENUS: How to Borrow Against Your zkLTC Without Selling",
+    excerpt: "Everything you need to know about FENUS. How it works, how to open a Trove, how much to borrow, what to do with FnUSD, and why borrowing against your holdings beats selling every time.",
+    coverImage: "https://www.image2url.com/r2/default/images/1777986038668-dc5c3fae-0569-406d-8dc6-9a2993f4f24d.png",
+    tags: ["Guide", "FENUS", "Trove", "FnUSD", "LitVM"],
+  },
   "censorship-resistant-money": {
     title: "Why Decentralized Stablecoins Are Censorship Resistant Money",
     excerpt: "Financial systems are programmable. That means they are censorable. FnUSD is built to remove that single point of control from the stablecoin layer entirely.",
