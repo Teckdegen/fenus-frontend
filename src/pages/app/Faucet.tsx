@@ -4,12 +4,14 @@ import { useAppKit } from "@reown/appkit/react";
 import { Card, PrimaryButton, Row, SectionLabel, TokenIcon } from "@/components/app/Shared";
 import { useBalances } from "@/hooks/useBalances";
 import { TxSuccessModal } from "@/components/app/TxSuccessModal";
+import { useQueryClient } from "@tanstack/react-query";
 
 const EXPLORER = "https://liteforge.explorer.caldera.xyz/tx/";
 
 const Faucet = () => {
   const { open } = useAppKit();
-  const { isConnected, address, wzkLTCBalance } = useBalances();
+  const { isConnected, address, wzkLTCBalance, wzkLTCBalanceFull } = useBalances();
+  const queryClient = useQueryClient();
 
   const [status,    setStatus]    = useState<"idle" | "pending" | "success" | "error">("idle");
   const [txHash,    setTxHash]    = useState("");
@@ -34,6 +36,8 @@ const Faucet = () => {
       setTxHash(data.txHash);
       setStatus("success");
       setModalData({ type: "Faucet Claim", amount: "1,000 wzkLTC", txHash: data.txHash });
+      // Refresh balances after claim
+      setTimeout(() => queryClient.invalidateQueries(), 3000);
     } catch (e: any) {
       setError(e?.message || "Request failed. Try again.");
       setStatus("error");
@@ -72,6 +76,17 @@ const Faucet = () => {
         </p>
       </div>
 
+      {/* Balance card */}
+      <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <TokenIcon symbol="wzkLTC" className="h-6 w-6" />
+          <span className="text-sm text-muted-foreground">Your wzkLTC balance</span>
+        </div>
+        <span className="font-display text-sm font-semibold tabular-nums">
+          {wzkLTCBalanceFull} wzkLTC
+        </span>
+      </div>
+
       <Card className="p-8 flex flex-col items-center text-center gap-6">
         <div className="flex flex-col items-center gap-3">
           <TokenIcon symbol="wzkLTC" className="h-16 w-16" />
@@ -93,13 +108,13 @@ const Faucet = () => {
           </div>
         )}
         {status === "success" && (
-          <div className="flex items-start gap-2 w-full rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
-            <CheckCircle2 className="h-4 w-4 shrink-0 text-foreground/60 mt-0.5" />
+          <div className="flex items-start gap-2 w-full rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
             <div className="text-left">
-              <p className="text-[11px] font-medium">1,000 wzkLTC sent to your wallet</p>
+              <p className="text-[11px] font-medium text-emerald-300">1,000 wzkLTC sent to your wallet</p>
               {txHash && (
                 <a href={`${EXPLORER}${txHash}`} target="_blank" rel="noopener noreferrer"
-                  className="text-[10px] text-muted-foreground hover:text-foreground underline">
+                  className="text-[10px] text-emerald-400/70 hover:text-emerald-400 underline">
                   View on explorer
                 </a>
               )}
@@ -107,9 +122,9 @@ const Faucet = () => {
           </div>
         )}
         {status === "error" && (
-          <div className="flex items-start gap-2 w-full rounded-2xl border border-border/60 bg-background/20 px-4 py-3">
-            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-muted-foreground mt-0.5" />
-            <p className="text-[11px] text-muted-foreground">{error}</p>
+          <div className="flex items-start gap-2 w-full rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-red-400 mt-0.5" />
+            <p className="text-[11px] text-red-300">{error}</p>
           </div>
         )}
 
@@ -125,10 +140,11 @@ const Faucet = () => {
       <div>
         <SectionLabel>Details</SectionLabel>
         <Card className="p-5">
-          <Row label="Your wzkLTC"  value={`${wzkLTCBalance} wzkLTC`} />
-          <Row label="Amount"       value="1,000 wzkLTC per claim" />
+          <Row label="Your wzkLTC"   value={`${wzkLTCBalanceFull} wzkLTC`} />
+          <Row label="Amount"        value="1,000 wzkLTC per claim" />
           <Row label="No gas needed" value="Faucet pays gas on your behalf" />
-          <Row label="Network"      value="LitVM LiteForge" />
+          <Row label="Contract"      value="0xa779d4...bfec" hint="0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec" />
+          <Row label="Network"       value="LitVM LiteForge" />
         </Card>
       </div>
 

@@ -13,14 +13,14 @@ const AMOUNT      = parseUnits("1000", 8); // 1000 wzkLTC (8 decimals)
 
 const ERC20_TRANSFER_ABI = [
   {
-    name: "adminMint",
+    name: "transfer",
     type: "function",
     stateMutability: "nonpayable",
     inputs: [
       { name: "to",     type: "address" },
       { name: "amount", type: "uint256" },
     ],
-    outputs: [],
+    outputs: [{ name: "", type: "bool" }],
   },
 ] as const;
 
@@ -57,9 +57,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const hash = await wallet.writeContract({
       address: WZKLITECOIN as `0x${string}`,
       abi: ERC20_TRANSFER_ABI,
-      functionName: "adminMint",
+      functionName: "transfer",
       args: [address as `0x${string}`, AMOUNT],
-      gas: BigInt(200_000),
+      gas: BigInt(100_000),
     });
 
     await pub.waitForTransactionReceipt({ hash });
