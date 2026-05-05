@@ -8,19 +8,19 @@ import { createWalletClient, createPublicClient, http, parseUnits } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 const RPC         = "https://liteforge.rpc.caldera.xyz/http";
-const WZKLITECOIN = "0xb474BcBAAdB14109937d20f826BE51f36318DC16";
+const WZKLITECOIN = "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec"; // collateral token used by contracts
 const AMOUNT      = parseUnits("1000", 8); // 1000 wzkLTC (8 decimals)
 
 const ERC20_TRANSFER_ABI = [
   {
-    name: "transfer",
+    name: "adminMint",
     type: "function",
     stateMutability: "nonpayable",
     inputs: [
       { name: "to",     type: "address" },
       { name: "amount", type: "uint256" },
     ],
-    outputs: [{ name: "", type: "bool" }],
+    outputs: [],
   },
 ] as const;
 
@@ -57,9 +57,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const hash = await wallet.writeContract({
       address: WZKLITECOIN as `0x${string}`,
       abi: ERC20_TRANSFER_ABI,
-      functionName: "transfer",
+      functionName: "adminMint",
       args: [address as `0x${string}`, AMOUNT],
-      gas: BigInt(100_000),
+      gas: BigInt(200_000),
     });
 
     await pub.waitForTransactionReceipt({ hash });
