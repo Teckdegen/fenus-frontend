@@ -10,7 +10,7 @@ import { privateKeyToAccount } from "viem/accounts";
 
 const RPC           = "https://liteforge.rpc.caldera.xyz/http";
 const WZKLITECOIN   = "0xa779d43BCaBda81f3324d11392f4ae35Bb2Fbfec";
-const AMOUNT        = parseUnits("1000", 8); // 1000 wzkLTC (8 decimals)
+const AMOUNT        = parseUnits("100", 8); // 100 wzkLTC (8 decimals)
 const COOLDOWN_MS   = 24 * 60 * 60 * 1000;  // 24 hours
 
 // In-memory cooldown store — persists across warm invocations

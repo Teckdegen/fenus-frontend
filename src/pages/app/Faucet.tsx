@@ -74,7 +74,7 @@ const Faucet = () => {
       localStorage.setItem(getCooldownKey(address), Date.now().toString());
       setTimeLeft(COOLDOWN_MS);
       setStatus("success");
-      setModalData({ type: "Faucet Claim", amount: "1,000 wzkLTC", txHash: data.txHash });
+      setModalData({ type: "Faucet Claim", amount: "100 wzkLTC", txHash: data.txHash });
       setTimeout(() => queryClient.invalidateQueries(), 3000);
     } catch (e: any) {
       setError(e?.message || "Request failed. Try again.");
@@ -87,7 +87,7 @@ const Faucet = () => {
       <div className="mx-auto w-full max-w-3xl space-y-6">
         <div className="px-1">
           <h1 className="font-display text-2xl font-semibold tracking-tight">Faucet</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Get 1,000 wzkLTC every 24 hours to test the protocol.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Get 100 wzkLTC every 24 hours to test the protocol.</p>
         </div>
         <Card className="p-10 flex flex-col items-center justify-center text-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/10">
@@ -110,7 +110,7 @@ const Faucet = () => {
       <div className="px-1">
         <h1 className="font-display text-2xl font-semibold tracking-tight">Faucet</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Get 1,000 wzkLTC every 24 hours to test the protocol.
+          Get 100 wzkLTC every 24 hours to test the protocol.
         </p>
       </div>
 
@@ -129,7 +129,7 @@ const Faucet = () => {
         <div className="flex flex-col items-center gap-3">
           <TokenIcon symbol="wzkLTC" className="h-16 w-16" />
           <div>
-            <p className="font-display text-4xl font-semibold tracking-tight">1,000</p>
+            <p className="font-display text-4xl font-semibold tracking-tight">100</p>
             <p className="text-sm text-muted-foreground mt-1">wzkLTC per claim</p>
           </div>
         </div>
@@ -159,7 +159,7 @@ const Faucet = () => {
           <div className="flex items-start gap-2 w-full rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400 mt-0.5" />
             <div className="text-left">
-              <p className="text-[11px] font-medium text-emerald-300">1,000 wzkLTC sent to your wallet</p>
+              <p className="text-[11px] font-medium text-emerald-300">100 wzkLTC sent to your wallet</p>
               {txHash && (
                 <a href={`${EXPLORER}${txHash}`} target="_blank" rel="noopener noreferrer"
                   className="text-[10px] text-emerald-400/70 hover:text-emerald-400 underline">
@@ -191,7 +191,7 @@ const Faucet = () => {
         <SectionLabel>Details</SectionLabel>
         <Card className="p-5">
           <Row label="Your wzkLTC"   value={`${wzkLTCBalanceFull} wzkLTC`} />
-          <Row label="Amount"        value="1,000 wzkLTC per claim" />
+          <Row label="Amount"        value="100 wzkLTC per claim" />
           <Row label="Cooldown"      value="24 hours per wallet" />
           <Row label="No gas needed" value="Faucet pays gas on your behalf" />
           <Row label="Network"       value="LitVM LiteForge" />
