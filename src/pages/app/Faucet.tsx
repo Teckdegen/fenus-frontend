@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Droplets, CheckCircle2, Loader2, AlertTriangle, Wallet, Clock } from "lucide-react";
+import { Droplets, CheckCircle2, Loader2, AlertTriangle, Wallet } from "lucide-react";
 import { useAppKit } from "@reown/appkit/react";
 import { Card, PrimaryButton, Row, SectionLabel, TokenIcon } from "@/components/app/Shared";
 import { useBalances } from "@/hooks/useBalances";
@@ -134,15 +134,8 @@ const Faucet = () => {
           </div>
         </div>
 
-        {/* Status pill */}
-        {onCooldown ? (
-          <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-2">
-            <Clock className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-[11px] font-medium text-amber-300">
-              Next claim in <span className="font-bold">{formatTimeLeft(timeLeft)}</span>
-            </span>
-          </div>
-        ) : (
+        {/* Status pill — only show when ready */}
+        {!onCooldown && (
           <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/20 px-4 py-2">
             <Droplets className="h-3.5 w-3.5 text-foreground/60" />
             <span className="text-[11px] font-medium">Ready to claim</span>
