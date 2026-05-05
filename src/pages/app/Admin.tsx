@@ -1,61 +1,85 @@
-import { useState, useEffect } from "react";
-import { useAccount, useWriteContract } from "wagmi";
-import { formatEther } from "viem";
+import { useState, useEffect, useCallback } from "react";
+import { useAccount, useWriteContract, useReadContract } from "wagmi";
+import { formatEther, formatUnits, createPublicClient, http } from "viem";
 import { useNavigate } from "react-router-dom";
 import { Shield, Loader2, AlertTriangle, CheckCircle2, RefreshCw } from "lucide-react";
 import { Card, PrimaryButton, SectionLabel } from "@/components/app/Shared";
 import { CONTRACTS } from "@/lib/contracts";
+import { DIA_ADAPTER } from "@/lib/oracles";
 
 const ADMIN_WALLET = "0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df".toLowerCase();
 const RPC          = "https://liteforge.rpc.caldera.xyz/http";
 const EXPLORER     = "https://liteforge.explorer.caldera.xyz/tx/";
-const MCR          = 130; // liquidation threshold %
+const MCR          = 130;
+
+const CHAIN = {
+  id: 4441,
+  name: "LitVM LiteForge",
+  nativeCurrency: { name: "zkLitecoin", symbol: "zkLTC", decimals: 18 },
+  rpcUrls: { default: { http: [RPC] } },
+} as const;
+
+const pub = createPublicClient({ chain: CHAIN, transport: http(RPC) });
+
+// ─── ABIs ─────────────────────────────────────────────────────────────────────
 
 const TROVE_MANAGER_ABI = [
   { name: "liquidate", type: "function", stateMutability: "nonpayable",
     inputs: [{ name: "owner", type: "address" }], outputs: [] },
   { name: "batchLiquidate", type: "function", stateMutability: "nonpayable",
     inputs: [{ name: "owners", type: "address[]" }], outputs: [] },
+  { name: "getTroveOwnersCount", type: "function", stateMutability: "view",
+    inputs: [], outputs: [{ type: "uint256" }] },
+  { name: "getTroveColl", type: "function", stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }], outputs: [{ type: "uint256" }] },
+  { name: "getTroveDebt", type: "function", stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }], outputs: [{ type: "uint256" }] },
+  { name: "getTroveStatus", type: "function", stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }], outputs: [{ type: "uint8" }] },
 ] as const;
+
+const TROVE_NFT_ABI = [
+  { name: "ownerOf", type: "function", stateMutability: "view",
+    inputs: [{ name: "tokenId", type: "uint256" }], outputs: [{ type: "address" }] },
+] as const;
+
+const DIA_ABI = [
+  { name: "latestRoundData", type: "function", stateMutability: "view",
+    inputs: [],
+    outputs: [
+      { name: "roundId",         type: "uint80"  },
+      { name: "answer",          type: "int256"  },
+      { name: "startedAt",       type: "uint256" },
+      { name: "updatedAt",       type: "uint256" },
+      { name: "answeredInRound", type: "uint80"  },
+    ] },
+] as const;
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type Trove = {
   tokenId: number;
   owner: string;
-  debt: bigint;
-  coll: bigint;
+  debt: number;
+  coll: number;
+  collUSD: number;
   ratio: number | null;
   liquidatable: boolean;
 };
 
 const shorten = (a: string) => `${a.slice(0, 8)}...${a.slice(-6)}`;
 
-async function rpc(method: string, params: unknown[]) {
-  const res = await fetch(RPC, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-  });
-  return res.json();
-}
-
-async function ethCall(to: string, data: string) {
-  const r = await rpc("eth_call", [{ to, data }, "latest"]);
-  return r.result as string | undefined;
-}
-
-function pad(n: number) { return n.toString(16).padStart(64, "0"); }
+// ─── Component ────────────────────────────────────────────────────────────────
 
 const Admin = () => {
   const { address, isConnected } = useAccount();
   const navigate = useNavigate();
   const { writeContractAsync } = useWriteContract();
 
-  const [troves,   setTroves]   = useState<Trove[]>([]);
-  const [loading,  setLoading]  = useState(false);
-  const [price,    setPrice]    = useState<number>(0);
-  const [txHash,   setTxHash]   = useState<string | null>(null);
-  const [txError,  setTxError]  = useState<string | null>(null);
-  const [scanning, setScanning] = useState(false);
+  const [troves,  setTroves]  = useState<Trove[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [txHash,  setTxHash]  = useState<string | null>(null);
+  const [txError, setTxError] = useState<string | null>(null);
 
   const isAdmin = isConnected && address?.toLowerCase() === ADMIN_WALLET;
 
@@ -64,67 +88,98 @@ const Admin = () => {
     if (isConnected && !isAdmin) navigate("/app");
   }, [isConnected, isAdmin, navigate]);
 
-  const fetchPrice = async () => {
-    // getLastGoodPrice() selector = 0x9a8a0592
-    const result = await ethCall(CONTRACTS.PriceFeed, "0x9a8a0592");
-    if (result && result !== "0x") {
-      const p = parseFloat(formatEther(BigInt(result)));
-      setPrice(p);
-      return p;
-    }
-    return 0;
-  };
+  // Get price from DIA
+  const { data: diaData } = useReadContract({
+    address: DIA_ADAPTER,
+    abi: DIA_ABI,
+    functionName: "latestRoundData",
+    query: { refetchInterval: 30_000 },
+  });
 
-  const scanTroves = async () => {
+  const price = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
+
+  // Scan troves using viem readContract (handles ABI encoding correctly)
+  const scanTroves = useCallback(async () => {
+    if (!isAdmin) return;
     setLoading(true);
-    setScanning(true);
     setTxHash(null);
     setTxError(null);
 
-    const currentPrice = await fetchPrice();
+    const currentPrice = price;
     const found: Trove[] = [];
 
     for (let id = 1; id <= 100; id++) {
       try {
-        // ownerOf(uint256) = 0x6352211e
-        const ownerResult = await ethCall(CONTRACTS.TroveNFT, `0x6352211e${pad(id)}`);
-        if (!ownerResult || ownerResult === "0x" || ownerResult.length < 66) continue;
-        const owner = `0x${ownerResult.slice(-40)}`;
-        if (owner === "0x0000000000000000000000000000000000000000") continue;
+        // ownerOf(tokenId) — will throw if token doesn't exist
+        const owner = await pub.readContract({
+          address: CONTRACTS.TroveNFT as `0x${string}`,
+          abi: TROVE_NFT_ABI,
+          functionName: "ownerOf",
+          args: [BigInt(id)],
+        }) as string;
 
-        // troves(uint256) = 0x1e6d4b4b
-        const troveResult = await ethCall(CONTRACTS.TroveManager, `0x1e6d4b4b${pad(id)}`);
-        if (!troveResult || troveResult === "0x" || troveResult.length < 130) continue;
+        if (!owner || owner === "0x0000000000000000000000000000000000000000") continue;
 
-        const hex    = troveResult.slice(2);
-        const debt   = BigInt(`0x${hex.slice(0, 64)}`);
-        const coll   = BigInt(`0x${hex.slice(64, 128)}`);
-        const status = parseInt(hex.slice(320, 384), 16);
+        // getTroveStatus
+        const status = await pub.readContract({
+          address: CONTRACTS.TroveManager as `0x${string}`,
+          abi: TROVE_MANAGER_ABI,
+          functionName: "getTroveStatus",
+          args: [owner as `0x${string}`],
+        }) as number;
 
-        if (status !== 1 || debt === 0n) continue;
+        if (Number(status) !== 1) continue; // only Active
 
-        const debtNum  = parseFloat(formatEther(debt));
-        const collNum  = parseFloat(formatEther(coll));
-        const collUSD  = collNum * currentPrice;
-        const ratio    = debtNum > 0 ? (collUSD / debtNum) * 100 : null;
+        // getTroveColl and getTroveDebt
+        const [coll18, debt18] = await Promise.all([
+          pub.readContract({
+            address: CONTRACTS.TroveManager as `0x${string}`,
+            abi: TROVE_MANAGER_ABI,
+            functionName: "getTroveColl",
+            args: [owner as `0x${string}`],
+          }) as Promise<bigint>,
+          pub.readContract({
+            address: CONTRACTS.TroveManager as `0x${string}`,
+            abi: TROVE_MANAGER_ABI,
+            functionName: "getTroveDebt",
+            args: [owner as `0x${string}`],
+          }) as Promise<bigint>,
+        ]);
+
+        const coll = parseFloat(formatEther(coll18));
+        const debt = parseFloat(formatEther(debt18));
+
+        if (debt === 0) continue;
+
+        const collUSD = coll * currentPrice;
+        const ratio   = debt > 0 ? (collUSD / debt) * 100 : null;
 
         found.push({
           tokenId: id,
           owner,
           debt,
           coll,
+          collUSD,
           ratio,
           liquidatable: ratio !== null && ratio < MCR,
         });
       } catch {
-        // skip
+        // token doesn't exist or reverted, skip
       }
     }
 
     setTroves(found);
     setLoading(false);
-    setScanning(false);
-  };
+  }, [isAdmin, price]);
+
+  // Auto-scan on mount and when price loads
+  useEffect(() => {
+    if (isAdmin && price > 0) {
+      scanTroves();
+    }
+  }, [isAdmin, price]);
+
+  // ─── Actions ──────────────────────────────────────────────────────────────
 
   const liquidate = async (owner: string) => {
     setTxHash(null);
@@ -160,6 +215,8 @@ const Admin = () => {
     }
   };
 
+  // ─── Render ───────────────────────────────────────────────────────────────
+
   if (!isConnected) {
     return (
       <div className="mx-auto w-full max-w-3xl pt-10">
@@ -174,6 +231,8 @@ const Admin = () => {
   if (!isAdmin) return null;
 
   const liquidatable = troves.filter(t => t.liquidatable);
+  const totalDebt    = troves.reduce((s, t) => s + t.debt, 0);
+  const totalCollUSD = troves.reduce((s, t) => s + t.collUSD, 0);
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -188,42 +247,39 @@ const Admin = () => {
             <p className="text-sm text-muted-foreground">Trove management and liquidations</p>
           </div>
         </div>
-        <PrimaryButton onClick={scanTroves} disabled={loading} className="flex items-center gap-2">
+        <PrimaryButton onClick={scanTroves} disabled={loading} className="flex items-center gap-2 text-xs px-4 py-2">
           {loading
-            ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Scanning…</>
-            : <><RefreshCw className="h-3.5 w-3.5" />Scan Troves</>
+            ? <><Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />Scanning…</>
+            : <><RefreshCw className="h-3.5 w-3.5 mr-1.5" />Refresh</>
           }
         </PrimaryButton>
       </div>
 
       {/* Stats strip */}
-      {troves.length > 0 && (
-        <Card className="p-4 flex items-center justify-around gap-4">
-          <div className="text-center">
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Active Troves</p>
-            <p className="font-display text-2xl font-semibold mt-0.5">{troves.length}</p>
-          </div>
-          <div className="h-8 w-px bg-border/40" />
-          <div className="text-center">
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">wzkLTC Price</p>
-            <p className="font-display text-2xl font-semibold mt-0.5">${price.toFixed(2)}</p>
-          </div>
-          <div className="h-8 w-px bg-border/40" />
-          <div className="text-center">
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Liquidatable</p>
-            <p className={`font-display text-2xl font-semibold mt-0.5 ${liquidatable.length > 0 ? "text-red-400" : "text-emerald-400"}`}>
-              {liquidatable.length}
-            </p>
-          </div>
-          <div className="h-8 w-px bg-border/40" />
-          <div className="text-center">
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Total Debt</p>
-            <p className="font-display text-2xl font-semibold mt-0.5">
-              {troves.reduce((s, t) => s + parseFloat(formatEther(t.debt)), 0).toFixed(0)} FnUSD
-            </p>
-          </div>
-        </Card>
-      )}
+      <Card className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="text-center">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Active Troves</p>
+          <p className="font-display text-2xl font-semibold mt-0.5">
+            {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" /> : troves.length}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">wzkLTC Price</p>
+          <p className="font-display text-2xl font-semibold mt-0.5">${price > 0 ? price.toFixed(2) : "..."}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Liquidatable</p>
+          <p className={`font-display text-2xl font-semibold mt-0.5 ${liquidatable.length > 0 ? "text-red-400" : "text-emerald-400"}`}>
+            {loading ? "..." : liquidatable.length}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Total Debt</p>
+          <p className="font-display text-2xl font-semibold mt-0.5">
+            {loading ? "..." : `${totalDebt.toFixed(0)} FnUSD`}
+          </p>
+        </div>
+      </Card>
 
       {/* Tx feedback */}
       {txHash && (
@@ -246,33 +302,39 @@ const Admin = () => {
       )}
 
       {/* Liquidatable alert */}
-      {liquidatable.length > 0 && (
+      {!loading && liquidatable.length > 0 && (
         <div className="flex items-center justify-between rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-red-400 shrink-0" />
             <p className="text-sm text-red-300 font-medium">
-              {liquidatable.length} trove{liquidatable.length > 1 ? "s" : ""} below 130% CR and eligible for liquidation
+              {liquidatable.length} trove{liquidatable.length > 1 ? "s" : ""} below 130% CR
             </p>
           </div>
-          <button
-            onClick={batchLiquidate}
-            className="shrink-0 rounded-full bg-red-500 px-4 py-1.5 text-[11px] font-semibold text-white hover:bg-red-600 transition ml-4"
-          >
+          <button onClick={batchLiquidate}
+            className="shrink-0 rounded-full bg-red-500 px-4 py-1.5 text-[11px] font-semibold text-white hover:bg-red-600 transition ml-4">
             Liquidate All
           </button>
         </div>
       )}
 
-      {/* Troves table */}
-      {troves.length === 0 && !loading && (
-        <Card className="p-10 text-center text-sm text-muted-foreground">
-          {scanning ? "Scanning..." : "Click Scan Troves to load all active positions."}
+      {/* Loading state */}
+      {loading && (
+        <Card className="p-10 flex flex-col items-center gap-3 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">Scanning tokenIds 1 to 100 for active troves…</p>
         </Card>
       )}
 
-      {troves.length > 0 && (
+      {/* Troves table */}
+      {!loading && troves.length === 0 && (
+        <Card className="p-10 text-center text-sm text-muted-foreground">
+          No active troves found. Click Refresh to scan again.
+        </Card>
+      )}
+
+      {!loading && troves.length > 0 && (
         <div>
-          <SectionLabel>All Active Troves</SectionLabel>
+          <SectionLabel>All Active Troves ({troves.length})</SectionLabel>
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -288,23 +350,19 @@ const Admin = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {troves
+                  {[...troves]
                     .sort((a, b) => (a.ratio ?? 999) - (b.ratio ?? 999))
                     .map((t) => {
-                      const debt    = parseFloat(formatEther(t.debt));
-                      const coll    = parseFloat(formatEther(t.coll));
-                      const collUSD = coll * price;
                       const isRed   = t.ratio !== null && t.ratio < MCR;
                       const isAmber = t.ratio !== null && t.ratio >= MCR && t.ratio < 145;
-
                       return (
                         <tr key={t.tokenId} className="border-b border-border/20 last:border-0 hover:bg-foreground/[0.02]">
                           <td className="px-4 py-3 font-mono text-xs text-muted-foreground">#{t.tokenId}</td>
                           <td className="px-4 py-3 font-mono text-xs">{shorten(t.owner)}</td>
-                          <td className="px-4 py-3 text-right tabular-nums">{debt.toFixed(2)}</td>
-                          <td className="px-4 py-3 text-right tabular-nums">{coll.toFixed(4)}</td>
+                          <td className="px-4 py-3 text-right tabular-nums">{t.debt.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right tabular-nums">{t.coll.toFixed(4)}</td>
                           <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
-                            ${collUSD.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                            ${t.collUSD.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                           </td>
                           <td className={`px-4 py-3 text-right tabular-nums font-semibold ${
                             isRed ? "text-red-400" : isAmber ? "text-amber-400" : "text-emerald-400"
