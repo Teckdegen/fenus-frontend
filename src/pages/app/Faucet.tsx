@@ -96,7 +96,7 @@ const Faucet = () => {
           <div>
             <p className="font-display text-base font-semibold">Connect your wallet</p>
             <p className="mt-1 text-sm text-muted-foreground max-w-xs">
-              Connect to claim 1,000 wzkLTC for testing.
+              Connect to claim 100 wzkLTC for testing.
             </p>
           </div>
           <PrimaryButton onClick={() => open()}>Connect Wallet</PrimaryButton>
@@ -182,7 +182,7 @@ const Faucet = () => {
           ) : onCooldown ? (
             `Available in ${formatTimeLeft(timeLeft)}`
           ) : (
-            "Claim 1,000 wzkLTC"
+            "Claim 100 wzkLTC"
           )}
         </PrimaryButton>
       </Card>
