@@ -108,7 +108,7 @@ const Trove = () => {
   const {
     wzkLTCBalance, wzkLTCBalanceFull, fnUSDBalance, fnUSDBalanceFull, priceNum,
     hasTrove, troveColl: existingCollStr, troveCollClose, troveDebt: existingDebtStr,
-    isConnected, address,
+    isConnected, address, diaIsDown,
   } = useBalances();
 
   const actions = useTroveActions(address as `0x${string}` | undefined);
@@ -118,7 +118,7 @@ const Trove = () => {
   const existingDebt = parseFloat(existingDebtStr.replace(/,/g, "")) || 0;
   const price        = priceNum;
   const priceLoaded  = price > 0;
-  const busy         = actions.status === "approving" || actions.status === "pending";
+  const busy = actions.status === "approving" || actions.status === "pending" || diaIsDown;
 
   // Auto-fill borrow amount at 140% CR when collateral changes
   const handleCollateralChange = (value: string) => {
@@ -295,13 +295,16 @@ const Trove = () => {
         </span>
       </div>
 
-      {/* Oracle down warning */}
-      {!priceLoaded && (
-        <div className="flex items-start gap-2 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
-          <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-400 mt-0.5" />
-          <p className="text-[11px] text-amber-300">
-            The price oracle is not responding. All transactions will fail until the oracle updates. Please wait a few minutes and refresh.
-          </p>
+      {/* Oracle down banner — shown when DIA is stale or price unavailable */}
+      {diaIsDown && (
+        <div className="flex items-start gap-3 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-4">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-red-300">Price Oracle Unavailable</p>
+            <p className="text-[11px] text-red-300/80 mt-0.5">
+              The DIA price feed is currently stale or unresponsive. Opening, managing, or closing Troves is temporarily disabled — all transactions will revert on-chain until the oracle recovers. Please check back in a few minutes.
+            </p>
+          </div>
         </div>
       )}
 

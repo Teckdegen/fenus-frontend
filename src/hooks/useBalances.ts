@@ -168,6 +168,13 @@ export function useBalances() {
 
   // ─── Derived ──────────────────────────────────────────────────────────────
   const diaPrice = diaData ? parseFloat(formatUnits(diaData[1] as bigint, 18)) : 0;
+  // Check if DIA oracle is stale — updatedAt more than 1 hour ago
+  const diaUpdatedAt = diaData ? Number(diaData[3]) : 0;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const diaIsDown = diaData !== undefined && (
+    diaPrice === 0 ||
+    (diaUpdatedAt > 0 && nowSec - diaUpdatedAt > 3600)
+  );
   // Use DIA on-chain price first, fall back to CoinGecko if oracle is stale
   const priceNum = diaPrice > 0 ? diaPrice : cgPrice;
   const collNum  = troveColl ? parseFloat(formatUnits(troveColl, 18)) : 0;
@@ -188,6 +195,7 @@ export function useBalances() {
     isConnected,
     address,
     priceNum,
+    diaIsDown,
     hasTrove,
 
     // Compact display (K/M) for balance strips
