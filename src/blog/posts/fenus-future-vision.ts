@@ -7,7 +7,7 @@ export const post = {
   excerpt:
     "Fenus is building the payment infrastructure for the next era of the internet. Agentic payments, universal payment rails, and seamless gas abstraction. Here is what is coming.",
   coverImage:
-    "https://www.image2url.com/r2/default/images/1777986038668-dc5c3fae-0569-406d-8dc6-9a2993f4f24d.png",
+    "https://www.image2url.com/r2/default/images/1778108782597-59d40fe6-5132-4f6b-8616-8e3b31432b11.png",
   content: `The internet is evolving faster than payment infrastructure can keep up. AI agents are starting to transact autonomously. Developers are building applications that need to accept payments from any source, Web2 or Web3. Users expect seamless experiences without thinking about gas tokens or network fees. The payment layer needs to catch up.
 
 Fenus Protocol is building that layer. FnUSD is not just a stablecoin you borrow against your zkLTC. It is the foundation for a new payment infrastructure that works for developers, for users, and for the autonomous agents that are coming online right now.
