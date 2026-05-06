@@ -52,17 +52,16 @@ const CHAIN_ID = CONTRACTS.chainId;
 // FnUSD external is 6 decimals; protocol debt accounting is 18.
 const FNUSD_SCALE = 1_000_000_000_000n; // 1e12
 
-// Explicit gas limits — prevents the "tx fee exceeds cap" error that occurs
-// when the oracle's fetchPrice() (state-changing) is called during estimation.
-// Increased limits to handle SortedTroves complexity with many active troves.
+// MASSIVE gas limits to handle SortedTroves complexity with many active troves
+// Each operation gets 3M+ gas with retry logic up to 5M gas maximum
 const GAS = {
-  openTrove:    BigInt(1_200_000),  // Increased from 800k due to SortedTroves gas usage
-  addColl:      BigInt(600_000),    // Increased from 400k
-  withdrawColl: BigInt(600_000),    // Increased from 400k
-  borrowMore:   BigInt(600_000),    // Increased from 400k
-  repayFnUSD:   BigInt(500_000),    // Increased from 300k
-  closeTrove:   BigInt(700_000),    // Increased from 500k
-  approve:      BigInt(100_000),
+  openTrove:    BigInt(3_000_000),  // 3M base, up to 5M with retry
+  addColl:      BigInt(2_500_000),  // 2.5M base, up to 4M with retry  
+  withdrawColl: BigInt(2_500_000),  // 2.5M base, up to 4M with retry
+  borrowMore:   BigInt(2_500_000),  // 2.5M base, up to 4M with retry
+  repayFnUSD:   BigInt(2_000_000),  // 2M base, up to 3.5M with retry
+  closeTrove:   BigInt(2_000_000),  // 2M base, up to 3.5M with retry
+  approve:      BigInt(200_000),    // 200k for approvals
 };
 
 export type TxStatus = "idle" | "approving" | "pending" | "success" | "error";
@@ -139,18 +138,37 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     }) as bigint;
     if (allowance < amount) {
       setStatus("approving");
-      const fees = await feeOverrides();
-      const hash = await writeContractAsync({
-        chainId: CHAIN_ID,
-        address: COLL, abi: ERC20_APPROVE_ABI,
-        functionName: "approve",
-        args: [BO, maxUint256],
-        gas: GAS.approve,
-        ...fees,
-      });
-      const receipt = await pub.waitForTransactionReceipt({ hash });
-      if (receipt.status === "reverted") {
-        throw new Error("Approval transaction reverted. Please try again.");
+      
+      // Retry approval with increasing gas limits
+      const gasLimits = [GAS.approve, BigInt(300_000), BigInt(500_000)];
+      
+      for (let i = 0; i < gasLimits.length; i++) {
+        try {
+          const fees = await feeOverrides();
+          const hash = await writeContractAsync({
+            chainId: CHAIN_ID,
+            address: COLL, abi: ERC20_APPROVE_ABI,
+            functionName: "approve",
+            args: [BO, maxUint256],
+            gas: gasLimits[i],
+            ...fees,
+          });
+          const receipt = await pub.waitForTransactionReceipt({ hash });
+          if (receipt.status === "reverted") {
+            throw new Error("Approval transaction reverted. Please try again.");
+          }
+          return; // Success
+        } catch (e: any) {
+          const isOutOfGas = e?.message?.includes('out of gas') || 
+                            e?.message?.includes('gas required exceeds allowance') ||
+                            e?.shortMessage?.includes('out of gas') ||
+                            e?.message?.includes('execution reverted');
+          
+          if (i === gasLimits.length - 1 || !isOutOfGas) {
+            throw e;
+          }
+          // Continue to next gas limit
+        }
       }
     }
   }
@@ -204,8 +222,8 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     const fnUSDAmt = parseUnits(fnUSDClean, 6);
     await ensureApproval(collAmt);
     
-    // Retry with increasing gas limits if out of gas
-    const gasLimits = [GAS.openTrove, BigInt(1_500_000), BigInt(2_000_000)];
+    // Aggressive retry with massive gas limits
+    const gasLimits = [GAS.openTrove, BigInt(4_000_000), BigInt(5_000_000)];
     
     for (let i = 0; i < gasLimits.length; i++) {
       try {
@@ -223,7 +241,8 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       } catch (e: any) {
         const isOutOfGas = e?.message?.includes('out of gas') || 
                           e?.message?.includes('gas required exceeds allowance') ||
-                          e?.shortMessage?.includes('out of gas');
+                          e?.shortMessage?.includes('out of gas') ||
+                          e?.message?.includes('execution reverted');
         
         // If it's the last attempt or not a gas issue, throw the error
         if (i === gasLimits.length - 1 || !isOutOfGas) {
@@ -241,8 +260,8 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     const collAmt = parseUnits(collClean, 8);
     await ensureApproval(collAmt);
     
-    // Retry with increasing gas limits if out of gas
-    const gasLimits = [GAS.addColl, BigInt(800_000), BigInt(1_000_000)];
+    // Aggressive retry with massive gas limits
+    const gasLimits = [GAS.addColl, BigInt(3_500_000), BigInt(4_000_000)];
     
     for (let i = 0; i < gasLimits.length; i++) {
       try {
@@ -260,7 +279,8 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       } catch (e: any) {
         const isOutOfGas = e?.message?.includes('out of gas') || 
                           e?.message?.includes('gas required exceeds allowance') ||
-                          e?.shortMessage?.includes('out of gas');
+                          e?.shortMessage?.includes('out of gas') ||
+                          e?.message?.includes('execution reverted');
         
         if (i === gasLimits.length - 1 || !isOutOfGas) {
           throw e;
@@ -275,8 +295,8 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     const collClean = collStr.replace(/,/g, "");
     const collAmt = parseUnits(collClean, 8);
     
-    // Retry with increasing gas limits if out of gas
-    const gasLimits = [GAS.withdrawColl, BigInt(800_000), BigInt(1_000_000)];
+    // Aggressive retry with massive gas limits
+    const gasLimits = [GAS.withdrawColl, BigInt(3_500_000), BigInt(4_000_000)];
     
     for (let i = 0; i < gasLimits.length; i++) {
       try {
@@ -294,7 +314,8 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       } catch (e: any) {
         const isOutOfGas = e?.message?.includes('out of gas') || 
                           e?.message?.includes('gas required exceeds allowance') ||
-                          e?.shortMessage?.includes('out of gas');
+                          e?.shortMessage?.includes('out of gas') ||
+                          e?.message?.includes('execution reverted');
         
         if (i === gasLimits.length - 1 || !isOutOfGas) {
           throw e;
@@ -308,16 +329,35 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     reset();
     const fnUSDClean = fnUSDStr.replace(/,/g, "");
     const fnUSDAmt = parseUnits(fnUSDClean, 6);
-    await run(async () => {
-      const fees = await feeOverrides();
-      return writeContractAsync({
-        chainId: CHAIN_ID,
-        address: BO, abi: BO_ABI, functionName: "withdrawFnUSD",
-        args: [fnUSDAmt, ZERO, ZERO],
-        gas: GAS.borrowMore,
-        ...fees,
-      });
-    }, "Borrow FnUSD", `${fnUSDClean} FnUSD`);
+    
+    // Aggressive retry with massive gas limits
+    const gasLimits = [GAS.borrowMore, BigInt(3_500_000), BigInt(4_000_000)];
+    
+    for (let i = 0; i < gasLimits.length; i++) {
+      try {
+        await run(async () => {
+          const fees = await feeOverrides();
+          return writeContractAsync({
+            chainId: CHAIN_ID,
+            address: BO, abi: BO_ABI, functionName: "withdrawFnUSD",
+            args: [fnUSDAmt, ZERO, ZERO],
+            gas: gasLimits[i],
+            ...fees,
+          });
+        }, "Borrow FnUSD", `${fnUSDClean} FnUSD`);
+        return;
+      } catch (e: any) {
+        const isOutOfGas = e?.message?.includes('out of gas') || 
+                          e?.message?.includes('gas required exceeds allowance') ||
+                          e?.shortMessage?.includes('out of gas') ||
+                          e?.message?.includes('execution reverted');
+        
+        if (i === gasLimits.length - 1 || !isOutOfGas) {
+          throw e;
+        }
+        reset();
+      }
+    }
   }
 
   async function repayFnUSD(fnUSDStr: string) {
@@ -334,43 +374,98 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     const shouldClose = debt18 > 0n && fnUSDAmt >= repay6Needed;
 
     if (shouldClose) {
-      await run(async () => {
-        const fees = await feeOverrides();
-        return writeContractAsync({
-          chainId: CHAIN_ID,
-          address: BO, abi: BO_ABI, functionName: "closeTrove",
-          args: [],
-          gas: GAS.closeTrove,
-          ...fees,
-        });
-      }, "Close Trove");
+      // Use closeTrove with massive retry logic
+      const gasLimits = [GAS.closeTrove, BigInt(3_000_000), BigInt(3_500_000)];
+      
+      for (let i = 0; i < gasLimits.length; i++) {
+        try {
+          await run(async () => {
+            const fees = await feeOverrides();
+            return writeContractAsync({
+              chainId: CHAIN_ID,
+              address: BO, abi: BO_ABI, functionName: "closeTrove",
+              args: [],
+              gas: gasLimits[i],
+              ...fees,
+            });
+          }, "Close Trove");
+          return;
+        } catch (e: any) {
+          const isOutOfGas = e?.message?.includes('out of gas') || 
+                            e?.message?.includes('gas required exceeds allowance') ||
+                            e?.shortMessage?.includes('out of gas') ||
+                            e?.message?.includes('execution reverted');
+          
+          if (i === gasLimits.length - 1 || !isOutOfGas) {
+            throw e;
+          }
+          reset();
+        }
+      }
       return;
     }
 
-    await run(async () => {
-      const fees = await feeOverrides();
-      return writeContractAsync({
-        chainId: CHAIN_ID,
-        address: BO, abi: BO_ABI, functionName: "repayFnUSD",
-        args: [fnUSDAmt, ZERO, ZERO],
-        gas: GAS.repayFnUSD,
-        ...fees,
-      });
-    }, "Repay Debt", `${fnUSDClean} FnUSD`);
+    // Regular repay with massive retry logic
+    const gasLimits = [GAS.repayFnUSD, BigInt(3_000_000), BigInt(3_500_000)];
+    
+    for (let i = 0; i < gasLimits.length; i++) {
+      try {
+        await run(async () => {
+          const fees = await feeOverrides();
+          return writeContractAsync({
+            chainId: CHAIN_ID,
+            address: BO, abi: BO_ABI, functionName: "repayFnUSD",
+            args: [fnUSDAmt, ZERO, ZERO],
+            gas: gasLimits[i],
+            ...fees,
+          });
+        }, "Repay Debt", `${fnUSDClean} FnUSD`);
+        return;
+      } catch (e: any) {
+        const isOutOfGas = e?.message?.includes('out of gas') || 
+                          e?.message?.includes('gas required exceeds allowance') ||
+                          e?.shortMessage?.includes('out of gas') ||
+                          e?.message?.includes('execution reverted');
+        
+        if (i === gasLimits.length - 1 || !isOutOfGas) {
+          throw e;
+        }
+        reset();
+      }
+    }
   }
 
   async function closeTrove() {
     reset();
-    await run(async () => {
-      const fees = await feeOverrides();
-      return writeContractAsync({
-        chainId: CHAIN_ID,
-        address: BO, abi: BO_ABI, functionName: "closeTrove",
-        args: [],
-        gas: GAS.closeTrove,
-        ...fees,
-      });
-    }, "Close Trove");
+    
+    // Aggressive retry with massive gas limits
+    const gasLimits = [GAS.closeTrove, BigInt(3_000_000), BigInt(3_500_000)];
+    
+    for (let i = 0; i < gasLimits.length; i++) {
+      try {
+        await run(async () => {
+          const fees = await feeOverrides();
+          return writeContractAsync({
+            chainId: CHAIN_ID,
+            address: BO, abi: BO_ABI, functionName: "closeTrove",
+            args: [],
+            gas: gasLimits[i],
+            ...fees,
+          });
+        }, "Close Trove");
+        return;
+      } catch (e: any) {
+        const isOutOfGas = e?.message?.includes('out of gas') || 
+                          e?.message?.includes('gas required exceeds allowance') ||
+                          e?.shortMessage?.includes('out of gas') ||
+                          e?.message?.includes('execution reverted');
+        
+        if (i === gasLimits.length - 1 || !isOutOfGas) {
+          throw e;
+        }
+        reset();
+      }
+    }
   }
 
   return {
