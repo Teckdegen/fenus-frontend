@@ -14,7 +14,7 @@ Fenus Protocol is building that layer. FnUSD is not just a stablecoin you borrow
 
 ## Agentic Payments: When Software Pays Software
 
-AI agents are already here. They are booking meetings, managing workflows, and making decisions on behalf of users. The next step is obvious: they need to transact. An agent that can research, decide, and execute but cannot pay for what it needs is only half-functional.
+AI agents are already here. They are booking meetings, managing workflows, and making decisions on behalf of users. They can already transact. The next step is bringing this capability to LitVM with the infrastructure that makes it seamless, stable, and censorship-resistant. An agent that can research, decide, and execute but cannot pay for what it needs is only half-functional.
 
 Fenus is building the rails for agentic payments. FnUSD is designed to be the currency that agents use to pay each other, to pay for services, and to settle transactions without human intervention. A decentralized stablecoin with no issuer, no blacklist, and no gatekeepers is the only kind of money that makes sense for autonomous software.
 
@@ -48,7 +48,7 @@ This matters for agentic payments because agents need a currency that cannot be 
 
 FnUSD is built on Litecoin, a chain with a 13-year track record of uptime, decentralization, and security. LitVM brings that security to a ZK rollup with low fees and fast finality. The combination is a stable, decentralized payment layer that works at scale.
 
-The peg is maintained by an automated PegKeeper that trades on Addax DEX. When FnUSD trades above one dollar, the PegKeeper sells to bring the price down. When it trades below one dollar, the PegKeeper buys to bring the price up. This is market-driven stability, not reserve-backed promises. The mechanism is transparent, automated, and verifiable on-chain.
+An automated PegKeeper system is planned for mainnet deployment. It will trade on Addax DEX to maintain the peg through market-driven stability rather than reserve-backed promises. The mechanism will be transparent, automated, and verifiable on-chain.
 
 ## What Developers Can Expect
 
