@@ -14,23 +14,23 @@ Fenus Protocol is building that layer. FnUSD is not just a stablecoin you borrow
 
 ## Agentic Payments: When Software Pays Software
 
-AI agents are already here. They are booking meetings, managing workflows, and making decisions on behalf of users. They can already transact. The next step is bringing this capability to LitVM with the infrastructure that makes it seamless, stable, and censorship-resistant. An agent that can research, decide, and execute but cannot pay for what it needs is only half-functional.
+AI agents are already here. They are booking meetings, managing workflows, and making decisions on behalf of users. They can already transact. Fenus is building the infrastructure to bring this capability to LitVM mainnet with the stability and censorship-resistance that autonomous systems need. An agent that can research, decide, and execute but cannot pay for what it needs is only half-functional.
 
-Fenus is building the rails for agentic payments. FnUSD is designed to be the currency that agents use to pay each other, to pay for services, and to settle transactions without human intervention. A decentralized stablecoin with no issuer, no blacklist, and no gatekeepers is the only kind of money that makes sense for autonomous software.
+Fenus is building the rails for agentic payments on mainnet. FnUSD is designed to be the currency that agents use to pay each other, to pay for services, and to settle transactions without human intervention. A decentralized stablecoin with no issuer, no blacklist, and no gatekeepers is the only kind of money that makes sense for autonomous software.
 
 Imagine an AI agent that manages your social media presence. It needs to pay for API access, for compute resources, for content distribution. It does not ask you for approval on every transaction. It has a budget in FnUSD and it spends within that budget autonomously. The payments happen on-chain, instantly, with full transparency. You can audit every transaction the agent made. You can revoke access at any time. The agent operates within the constraints you set, but it operates independently.
 
-This is not speculative. The infrastructure for this is being built right now. Fenus is working with developers who are integrating FnUSD into agent frameworks, building payment APIs for autonomous systems, and designing the protocols that let agents transact with each other trustlessly. The first wave of agentic payments is coming, and FnUSD is the currency they will use.
+This is not speculative. The infrastructure for this is being built for mainnet deployment right now. Fenus is working with developers who are integrating FnUSD into agent frameworks, building payment APIs for autonomous systems, and designing the protocols that let agents transact with each other trustlessly. The first wave of agentic payments is coming, and FnUSD is the currency they will use.
 
 ## x402 Payment Rails: Universal Payment Acceptance
 
-The x402 protocol is the missing piece for universal payment acceptance. Any application, Web2 or Web3, should be able to accept FnUSD as payment in a few lines of code. No complex integrations. No custody requirements. No compliance overhead. Just a simple API that lets any developer accept stable, censorship-resistant payments.
+The x402 protocol is the missing piece for universal payment acceptance on mainnet. Any application, Web2 or Web3, should be able to accept FnUSD as payment in a few lines of code. No complex integrations. No custody requirements. No compliance overhead. Just a simple API that lets any developer accept stable, censorship-resistant payments.
 
 This is not just for e-commerce. This is for APIs, for apps, for services, for stores, for creators, for anyone who needs to get paid. A SaaS application that wants to accept FnUSD for subscriptions. A content platform that wants to pay creators in FnUSD. A Web3 game that wants to accept FnUSD for in-game purchases. A traditional business that wants to accept crypto payments without dealing with volatility or regulatory uncertainty.
 
 The x402 rails make all of this possible. The protocol abstracts away the complexity of blockchain transactions and presents a simple interface: accept payment, verify payment, deliver service. The developer does not need to understand Litecoin, LitVM, or zkLTC. They just need to know that when a payment comes through, it is final, it is stable, and it is theirs.
 
-Fenus is building these rails in partnership with developers who are already integrating them into real applications. The goal is to make FnUSD as easy to accept as a credit card payment, but with the finality and censorship resistance of a blockchain transaction. This is the upgrade that brings crypto payments into the mainstream without compromising on the principles that make crypto valuable in the first place.
+Fenus is building these rails for mainnet deployment in partnership with developers who are already integrating them into real applications. The goal is to make FnUSD as easy to accept as a credit card payment, but with the finality and censorship resistance of a blockchain transaction. This is the upgrade that brings crypto payments into the mainstream without compromising on the principles that make crypto valuable in the first place.
 
 ## Gas Abstraction: Seamless Onboarding
 
@@ -38,7 +38,7 @@ Users should not need to think about gas tokens. They should not need to hold zk
 
 This is a massive upgrade for user experience. New users can onboard with a single asset and start transacting immediately. No need to acquire a second token just to pay fees. No need to understand the difference between a gas token and a payment token. The experience is seamless, and the complexity is hidden.
 
-Fenus is building gas abstraction into the FnUSD payment flow using account abstraction primitives. The infrastructure is being tested now and will roll out as part of the broader payment rails. For developers, this means you can onboard users with FnUSD alone and they can start using your application without friction. For users, this means one less thing to worry about.
+Fenus is building gas abstraction for mainnet using account abstraction primitives. For developers, this means you can onboard users with FnUSD alone and they can start using your application without friction. For users, this means one less thing to worry about.
 
 ## Why FnUSD Is the Right Foundation
 
@@ -48,15 +48,13 @@ This matters for agentic payments because agents need a currency that cannot be 
 
 FnUSD is built on Litecoin, a chain with a 13-year track record of uptime, decentralization, and security. LitVM brings that security to a ZK rollup with low fees and fast finality. The combination is a stable, decentralized payment layer that works at scale.
 
-An automated PegKeeper system is planned for mainnet deployment. It will trade on Addax DEX to maintain the peg through market-driven stability rather than reserve-backed promises. The mechanism will be transparent, automated, and verifiable on-chain.
-
 ## What Developers Can Expect
 
-Fenus Protocol is developer-first. The team is building APIs, SDKs, and documentation that make it easy to integrate FnUSD into any application. The x402 payment rails are designed to be simple enough for a junior developer to integrate in an afternoon and robust enough to handle production-scale traffic.
+Fenus Protocol is developer-first. The team is building payment SDKs, APIs, and documentation for mainnet that make it easy to integrate FnUSD into any application. The x402 payment rails are designed to be simple enough for a junior developer to integrate in an afternoon and robust enough to handle production-scale traffic.
 
-The agentic payment infrastructure is being built with agent frameworks in mind. If you are building AI agents that need to transact, Fenus is building the tools you need. If you are building applications that need to accept payments from agents, Fenus is building the rails that make that possible.
+The agentic payment infrastructure is being built for mainnet with agent frameworks in mind. If you are building AI agents that need to transact, Fenus is building the tools you need. If you are building applications that need to accept payments from agents, Fenus is building the rails that make that possible.
 
-Gas abstraction and account abstraction are being rolled out as part of the core protocol. Developers will be able to offer seamless onboarding experiences without requiring users to hold multiple tokens. The complexity is abstracted away. The experience is smooth.
+Gas abstraction and account abstraction are being developed for mainnet deployment as part of the core protocol. Developers will be able to offer seamless onboarding experiences without requiring users to hold multiple tokens. The complexity is abstracted away. The experience is smooth.
 
 The Fenus team is working directly with developers who are building on LitVM. If you are building something that needs a stable, decentralized payment layer, reach out. The infrastructure is being built in collaboration with the developers who will use it, and the feedback loop is tight.
 
