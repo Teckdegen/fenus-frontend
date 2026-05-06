@@ -54,13 +54,14 @@ const FNUSD_SCALE = 1_000_000_000_000n; // 1e12
 
 // Explicit gas limits — prevents the "tx fee exceeds cap" error that occurs
 // when the oracle's fetchPrice() (state-changing) is called during estimation.
+// Increased limits to handle SortedTroves complexity with many active troves.
 const GAS = {
-  openTrove:    BigInt(800_000),
-  addColl:      BigInt(400_000),
-  withdrawColl: BigInt(400_000),
-  borrowMore:   BigInt(400_000),
-  repayFnUSD:   BigInt(300_000),
-  closeTrove:   BigInt(500_000),
+  openTrove:    BigInt(1_200_000),  // Increased from 800k due to SortedTroves gas usage
+  addColl:      BigInt(600_000),    // Increased from 400k
+  withdrawColl: BigInt(600_000),    // Increased from 400k
+  borrowMore:   BigInt(600_000),    // Increased from 400k
+  repayFnUSD:   BigInt(500_000),    // Increased from 300k
+  closeTrove:   BigInt(700_000),    // Increased from 500k
   approve:      BigInt(100_000),
 };
 
@@ -202,16 +203,36 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     const collAmt  = parseUnits(collClean,  8);
     const fnUSDAmt = parseUnits(fnUSDClean, 6);
     await ensureApproval(collAmt);
-    await run(async () => {
-      const fees = await feeOverrides();
-      return writeContractAsync({
-        chainId: CHAIN_ID,
-        address: BO, abi: BO_ABI, functionName: "openTrove",
-        args: [collAmt, fnUSDAmt, ZERO, ZERO],
-        gas: GAS.openTrove,
-        ...fees,
-      });
-    }, "Open Trove", `${fnUSDClean} FnUSD`, `${collClean} wzkLTC`);
+    
+    // Retry with increasing gas limits if out of gas
+    const gasLimits = [GAS.openTrove, BigInt(1_500_000), BigInt(2_000_000)];
+    
+    for (let i = 0; i < gasLimits.length; i++) {
+      try {
+        await run(async () => {
+          const fees = await feeOverrides();
+          return writeContractAsync({
+            chainId: CHAIN_ID,
+            address: BO, abi: BO_ABI, functionName: "openTrove",
+            args: [collAmt, fnUSDAmt, ZERO, ZERO],
+            gas: gasLimits[i],
+            ...fees,
+          });
+        }, "Open Trove", `${fnUSDClean} FnUSD`, `${collClean} wzkLTC`);
+        return; // Success, exit retry loop
+      } catch (e: any) {
+        const isOutOfGas = e?.message?.includes('out of gas') || 
+                          e?.message?.includes('gas required exceeds allowance') ||
+                          e?.shortMessage?.includes('out of gas');
+        
+        // If it's the last attempt or not a gas issue, throw the error
+        if (i === gasLimits.length - 1 || !isOutOfGas) {
+          throw e;
+        }
+        // Otherwise, continue to next gas limit
+        reset(); // Reset status for retry
+      }
+    }
   }
 
   async function addColl(collStr: string) {
@@ -219,32 +240,68 @@ export function useTroveActions(address: `0x${string}` | undefined) {
     const collClean = collStr.replace(/,/g, "");
     const collAmt = parseUnits(collClean, 8);
     await ensureApproval(collAmt);
-    await run(async () => {
-      const fees = await feeOverrides();
-      return writeContractAsync({
-        chainId: CHAIN_ID,
-        address: BO, abi: BO_ABI, functionName: "addColl",
-        args: [collAmt, ZERO, ZERO],
-        gas: GAS.addColl,
-        ...fees,
-      });
-    }, "Add Collateral", `${collClean} wzkLTC`);
+    
+    // Retry with increasing gas limits if out of gas
+    const gasLimits = [GAS.addColl, BigInt(800_000), BigInt(1_000_000)];
+    
+    for (let i = 0; i < gasLimits.length; i++) {
+      try {
+        await run(async () => {
+          const fees = await feeOverrides();
+          return writeContractAsync({
+            chainId: CHAIN_ID,
+            address: BO, abi: BO_ABI, functionName: "addColl",
+            args: [collAmt, ZERO, ZERO],
+            gas: gasLimits[i],
+            ...fees,
+          });
+        }, "Add Collateral", `${collClean} wzkLTC`);
+        return;
+      } catch (e: any) {
+        const isOutOfGas = e?.message?.includes('out of gas') || 
+                          e?.message?.includes('gas required exceeds allowance') ||
+                          e?.shortMessage?.includes('out of gas');
+        
+        if (i === gasLimits.length - 1 || !isOutOfGas) {
+          throw e;
+        }
+        reset();
+      }
+    }
   }
 
   async function withdrawColl(collStr: string) {
     reset();
     const collClean = collStr.replace(/,/g, "");
     const collAmt = parseUnits(collClean, 8);
-    await run(async () => {
-      const fees = await feeOverrides();
-      return writeContractAsync({
-        chainId: CHAIN_ID,
-        address: BO, abi: BO_ABI, functionName: "withdrawColl",
-        args: [collAmt, ZERO, ZERO],
-        gas: GAS.withdrawColl,
-        ...fees,
-      });
-    }, "Remove Collateral", `${collClean} wzkLTC`);
+    
+    // Retry with increasing gas limits if out of gas
+    const gasLimits = [GAS.withdrawColl, BigInt(800_000), BigInt(1_000_000)];
+    
+    for (let i = 0; i < gasLimits.length; i++) {
+      try {
+        await run(async () => {
+          const fees = await feeOverrides();
+          return writeContractAsync({
+            chainId: CHAIN_ID,
+            address: BO, abi: BO_ABI, functionName: "withdrawColl",
+            args: [collAmt, ZERO, ZERO],
+            gas: gasLimits[i],
+            ...fees,
+          });
+        }, "Remove Collateral", `${collClean} wzkLTC`);
+        return;
+      } catch (e: any) {
+        const isOutOfGas = e?.message?.includes('out of gas') || 
+                          e?.message?.includes('gas required exceeds allowance') ||
+                          e?.shortMessage?.includes('out of gas');
+        
+        if (i === gasLimits.length - 1 || !isOutOfGas) {
+          throw e;
+        }
+        reset();
+      }
+    }
   }
 
   async function borrowMore(fnUSDStr: string) {

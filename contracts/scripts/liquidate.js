@@ -18,7 +18,7 @@ dotenv.config({ path: join(__dirname, "../.env") });
 const RPC_URL = "https://liteforge.rpc.caldera.xyz/http";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
-// Contract addresses
+// Contract addresses — updated after redeployment
 const TROVE_MANAGER = "0xD001F1E7CB690C12E191bf7Aa1c3B6332D92a8B4";
 const TROVE_NFT = "0x3A856810c38a0446692c8C44400A09Dc9bAA519f";
 const PRICE_FEED = "0x39992B70D9C36902aeE699185E94d021BDa94ab6";
