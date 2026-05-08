@@ -1,12 +1,28 @@
 {
-  "name": "fenus-liquidation-bot",
+  "name": "fenus-pegkeeper",
   "version": "1.0.0",
-  "description": "24/7 liquidation bot for the FENUS protocol",
+  "description": "Automated PegKeeper and Liquidation Bot for FENUS Protocol on LitVM",
   "type": "module",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
     "dev": "node --watch bot.js"
+  },
+  "keywords": [
+    "fenus",
+    "pegkeeper",
+    "liquidation",
+    "litvm",
+    "fnusd",
+    "stablecoin",
+    "defi",
+    "litecoin"
+  ],
+  "author": "FENUS Protocol",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kardsdotcards/PegKeeper.git"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

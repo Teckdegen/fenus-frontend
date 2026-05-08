@@ -34,6 +34,101 @@
 
 import { ethers } from "ethers";
 import "dotenv/config";
+import https from "https";
+
+// ─── Telegram Notifier ────────────────────────────────────────────────────────
+
+const TG = {
+  async send(message) {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    if (!token || !chatId) return;
+
+    const body = JSON.stringify({
+      chat_id: chatId,
+      text: message,
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+    });
+
+    return new Promise((resolve) => {
+      const req = https.request(
+        {
+          hostname: "api.telegram.org",
+          path: `/bot${token}/sendMessage`,
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
+        },
+        (res) => {
+          res.on("data", () => {});
+          res.on("end", resolve);
+        }
+      );
+      req.on("error", (e) => log.warn("Telegram send error:", e.message));
+      req.write(body);
+      req.end();
+    });
+  },
+
+  liquidation(owner, txHash, blockNumber, gasUsed, count = 1) {
+    const explorerUrl = explorerTxUrl(CONFIG.BLOCK_EXPLORER, txHash);
+    const msg =
+      `🔴 <b>LIQUIDATION EXECUTED</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 Troves: <code>${count}</code>\n` +
+      `📦 Block: <code>${blockNumber}</code>\n` +
+      `⛽ Gas Used: <code>${gasUsed}</code>\n` +
+      `🔗 Tx: <a href="${explorerUrl}">${txHash.slice(0, 20)}...</a>`;
+    return this.send(msg);
+  },
+
+  arbitrage(action, amount, price, txHash) {
+    const explorerUrl = explorerTxUrl(CONFIG.BLOCK_EXPLORER, txHash);
+    const emoji = action === "BUY" ? "🟢" : "🔴";
+    const msg =
+      `${emoji} <b>PEG KEEPER TRADE</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `📊 Action: <b>${action} FnUSD</b>\n` +
+      `💰 Amount: <code>${amount} FnUSD</code>\n` +
+      `📈 Price: <code>$${price}</code>\n` +
+      `🔗 Tx: <a href="${explorerUrl}">${txHash.slice(0, 20)}...</a>`;
+    return this.send(msg);
+  },
+
+  pegAlert(price, threshold) {
+    const direction = price > threshold ? "ABOVE" : "BELOW";
+    const emoji = direction === "ABOVE" ? "📈" : "📉";
+    const msg =
+      `${emoji} <b>PEG ALERT</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `💵 FnUSD Price: <code>$${price.toFixed(4)}</code>\n` +
+      `⚠️ Status: <b>${direction} PEG</b>\n` +
+      `🎯 Target: <code>$${CONFIG.TARGET_PRICE}</code>`;
+    return this.send(msg);
+  },
+
+  dangerZone(owner, icr) {
+    const icrPct = (Number(ethers.formatEther(icr)) * 100).toFixed(1);
+    const msg =
+      `⚠️ <b>DANGER ZONE</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 Trove: <code>${owner.slice(0, 10)}...${owner.slice(-6)}</code>\n` +
+      `📊 ICR: <code>${icrPct}%</code>\n` +
+      `🚨 Below 145% — liquidation imminent`;
+    return this.send(msg);
+  },
+
+  startup(walletAddress, troveCount) {
+    const msg =
+      `🤖 <b>FENUS BOT STARTED</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━\n` +
+      `🌐 Network: <code>${CONFIG.NETWORK_NAME}</code>\n` +
+      `👛 Wallet: <code>${walletAddress.slice(0, 10)}...${walletAddress.slice(-6)}</code>\n` +
+      `📊 Active Troves: <code>${troveCount}</code>\n` +
+      `🔄 PegKeeper: <b>${CONFIG.ENABLE_PEG_KEEPER ? "ENABLED" : "DISABLED"}</b>`;
+    return this.send(msg);
+  },
+};
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -103,6 +198,7 @@ const CONFIG = {
   MIN_TRADE_AMOUNT: parseFloat(process.env.MIN_TRADE_AMOUNT || "100"),
   MAX_TRADE_AMOUNT: parseFloat(process.env.MAX_TRADE_AMOUNT || "10000"),
   PEG_CHECK_INTERVAL: parseInt(process.env.PEG_CHECK_INTERVAL || "60", 10),
+  BOT_SLEEP_INTERVAL: parseInt(process.env.BOT_SLEEP_INTERVAL || "60", 10),
   ENABLE_AUTO_BORROW: process.env.ENABLE_AUTO_BORROW === "true",
   ENABLE_AUTO_REPAY: process.env.ENABLE_AUTO_REPAY === "true",
 };
@@ -233,6 +329,7 @@ class PegKeeper {
     this.provider = provider;
     this.signer = signer;
     this.lastCheck = 0;
+    this.lastPegAlert = { above: 0, below: 0 }; // Track last alert time to avoid spam
     this.stats = { trades: 0, borrows: 0, repays: 0, errors: 0 };
     
     if (!CONFIG.ENABLE_PEG_KEEPER) return;
@@ -262,9 +359,19 @@ class PegKeeper {
 
       if (price > CONFIG.UPPER_THRESHOLD) {
         log.info(`PegKeeper: Price too high ($${price.toFixed(4)} > $${CONFIG.UPPER_THRESHOLD}) - selling FnUSD`);
+        // 🔔 Send peg alert (max once per 5 minutes to avoid spam)
+        if (now - this.lastPegAlert.above > 300000) {
+          await TG.pegAlert(price, CONFIG.UPPER_THRESHOLD);
+          this.lastPegAlert.above = now;
+        }
         await this.sellFnUSD(price);
       } else if (price < CONFIG.LOWER_THRESHOLD) {
         log.info(`PegKeeper: Price too low ($${price.toFixed(4)} < $${CONFIG.LOWER_THRESHOLD}) - buying FnUSD`);
+        // 🔔 Send peg alert (max once per 5 minutes to avoid spam)
+        if (now - this.lastPegAlert.below > 300000) {
+          await TG.pegAlert(price, CONFIG.LOWER_THRESHOLD);
+          this.lastPegAlert.below = now;
+        }
         await this.buyFnUSD(price);
       }
     } catch (e) {
@@ -341,6 +448,8 @@ class PegKeeper {
       const receipt = await tx.wait();
       log.info(`PegKeeper: Sold FnUSD - tx ${tx.hash}`);
       this.stats.trades++;
+      // 🔔 Telegram notification
+      await TG.arbitrage("SELL", tradeAmount.toFixed(2), currentPrice.toFixed(4), tx.hash);
     } catch (e) {
       log.error("PegKeeper: Sell failed:", e.message);
       this.stats.errors++;
@@ -387,6 +496,8 @@ class PegKeeper {
       const receipt = await tx.wait();
       log.info(`PegKeeper: Bought FnUSD - tx ${tx.hash}`);
       this.stats.trades++;
+      // 🔔 Telegram notification
+      await TG.arbitrage("BUY", tradeAmount.toFixed(2), currentPrice.toFixed(4), tx.hash);
 
       // Optionally repay debt if we have excess FnUSD
       if (CONFIG.ENABLE_AUTO_REPAY) {
@@ -579,6 +690,9 @@ class LiquidationBot {
     await this.fullSync();
     log.info("Indexed", this.store.size(), "active Troves");
 
+    // 🔔 Telegram startup notification
+    await TG.startup(this.signer.address, this.store.size());
+
     if (CONFIG.ENABLE_PEG_KEEPER) {
       log.info("PegKeeper: ENABLED");
       log.info(" Target  :", `$${CONFIG.TARGET_PRICE}`);
@@ -620,6 +734,11 @@ class LiquidationBot {
     if (!this._listenersAttached) return;
     this.blockCount++;
     this.stats.blocksProcessed++;
+
+    // Sleep/wake logging every BOT_SLEEP_INTERVAL blocks
+    if (this.blockCount % CONFIG.BOT_SLEEP_INTERVAL === 0) {
+      log.info(`💤 Bot awake — Block ${blockNumber} | Troves: ${this.store.size()} | Danger: ${this.store.dangerSize()}`);
+    }
 
     if (this.blockCount % CONFIG.FULL_RESYNC_INTERVAL === 0) {
       log.info(`Block ${blockNumber} — periodic full re-sync`);
@@ -689,8 +808,13 @@ class LiquidationBot {
           const owner = batch[j];
           if (icr === null) continue;
 
-          if (icr < DANGER_ZONE) this.store.addDanger(owner);
-          else this.store.removeDanger(owner);
+          if (icr < DANGER_ZONE) {
+            this.store.addDanger(owner);
+            // 🔔 Alert if newly entering danger zone
+            if (!dangerSet.has(owner)) {
+              await TG.dangerZone(owner, icr).catch(() => {});
+            }
+          } else this.store.removeDanger(owner);
 
           if (icr > 0n && icr < MCR) eligible.push({ owner, icr });
         }
@@ -743,6 +867,8 @@ class LiquidationBot {
       this.stats.liquidations++;
       this.stats.txsSent++;
       this.store.remove(owner);
+      // 🔔 Telegram notification
+      await TG.liquidation(owner, tx.hash, receipt.blockNumber, receipt.gasUsed.toString(), 1);
     } catch (e) {
       log.error(` liquidate(${owner}):`, e.shortMessage || e.message);
       this.stats.errors++;
@@ -770,6 +896,8 @@ class LiquidationBot {
         this.stats.liquidations += chunk.length;
         this.stats.txsSent++;
         chunk.forEach((o) => this.store.remove(o));
+        // 🔔 Telegram notification
+        await TG.liquidation(chunk[0], tx.hash, receipt.blockNumber, receipt.gasUsed.toString(), chunk.length);
       } catch (e) {
         log.error(" batchLiquidate failed:", e.shortMessage || e.message, "— trying singles");
         for (const owner of chunk) await this.liquidateSingle(owner);
