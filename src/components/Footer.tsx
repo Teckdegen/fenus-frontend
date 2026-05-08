@@ -23,7 +23,7 @@ const Footer = () => {
 
         <div className="flex items-center gap-2">
           <a
-            href="https://x.com/fenusprotocol"
+            href="https://x.com/fenus_protocol"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="FENUS on X"
