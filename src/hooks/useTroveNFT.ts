@@ -26,12 +26,21 @@ const CHAIN_ID = CONTRACTS.chainId;
 
 export type TxStatus = "idle" | "pending" | "success" | "error";
 
+type TxResult = {
+  type: string;
+  amount?: string;
+  amount2?: string;
+  txHash: string;
+};
+
 export function useTroveNFT() {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const write = (request: any) => writeContractAsync(request);
   const [status, setStatus] = useState<TxStatus>("idle");
   const [txHash, setTxHash] = useState("");
   const [error, setError] = useState("");
+  const [txResult, setTxResult] = useState<TxResult | null>(null);
 
   const pub = createPublicClient({ transport: http(RPC) });
 
@@ -48,6 +57,7 @@ export function useTroveNFT() {
     setStatus("idle");
     setTxHash("");
     setError("");
+    setTxResult(null);
   };
 
   async function transferTrove(toAddress: string) {
@@ -100,7 +110,7 @@ export function useTroveNFT() {
 
     try {
       // Use safeTransferFrom to ensure recipient can receive NFTs
-      const hash = await writeContractAsync({
+      const hash = await write({
         chainId: CHAIN_ID,
         address: TROVE_NFT,
         abi: TROVE_NFT_ABI,
@@ -110,6 +120,7 @@ export function useTroveNFT() {
 
       setTxHash(hash);
       await pub.waitForTransactionReceipt({ hash });
+      setTxResult({ type: "Transfer Trove", txHash: hash });
       setStatus("success");
     } catch (e: any) {
       const msg = e?.shortMessage || e?.details || e?.message || "Transfer failed";
@@ -123,6 +134,7 @@ export function useTroveNFT() {
     status,
     txHash,
     error,
+    txResult,
     reset,
     transferTrove,
   };
