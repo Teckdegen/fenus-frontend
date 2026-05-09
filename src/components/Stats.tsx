@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { useReadContract } from "wagmi";
 import { formatUnits } from "viem";
 import MuxVideo from "./MuxVideo";
@@ -33,6 +34,37 @@ function compact(n: number): string {
   return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
+// Count-up hook: animates from 0 to `target` over `duration` ms (ease-out).
+function useCountUp(target: number, duration = 4000) {
+  const [value, setValue] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const startRef = useRef<number | null>(null);
+  const fromRef = useRef(0);
+
+  useEffect(() => {
+    if (!target || target <= 0) {
+      setValue(0);
+      return;
+    }
+    fromRef.current = 0;
+    startRef.current = null;
+    const tick = (t: number) => {
+      if (startRef.current === null) startRef.current = t;
+      const elapsed = t - startRef.current;
+      const p = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(fromRef.current + (target - fromRef.current) * eased);
+      if (p < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [target, duration]);
+
+  return value;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 const Stats = () => {
   // FnUSD total supply
@@ -65,14 +97,17 @@ const Stats = () => {
   const tvlUSD      = priceUSD > 0 ? collNum * priceUSD : 0;
   const fnUSDMinted = totalSupply ? parseFloat(formatUnits(totalSupply, 6)) : 0;
 
+  const animatedTvl    = useCountUp(tvlUSD, 4000);
+  const animatedMinted = useCountUp(fnUSDMinted, 4000);
+
   const stats = [
     {
       label: "TVL",
-      value: tvlUSD > 0 ? `$${compact(tvlUSD)}` : "$0",
+      value: tvlUSD > 0 ? `$${compact(animatedTvl)}` : "$0",
     },
     {
       label: "FnUSD Minted",
-      value: fnUSDMinted > 0 ? compact(fnUSDMinted) : "0",
+      value: fnUSDMinted > 0 ? compact(animatedMinted) : "0",
     },
   ];
 
