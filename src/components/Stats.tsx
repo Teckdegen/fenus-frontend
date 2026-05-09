@@ -97,14 +97,17 @@ const Stats = () => {
   const tvlUSD      = priceUSD > 0 ? collNum * priceUSD : 0;
   const fnUSDMinted = totalSupply ? parseFloat(formatUnits(totalSupply, 6)) : 0;
 
+  const animatedTvl    = useCountUp(tvlUSD, 4000);
+  const animatedMinted = useCountUp(fnUSDMinted, 4000);
+
   const stats = [
     {
       label: "TVL",
-      value: tvlUSD > 0 ? `$${compact(tvlUSD)}` : "$0",
+      value: tvlUSD > 0 ? `$${compact(animatedTvl)}` : "$0",
     },
     {
       label: "FnUSD Minted",
-      value: fnUSDMinted > 0 ? compact(fnUSDMinted) : "0",
+      value: fnUSDMinted > 0 ? compact(animatedMinted) : "0",
     },
   ];
 
