@@ -75,6 +75,7 @@ const Admin = () => {
   const { address, isConnected } = useAccount();
   const navigate = useNavigate();
   const { writeContractAsync } = useWriteContract();
+  const write = (request: any) => writeContractAsync(request);
 
   const [troves,  setTroves]  = useState<Trove[]>([]);
   const [loading, setLoading] = useState(false);
@@ -199,7 +200,7 @@ const Admin = () => {
     setTxHash(null);
     setTxError(null);
     try {
-      const hash = await writeContractAsync({
+      const hash = await write({
         address: CONTRACTS.TroveManager as `0x${string}`,
         abi: TROVE_MANAGER_ABI,
         functionName: "liquidate",
@@ -217,7 +218,7 @@ const Admin = () => {
     setTxHash(null);
     setTxError(null);
     try {
-      const hash = await writeContractAsync({
+      const hash = await write({
         address: CONTRACTS.TroveManager as `0x${string}`,
         abi: TROVE_MANAGER_ABI,
         functionName: "batchLiquidate",
