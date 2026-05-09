@@ -141,6 +141,7 @@ export interface TxResult {
 
 export function useTroveActions(address: `0x${string}` | undefined) {
   const { writeContractAsync } = useWriteContract();
+  const write = (request: any) => writeContractAsync(request);
   const [status, setStatus] = useState<TxStatus>("idle");
   const [txHash, setTxHash] = useState("");
   const [error, setError] = useState("");
@@ -216,7 +217,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       for (let i = 0; i < gasLimits.length; i++) {
         try {
           const fees = await feeOverrides();
-          const hash = await writeContractAsync({
+          const hash = await write({
             chainId: CHAIN_ID,
             address: COLL,
             abi: ERC20_APPROVE_ABI,
@@ -305,7 +306,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         await run(
           async () => {
             const fees = await feeOverrides();
-            return writeContractAsync({
+            return write({
               chainId: CHAIN_ID,
               address: BO,
               abi: BO_ABI,
@@ -351,7 +352,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         await run(
           async () => {
             const fees = await feeOverrides();
-            return writeContractAsync({
+            return write({
               chainId: CHAIN_ID,
               address: BO,
               abi: BO_ABI,
@@ -397,7 +398,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         await run(
           async () => {
             const fees = await feeOverrides();
-            return writeContractAsync({
+            return write({
               chainId: CHAIN_ID,
               address: BO,
               abi: BO_ABI,
@@ -439,7 +440,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         await run(
           async () => {
             const fees = await feeOverrides();
-            return writeContractAsync({
+            return write({
               chainId: CHAIN_ID,
               address: BO,
               abi: BO_ABI,
@@ -498,7 +499,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         try {
           await run(async () => {
             const fees = await feeOverrides();
-            return writeContractAsync({
+            return write({
               chainId: CHAIN_ID,
               address: BO,
               abi: BO_ABI,
@@ -533,7 +534,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
         await run(
           async () => {
             const fees = await feeOverrides();
-            return writeContractAsync({
+            return write({
               chainId: CHAIN_ID,
               address: BO,
               abi: BO_ABI,
@@ -572,7 +573,7 @@ export function useTroveActions(address: `0x${string}` | undefined) {
       try {
         await run(async () => {
           const fees = await feeOverrides();
-          return writeContractAsync({
+          return write({
             chainId: CHAIN_ID,
             address: BO,
             abi: BO_ABI,

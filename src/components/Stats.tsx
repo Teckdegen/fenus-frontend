@@ -34,7 +34,13 @@ function compact(n: number): string {
   return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
-// Count-up hook: animates from 0 to `target` over `duration` ms (ease-out).
+function countDurationFor(target: number): number {
+  if (!Number.isFinite(target) || target <= 0) return 0;
+  const digits = Math.floor(Math.log10(Math.max(target, 1))) + 1;
+  return Math.min(4_500, Math.max(1_800, 1_250 + digits * 400));
+}
+
+// Count-up hook: animates from the current display value to `target` over `duration` ms (ease-out).
 function useCountUp(target: number, duration = 4000) {
   const [value, setValue] = useState(0);
   const rafRef = useRef<number | null>(null);
@@ -46,7 +52,7 @@ function useCountUp(target: number, duration = 4000) {
       setValue(0);
       return;
     }
-    fromRef.current = 0;
+    fromRef.current = value;
     startRef.current = null;
     const tick = (t: number) => {
       if (startRef.current === null) startRef.current = t;
@@ -97,8 +103,8 @@ const Stats = () => {
   const tvlUSD      = priceUSD > 0 ? collNum * priceUSD : 0;
   const fnUSDMinted = totalSupply ? parseFloat(formatUnits(totalSupply, 6)) : 0;
 
-  const animatedTvl    = useCountUp(tvlUSD, 4000);
-  const animatedMinted = useCountUp(fnUSDMinted, 4000);
+  const animatedTvl    = useCountUp(tvlUSD, countDurationFor(tvlUSD));
+  const animatedMinted = useCountUp(fnUSDMinted, countDurationFor(fnUSDMinted));
 
   const stats = [
     {
