@@ -34,15 +34,11 @@ const Hero = () => {
           FENUS
         </p>
         <h1 className="font-display text-balance text-4xl font-semibold leading-[1.05] sm:text-5xl md:text-6xl">
-          Borrow Against Your<br />LitVM / Equities.
+          Borrow Against Your<br />LitVM / Equity Holdings.
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-balance text-base text-muted-foreground sm:text-lg">
+        <p className="mx-auto mt-5 max-w-md text-balance text-sm text-muted-foreground sm:text-base">
           Mint <span className="text-foreground">$FnUSD</span> with{" "}
-          <span className="text-foreground">$wzkLTC</span> collateral{" "}
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-2 py-0.5 text-xs font-semibold text-background align-middle">
-            <span className="h-1.5 w-1.5 rounded-full bg-background animate-pulse" />
-            Live
-          </span>
+          <span className="text-foreground">$wzkLTC</span> collateral.
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
