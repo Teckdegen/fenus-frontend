@@ -91,7 +91,7 @@ const Hero = () => {
           </div>
 
           <p className="mt-4 text-xs text-muted-foreground/80 sm:text-sm">
-            AAPL · TSLA · NVDA · AMZN · META — and more stocks, crypto & equities on the way.
+            AAPL · TSLA · NVDA · AMZN · META  and more stocks, equities on the way.
           </p>
         </div>
       </div>
