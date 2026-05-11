@@ -96,11 +96,6 @@ const Hero = () => {
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2">
-        <p className="font-display text-[10px] tracking-[0.35em] text-muted-foreground">
-          DEPOSIT · MINT · LEVERAGE
-        </p>
-      </div>
     </section>
   );
 };
