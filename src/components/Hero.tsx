@@ -6,16 +6,19 @@ import nvidiaLogo from "@/assets/logos/nvidia.png";
 import amazonLogo from "@/assets/logos/amazon.png";
 import metaLogo from "@/assets/logos/meta.png";
 
-const assets = [
-  { src: litecoinLogo, name: "Litecoin" },
-  { src: appleLogo, name: "Apple" },
-  { src: teslaLogo, name: "Tesla" },
-  { src: nvidiaLogo, name: "Nvidia" },
-  { src: amazonLogo, name: "Amazon" },
-  { src: metaLogo, name: "Meta" },
+const liveAssets = [{ src: litecoinLogo, name: "wzkLTC", live: true }];
+const comingAssets = [
+  { src: appleLogo, name: "AAPL" },
+  { src: teslaLogo, name: "TSLA" },
+  { src: nvidiaLogo, name: "NVDA" },
+  { src: amazonLogo, name: "AMZN" },
+  { src: metaLogo, name: "META" },
 ];
 
 const Hero = () => {
+  // duplicate for seamless marquee loop
+  const marquee = [...comingAssets, ...comingAssets, ...comingAssets];
+
   return (
     <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden">
       <img
@@ -26,18 +29,7 @@ const Hero = () => {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background" />
 
-      {/* Coming soon side ribbon */}
-      <div className="absolute right-4 top-24 z-10 hidden md:block">
-        <div className="rounded-full border border-foreground/15 bg-background/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground backdrop-blur-md animate-pulse-soft">
-          <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 align-middle" />
-          Equities · Coming Soon
-        </div>
-        <p className="mt-2 max-w-[180px] text-right text-[11px] leading-snug text-muted-foreground/80">
-          Tokenized stocks on LitVM
-        </p>
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+      <div className="relative z-10 mx-auto w-full max-w-5xl px-6 text-center">
         <p className="mb-6 font-display text-sm tracking-[0.4em] text-muted-foreground">
           FENUS
         </p>
@@ -45,29 +37,12 @@ const Hero = () => {
           Borrow Against Your<br />LitVM / Equities.
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-balance text-base text-muted-foreground sm:text-lg">
-          Mint $FnUSD with $wzkLTC collateral. Tokenized stocks on LitVM coming soon.
-        </p>
-
-        {/* Logo row */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-          {assets.map((a, i) => (
-            <div
-              key={a.name}
-              className="group relative h-12 w-12 overflow-hidden rounded-full border border-foreground/10 bg-background/70 shadow-sm backdrop-blur-md transition-transform duration-300 hover:-translate-y-1 hover:scale-110 sm:h-14 sm:w-14 animate-float"
-              style={{ animationDelay: `${i * 0.15}s` }}
-              title={a.name}
-            >
-              <img
-                src={a.src}
-                alt={`${a.name} logo`}
-                className="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          ))}
-        </div>
-        <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.3em] text-muted-foreground/70">
-          LTC · AAPL · TSLA · NVDA · AMZN · META
+          Mint <span className="text-foreground">$FnUSD</span> with{" "}
+          <span className="text-foreground">$wzkLTC</span> collateral —{" "}
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-400 align-middle">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Live
+          </span>
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -84,10 +59,45 @@ const Hero = () => {
             Docs
           </a>
         </div>
+
+        {/* Coming soon block */}
+        <div className="mt-14">
+          <div className="mb-4 flex items-center justify-center gap-2 text-[10px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">
+            <span className="h-px w-8 bg-foreground/20" />
+            <span className="rounded-full border border-foreground/15 bg-background/60 px-3 py-1 backdrop-blur-md">
+              Coming Soon · Tokenized Equities on LitVM
+            </span>
+            <span className="h-px w-8 bg-foreground/20" />
+          </div>
+
+          {/* Marquee */}
+          <div className="group relative mx-auto max-w-3xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
+            <div className="flex w-max gap-5 animate-marquee group-hover:[animation-play-state:paused]">
+              {marquee.map((a, i) => (
+                <div
+                  key={`${a.name}-${i}`}
+                  className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-foreground/10 bg-background/80 shadow-sm backdrop-blur-md transition-transform duration-300 hover:-translate-y-1 hover:scale-110 sm:h-16 sm:w-16"
+                  title={a.name}
+                >
+                  <img
+                    src={a.src}
+                    alt={`${a.name} logo`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="mt-4 text-xs text-muted-foreground/80 sm:text-sm">
+            AAPL · TSLA · NVDA · AMZN · META — and more stocks, crypto & equities on the way.
+          </p>
+        </div>
       </div>
 
-      <div className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2">
-        <p className="font-display text-xs tracking-[0.35em] text-muted-foreground">
+      <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2">
+        <p className="font-display text-[10px] tracking-[0.35em] text-muted-foreground">
           DEPOSIT · MINT · LEVERAGE
         </p>
       </div>
