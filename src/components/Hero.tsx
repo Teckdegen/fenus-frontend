@@ -5,6 +5,16 @@ import teslaLogo from "@/assets/logos/tesla.png";
 import nvidiaLogo from "@/assets/logos/nvidia.png";
 import amazonLogo from "@/assets/logos/amazon.png";
 import metaLogo from "@/assets/logos/meta.png";
+import googleLogo from "@/assets/logos/google.png";
+import microsoftLogo from "@/assets/logos/microsoft.png";
+import netflixLogo from "@/assets/logos/netflix.png";
+import amdLogo from "@/assets/logos/amd.png";
+import intelLogo from "@/assets/logos/intel.png";
+import coinbaseLogo from "@/assets/logos/coinbase.png";
+import disneyLogo from "@/assets/logos/disney.png";
+import paypalLogo from "@/assets/logos/paypal.png";
+import visaLogo from "@/assets/logos/visa.png";
+import mastercardLogo from "@/assets/logos/mastercard.png";
 
 const liveAssets = [{ src: litecoinLogo, name: "wzkLTC", live: true }];
 const comingAssets = [
@@ -13,6 +23,16 @@ const comingAssets = [
   { src: nvidiaLogo, name: "NVDA" },
   { src: amazonLogo, name: "AMZN" },
   { src: metaLogo, name: "META" },
+  { src: googleLogo, name: "GOOGL" },
+  { src: microsoftLogo, name: "MSFT" },
+  { src: netflixLogo, name: "NFLX" },
+  { src: amdLogo, name: "AMD" },
+  { src: intelLogo, name: "INTC" },
+  { src: coinbaseLogo, name: "COIN" },
+  { src: disneyLogo, name: "DIS" },
+  { src: paypalLogo, name: "PYPL" },
+  { src: visaLogo, name: "V" },
+  { src: mastercardLogo, name: "MA" },
 ];
 
 const Hero = () => {
