@@ -64,6 +64,10 @@ export function usePortfolio() {
     queryKey: ["portfolio", address],
     enabled: isConnected && !!address && !!publicClient,
     refetchInterval: 5_000,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     queryFn: async () => {
       if (!address || !publicClient) return null;
 
