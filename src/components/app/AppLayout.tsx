@@ -7,11 +7,12 @@ import logo from "@/assets/fenus-logo.png";
 const ADMIN_WALLET = "0xdb4034fA3829B488eFc1FC0f01F5F1Af722562Df".toLowerCase();
 
 const nav = [
-  { to: "/app",          end: true,  label: "Home"     },
-  { to: "/app/faucet",   end: false, label: "Faucet"   },
-  { to: "/app/trove",    end: false, label: "Trove"    },
-  { to: "/app/transfer", end: false, label: "Transfer" },
-  { to: "/app/pools",    end: false, label: "Pools"    },
+  { to: "/app",            end: true,  label: "Home"      },
+  { to: "/app/faucet",     end: false, label: "Faucet"    },
+  { to: "/app/trove",      end: false, label: "Trove"     },
+  { to: "/app/transfer",   end: false, label: "Transfer"  },
+  { to: "/app/pools",      end: false, label: "Pools"     },
+  { to: "/app/portfolio",  end: false, label: "Portfolio" },
 ];
 
 const tabCls = ({ isActive }: { isActive: boolean }) =>

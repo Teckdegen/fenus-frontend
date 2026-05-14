@@ -14,6 +14,7 @@ import Transfer from "./pages/app/Transfer.tsx";
 import Pools from "./pages/app/Pools.tsx";
 import Faucet from "./pages/app/Faucet.tsx";
 import Admin from "./pages/app/Admin.tsx";
+import Portfolio from "./pages/app/Portfolio.tsx";
 import Docs from "./pages/Docs.tsx";
 import Blog from "./pages/Blog.tsx";
 import BlogPost from "./pages/BlogPost.tsx";
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="transfer" element={<Transfer />} />
               <Route path="pools" element={<Pools />} />
               <Route path="faucet" element={<Faucet />} />
+              <Route path="portfolio" element={<Portfolio />} />
               <Route path="admin" element={<Admin />} />
             </Route>
             <Route path="*" element={<NotFound />} />
