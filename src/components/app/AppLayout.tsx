@@ -16,7 +16,7 @@ const nav = [
 ];
 
 const tabCls = ({ isActive }: { isActive: boolean }) =>
-  `flex shrink-0 items-center justify-center rounded-full px-4 py-2 text-xs font-medium transition whitespace-nowrap ${
+  `flex flex-1 items-center justify-center rounded-full px-3 py-2 text-[11px] font-medium transition whitespace-nowrap ${
     isActive
       ? "bg-foreground text-background"
       : "text-muted-foreground hover:text-foreground"
@@ -88,7 +88,7 @@ const AppLayout = () => {
       </main>
 
       <nav className="fixed bottom-4 left-1/2 z-40 w-[min(calc(100%-1.5rem),40rem)] -translate-x-1/2">
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none rounded-full border border-border bg-card/80 p-1 shadow-2xl shadow-black/40 backdrop-blur-xl">
+        <div className="flex items-center gap-0.5 rounded-full border border-border bg-card/80 p-1 shadow-2xl shadow-black/40 backdrop-blur-xl">
           {nav.map((n) => (
             <NavLink key={n.to} to={n.to} end={n.end} className={tabCls}>
               {n.label}
