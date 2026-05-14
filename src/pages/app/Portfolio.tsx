@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Wallet, ExternalLink } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { Card, SectionLabel, Row } from "@/components/app/Shared";
 import { usePortfolio, type ActivityItem, type ActivityType } from "@/hooks/usePortfolio";
 import { useBalances } from "@/hooks/useBalances";
@@ -154,28 +154,22 @@ function ActivityRow({ item }: { item: ActivityItem }) {
   }
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3">
+    <a
+      href={`${EXPLORER}/tx/${item.txHash}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 px-4 py-3 transition hover:bg-foreground/[0.03]"
+    >
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{meta.label}</p>
         {detail && (
           <p className="text-[11px] text-muted-foreground truncate">{detail}</p>
         )}
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="text-[10px] text-muted-foreground/60 tabular-nums">
-          Block {item.blockNumber.toString()}
-        </span>
-        <a
-          href={`${EXPLORER}/tx/${item.txHash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-muted-foreground/40 hover:text-foreground transition"
-          aria-label="View on explorer"
-        >
-          <ExternalLink className="h-3 w-3" />
-        </a>
-      </div>
-    </div>
+      <span className="text-[10px] text-muted-foreground/60 tabular-nums shrink-0">
+        Block {item.blockNumber.toString()}
+      </span>
+    </a>
   );
 }
 
