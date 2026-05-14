@@ -1,22 +1,19 @@
 import { Link } from "react-router-dom";
-import {
-  Activity, TrendingUp, TrendingDown, Wallet, ArrowUpRight,
-  PlusCircle, MinusCircle, Landmark, XCircle, ExternalLink,
-} from "lucide-react";
+import { Wallet, ExternalLink } from "lucide-react";
 import { Card, SectionLabel, Row } from "@/components/app/Shared";
 import { usePortfolio, type ActivityItem, type ActivityType } from "@/hooks/usePortfolio";
 import { useBalances } from "@/hooks/useBalances";
 
 // ─── Activity type metadata ───────────────────────────────────────────────────
 
-const ACTIVITY_META: Record<ActivityType, { label: string; icon: typeof Activity; color: string }> = {
-  TroveOpened:         { label: "Trove Opened",         icon: PlusCircle,   color: "text-emerald-400" },
-  CollateralAdded:     { label: "Collateral Added",     icon: TrendingUp,   color: "text-emerald-400" },
-  CollateralWithdrawn: { label: "Collateral Withdrawn", icon: TrendingDown, color: "text-amber-400" },
-  FnUSDBorrowed:       { label: "FnUSD Borrowed",       icon: ArrowUpRight, color: "text-blue-400" },
-  FnUSDRepaid:         { label: "FnUSD Repaid",         icon: MinusCircle,  color: "text-violet-400" },
-  TroveClosed:         { label: "Trove Closed",         icon: XCircle,      color: "text-red-400" },
-  TroveLiquidated:     { label: "Liquidated",           icon: Landmark,     color: "text-red-500" },
+const ACTIVITY_META: Record<ActivityType, { label: string }> = {
+  TroveOpened:         { label: "Trove Opened" },
+  CollateralAdded:     { label: "Collateral Added" },
+  CollateralWithdrawn: { label: "Collateral Withdrawn" },
+  FnUSDBorrowed:       { label: "FnUSD Borrowed" },
+  FnUSDRepaid:         { label: "FnUSD Repaid" },
+  TroveClosed:         { label: "Trove Closed" },
+  TroveLiquidated:     { label: "Liquidated" },
 };
 
 const EXPLORER = "https://liteforge.explorer.caldera.xyz";
@@ -55,26 +52,10 @@ const Portfolio = () => {
 
       {/* ─── Stats Overview ──────────────────────────────────────────────── */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          label="Total Interactions"
-          value={stats?.totalInteractions.toString() ?? "0"}
-          icon={Activity}
-        />
-        <StatCard
-          label="Total Borrowed"
-          value={`${stats?.totalBorrowed ?? "0"} FnUSD`}
-          icon={ArrowUpRight}
-        />
-        <StatCard
-          label="Total Repaid"
-          value={`${stats?.totalRepaid ?? "0"} FnUSD`}
-          icon={MinusCircle}
-        />
-        <StatCard
-          label="Coll. Deposited"
-          value={`${stats?.totalCollDeposited ?? "0"} wzkLTC`}
-          icon={TrendingUp}
-        />
+        <StatCard label="Total Interactions" value={stats?.totalInteractions.toString() ?? "0"} />
+        <StatCard label="Total Borrowed" value={`${stats?.totalBorrowed ?? "0"} FnUSD`} />
+        <StatCard label="Total Repaid" value={`${stats?.totalRepaid ?? "0"} FnUSD`} />
+        <StatCard label="Coll. Deposited" value={`${stats?.totalCollDeposited ?? "0"} wzkLTC`} />
       </div>
 
       {/* ─── Current Position ────────────────────────────────────────────── */}
@@ -86,7 +67,7 @@ const Portfolio = () => {
               <Row label="Collateral" value={`${troveColl} wzkLTC`} />
               <Row label="Debt" value={`${troveDebt} FnUSD`} />
               <Row label="Collateral Ratio" value={troveRatio} hint="Min 130%" />
-              <Row label="Liquidation Price" value={`$${troveLiqPrice}`} hint="per wzkLTC" />
+              <Row label="Liquidation Price" value={`${troveLiqPrice}`} hint="per wzkLTC" />
               <div className="mt-4 flex justify-end">
                 <Link
                   to="/app/trove"
@@ -134,7 +115,6 @@ const Portfolio = () => {
             </div>
           ) : activities.length === 0 ? (
             <div className="flex flex-col items-center py-12 text-center">
-              <Activity className="h-8 w-8 text-muted-foreground/30 mb-2" />
               <p className="text-sm text-muted-foreground">No activity yet</p>
               <p className="text-[11px] text-muted-foreground/60 mt-1">
                 Open a Trove or use the faucet to get started.
@@ -153,23 +133,10 @@ const Portfolio = () => {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
+function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <Card className="p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground/10">
-          <Icon className="h-3.5 w-3.5 text-foreground/70" />
-        </span>
-        <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60">{label}</span>
-      </div>
+      <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60 mb-2">{label}</p>
       <p className="font-display text-lg font-semibold tabular-nums">{value}</p>
     </Card>
   );
@@ -177,7 +144,6 @@ function StatCard({
 
 function ActivityRow({ item }: { item: ActivityItem }) {
   const meta = ACTIVITY_META[item.type];
-  const Icon = meta.icon;
 
   let detail = "";
   if (item.type === "TroveOpened" && item.coll && item.debt) {
@@ -189,9 +155,6 @@ function ActivityRow({ item }: { item: ActivityItem }) {
 
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-foreground/5 ${meta.color}`}>
-        <Icon className="h-4 w-4" />
-      </span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{meta.label}</p>
         {detail && (

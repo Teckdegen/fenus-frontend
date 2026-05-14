@@ -63,7 +63,7 @@ export function usePortfolio() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["portfolio", address],
     enabled: isConnected && !!address && !!publicClient,
-    refetchInterval: 30_000,
+    refetchInterval: 5_000,
     queryFn: async () => {
       if (!address || !publicClient) return null;
 
