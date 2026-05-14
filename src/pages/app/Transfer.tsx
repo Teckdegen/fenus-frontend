@@ -130,24 +130,13 @@ const Transfer = () => {
         </div>
 
         {/* Warning */}
-        <div className="rounded-2xl border border-white/20 bg-white/5 px-4 py-4 space-y-2">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-white mt-0.5" />
-            <div className="space-y-1">
-              <p className="text-[11px] font-medium text-white">⚠️ Warning: Transferring Your Entire Position</p>
-              <p className="text-[10px] text-white/70">
-                Transferring this NFT will transfer your ENTIRE trove position including:
-              </p>
-              <ul className="text-[10px] text-white/70 list-disc list-inside space-y-0.5 ml-2">
-                <li>All collateral ({existingColl.toFixed(4)} wzkLTC)</li>
-                <li>All debt ({existingDebt.toFixed(2)} FnUSD)</li>
-                <li>All future obligations and rewards</li>
-              </ul>
-              <p className="text-[10px] text-white/70 mt-2">
-                The recipient will become the new owner and will be responsible for maintaining the position.
-              </p>
-            </div>
-          </div>
+        <div className="rounded-2xl border border-white/20 bg-white/5 px-4 py-4">
+          <p className="text-[11px] font-medium text-white/90 mb-1">Heads up</p>
+          <p className="text-[10px] text-white/60 leading-relaxed">
+            This transfers your entire position — {existingColl.toFixed(4)} wzkLTC collateral
+            and {existingDebt.toFixed(2)} FnUSD debt — to the recipient. They take over everything,
+            including any future obligations. Double-check the address.
+          </p>
         </div>
 
         {/* Transfer Input */}
