@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ExternalLink } from "lucide-react";
 import { Card, Row, SectionLabel, TokenIcon } from "@/components/app/Shared";
 
 interface PoolData {
@@ -164,7 +163,6 @@ const Pools = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   {p.status !== "coming-soon" && (
-                    <>
                       <div className="text-right">
                         <p className="font-display text-sm tabular-nums">
                           {loading ? "..." : apr} APR
@@ -173,8 +171,6 @@ const Pools = () => {
                           TVL {loading ? "..." : tvl}
                         </p>
                       </div>
-                      <ExternalLink className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                    </>
                   )}
                 </div>
               </a>

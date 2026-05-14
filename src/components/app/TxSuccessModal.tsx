@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, ExternalLink, X, AlertTriangle } from "lucide-react";
+import { CheckCircle2, X, AlertTriangle } from "lucide-react";
 
 const EXPLORER = "https://liteforge.explorer.caldera.xyz/tx/";
 
@@ -111,7 +111,7 @@ export const TxSuccessModal = ({ data, onClose }: Props) => {
           href={`${EXPLORER}${data.txHash}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-between rounded-2xl border border-border/60 bg-background/40 px-5 py-3.5 transition hover:border-foreground/40 hover:bg-foreground/5"
+          className="flex w-full items-center justify-between rounded-2xl border border-border/60 bg-background/40 px-5 py-3.5 transition hover:border-foreground/40 hover:bg-foreground/5 cursor-pointer"
         >
           <div className="text-left">
             <p className="text-[11px] text-muted-foreground">
@@ -121,7 +121,6 @@ export const TxSuccessModal = ({ data, onClose }: Props) => {
               {data.txHash.slice(0, 10)}…{data.txHash.slice(-8)}
             </p>
           </div>
-          <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
         </a>
 
         {/* Dismiss */}
