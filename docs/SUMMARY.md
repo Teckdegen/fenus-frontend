@@ -25,3 +25,7 @@
 
 * [Pools & liquidity](pools-and-liquidity.md)
 * [Protocol parameters](protocol-parameters.md)
+
+## Tokenomics & Governance (Mainnet Plan)
+
+* [FNS Governance](fns-governance.md)
