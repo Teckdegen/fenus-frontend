@@ -310,12 +310,12 @@ const Trove = () => {
       )}
 
       {isZombieInSortedList && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3">
-          <Info className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3">
+          <Info className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-amber-200">Cannot open a new trove with this wallet</p>
-            <p className="text-[11px] text-amber-200/80 mt-0.5">
-              This address is still on the protocol sorted-trove list from a prior position (for example after liquidation), but has no active trove. <span className="font-medium">Open Trove will always revert.</span> Use a different wallet to borrow again, or wait for a protocol update that clears stale list entries.
+            <p className="text-sm font-semibold text-red-300">Open a new trove with another wallet</p>
+            <p className="text-[11px] text-red-300/80 mt-0.5">
+              This address already had a trove here and can’t start a new one on this deployment. Connect a different wallet if you’d like to deposit collateral and borrow FnUSD again.
             </p>
           </div>
         </div>
@@ -353,11 +353,11 @@ const Trove = () => {
               </div>
             </div>
           ) : isZombieInSortedList ? (
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-8 flex flex-col items-center text-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-400" />
-              <p className="font-display text-sm font-semibold">Open Trove unavailable</p>
+            <div className="rounded-2xl border border-red-500/30 bg-red-500/5 px-4 py-8 flex flex-col items-center text-center gap-3">
+              <Info className="h-5 w-5 text-red-400" />
+              <p className="font-display text-sm font-semibold">New troves use a fresh wallet</p>
               <p className="text-[11px] text-muted-foreground max-w-sm">
-                This wallet remains on the sorted trove list without an active position, so a new borrow cannot be opened here. Connect a different wallet, or wait for a protocol redeploy that fixes stale list entries.
+                You don’t have an active position on this address. To open again, switch to a wallet that hasn’t opened a trove on FENUS yet.
               </p>
             </div>
           ) : (

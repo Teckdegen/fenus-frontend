@@ -84,7 +84,7 @@ const Dashboard = () => {
                 <p className="max-w-xs text-sm text-muted-foreground">
                   {isConnected
                     ? isZombieInSortedList
-                      ? "This wallet cannot open a new trove (stale sorted-list entry after a prior liquidation). Use another wallet or see Trove for details."
+                      ? "This wallet already used its trove slot on FENUS. Connect another wallet to open a new position."
                       : "You don't have a Trove yet. Open one to start borrowing FnUSD against your wzkLTC."
                     : "Connect your wallet to see your Trove."}
                 </p>
