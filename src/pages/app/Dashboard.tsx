@@ -8,7 +8,7 @@ const whiteBtn =
 
 const Dashboard = () => {
   const {
-    hasTrove, isConnected,
+    hasTrove, isConnected, isZombieInSortedList,
     troveColl, troveDebt, troveCollUSD,
     troveRatio, troveLiqPrice,
     defaultPoolColl, defaultPoolDebt,
@@ -83,11 +83,16 @@ const Dashboard = () => {
               <div className="flex flex-col items-center justify-center py-10 text-center">
                 <p className="max-w-xs text-sm text-muted-foreground">
                   {isConnected
-                    ? "You don't have a Trove yet. Open one to start borrowing FnUSD against your wzkLTC."
+                    ? isZombieInSortedList
+                      ? "This wallet cannot open a new trove (stale sorted-list entry after a prior liquidation). Use another wallet or see Trove for details."
+                      : "You don't have a Trove yet. Open one to start borrowing FnUSD against your wzkLTC."
                     : "Connect your wallet to see your Trove."}
                 </p>
-                {isConnected && (
+                {isConnected && !isZombieInSortedList && (
                   <Link to="/app/trove" className={`${whiteBtn} mt-5`}>Open Trove</Link>
+                )}
+                {isConnected && isZombieInSortedList && (
+                  <Link to="/app/trove" className={`${whiteBtn} mt-5`}>View details</Link>
                 )}
               </div>
             )}

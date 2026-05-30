@@ -108,7 +108,7 @@ const Trove = () => {
   const {
     wzkLTCBalance, wzkLTCBalanceFull, fnUSDBalance, fnUSDBalanceFull, priceNum,
     hasTrove, troveColl: existingCollStr, troveCollClose, troveDebt: existingDebtStr,
-    isConnected, address, diaIsDown,
+    isConnected, address, diaIsDown, isZombieInSortedList,
   } = useBalances();
 
   const actions = useTroveActions(address as `0x${string}` | undefined);
@@ -160,9 +160,10 @@ const Trove = () => {
     const ratio    = collUSD !== null && totalDebt > 0 ? collUSD / totalDebt : null;
     const liqPrice = totalDebt > 0 && coll > 0 ? (totalDebt * MCR) / coll : null;
     const ratioOk  = ratio !== null ? ratio >= BUFFER : true;
-    const canOpen  = coll > 0 && borrow > 0 && ratioOk;
+    const canOpen  =
+      coll > 0 && borrow > 0 && ratioOk && !isZombieInSortedList;
     return { coll, borrow, fee, amountToReceive, totalDebt, collUSD, ratio, liqPrice, canOpen };
-  }, [collInput, borrowInput, price, priceLoaded]);
+  }, [collInput, borrowInput, price, priceLoaded, isZombieInSortedList]);
 
   const addCalc = useMemo(() => {
     const amt = parseFloat(addInput) || 0;
@@ -308,6 +309,18 @@ const Trove = () => {
         </div>
       )}
 
+      {isZombieInSortedList && (
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-4 py-3">
+          <Info className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-200">Cannot open a new trove with this wallet</p>
+            <p className="text-[11px] text-amber-200/80 mt-0.5">
+              This address is still on the protocol sorted-trove list from a prior position (for example after liquidation), but has no active trove. <span className="font-medium">Open Trove will always revert.</span> Use a different wallet to borrow again, or wait for a protocol update that clears stale list entries.
+            </p>
+          </div>
+        </div>
+      )}
+
       <Card className="p-4 space-y-4">
         {/* Tabs */}
         <div className="flex rounded-full bg-background/60 p-1 gap-0.5">
@@ -338,6 +351,14 @@ const Trove = () => {
                   Borrow More
                 </button>
               </div>
+            </div>
+          ) : isZombieInSortedList ? (
+            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-8 flex flex-col items-center text-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-400" />
+              <p className="font-display text-sm font-semibold">Open Trove unavailable</p>
+              <p className="text-[11px] text-muted-foreground max-w-sm">
+                This wallet remains on the sorted trove list without an active position, so a new borrow cannot be opened here. Connect a different wallet, or wait for a protocol redeploy that fixes stale list entries.
+              </p>
             </div>
           ) : (
             <div className="space-y-3">

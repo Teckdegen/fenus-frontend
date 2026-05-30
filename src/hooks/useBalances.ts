@@ -44,6 +44,12 @@ const DEFAULT_POOL_ABI = [
     inputs: [], outputs: [{ name: "", type: "uint256" }] },
 ] as const;
 
+const SORTED_TROVES_ABI = [
+  { name: "contains", type: "function", stateMutability: "view",
+    inputs: [{ name: "owner", type: "address" }],
+    outputs: [{ name: "", type: "bool" }] },
+] as const;
+
 // ─── Format helpers ───────────────────────────────────────────────────────────
 
 // Compact number: 1,234 -> "1.23K", 1,234,567 -> "1.23M"
@@ -126,6 +132,14 @@ export function useBalances() {
     query: { enabled, refetchInterval: 10_000 },
   });
 
+  const { data: inSortedTroves } = useReadContract({
+    address: CONTRACTS.SortedTroves as `0x${string}`,
+    abi: SORTED_TROVES_ABI,
+    functionName: "contains",
+    args: [address!],
+    query: { enabled, refetchInterval: 10_000 },
+  });
+
   const { data: troveColl } = useReadContract({
     address: CONTRACTS.TroveManager as `0x${string}`,
     abi: TROVE_MANAGER_ABI,
@@ -185,6 +199,11 @@ export function useBalances() {
                    troveDebt ? parseFloat(formatUnits(troveDebt, 18)) : 0;
   
   const hasTrove = troveStatus === 1;
+  const sortedListChecked =
+    enabled && inSortedTroves !== undefined && troveStatus !== undefined;
+  // Still listed after liquidation/close bug — openTrove will revert with AlreadyExists()
+  const isZombieInSortedList =
+    sortedListChecked && inSortedTroves === true && troveStatus !== 1;
   const entireColl = entireDebtAndColl?.[1];
 
   const collUSD  = priceNum > 0 ? collNum * priceNum : 0;
@@ -197,6 +216,9 @@ export function useBalances() {
     priceNum,
     diaIsDown,
     hasTrove,
+    inSortedTroves: inSortedTroves === true,
+    isZombieInSortedList,
+    sortedListChecked,
 
     // Compact display (K/M) for balance strips
     wzkLTCBalance:   fmtCompact(wzkLTCBal, 8),
