@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import logo from "@/assets/fenus-logo.png";
 
 const sections = [
-  { id: "stats", label: "Stats" },
   { id: "how", label: "How it works" },
 ];
 
