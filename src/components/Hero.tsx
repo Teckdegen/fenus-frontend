@@ -36,7 +36,7 @@ const Hero = () => {
       {/* vignette — keeps edges dark */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,hsl(0_0%_0%/0.5)_60%,hsl(0_0%_0%)_100%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(0_0%_0%/0.35)_0%,hsl(0_0%_0%/0.55)_60%,hsl(0_0%_0%)_100%)]"
       />
       {/* bottom fade to page */}
       <div
@@ -57,11 +57,12 @@ const Hero = () => {
             text-[2.75rem]
             sm:text-5xl
             md:text-6xl
+            [text-shadow:0_2px_20px_rgba(0,0,0,0.9),0_1px_4px_rgba(0,0,0,1)]
           "
         >
           Borrow, Invest &amp; Trade
           <br />
-          <span className="text-muted-foreground">
+          <span className="text-white/80">
             tokenized stocks, commodities &amp; ETFs
           </span>
           <br />
