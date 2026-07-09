@@ -4,35 +4,44 @@ const Hero = () => {
   return (
     <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-background pt-20 sm:pt-28">
 
-      {/* ── Background image ──
-          Mobile  : 3x scale so coins fill the entire viewport, no black gaps
-                    centered vertically around the midpoint of the image
-          Desktop : unchanged — covers the full section naturally
+      {/*
+        ── Background image ──
+
+        MOBILE:
+          - Position absolute, centered horizontally + vertically
+          - min-h: 100vh so it always covers full screen height
+          - w-auto + scale-[2.2] so the coins appear large and fill the frame
+          - object-cover + object-center keeps coins centered
+
+        DESKTOP (sm+):
+          - Resets to a normal inset-0 full-cover image, no scaling
       */}
       <img
         src={heroCoins}
         alt=""
         aria-hidden
+        style={{ objectPosition: "center 40%" }}
         className="
-          absolute left-1/2 -translate-x-1/2
-          /* mobile: scale 3x, position to fill screen */
-          top-1/2 -translate-y-1/2
-          w-[300%] h-auto object-cover
-          /* sm+ desktop: reset to full cover */
-          sm:w-full sm:h-full sm:inset-0 sm:top-0 sm:left-0 sm:translate-x-0 sm:translate-y-0 sm:object-cover sm:object-center
-          opacity-70
+          absolute inset-0
+          w-full h-full object-cover opacity-75
+
+          /* mobile scale-up — coins fill the screen */
+          scale-[2.2] origin-center
+
+          /* desktop — no scale, natural cover */
+          sm:scale-100
         "
       />
 
-      {/* vignette */}
+      {/* vignette — keeps edges dark */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,hsl(0_0%_0%/0.55)_65%,hsl(0_0%_0%)_100%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,hsl(0_0%_0%/0.5)_60%,hsl(0_0%_0%)_100%)]"
       />
-      {/* bottom fade */}
+      {/* bottom fade to page */}
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background"
+        className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent to-background"
       />
 
       {/* ── Hero text ── */}
@@ -43,10 +52,12 @@ const Hero = () => {
         </p>
 
         <h1
-          className="font-display font-semibold leading-[1.08] text-balance text-center
-                     text-[2.75rem]
-                     sm:text-5xl
-                     md:text-6xl"
+          className="
+            font-display font-semibold leading-[1.08] text-balance text-center
+            text-[2.75rem]
+            sm:text-5xl
+            md:text-6xl
+          "
         >
           Borrow, Invest &amp; Trade
           <br />
