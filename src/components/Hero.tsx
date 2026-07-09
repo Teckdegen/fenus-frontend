@@ -1,17 +1,22 @@
-import { ALL_TICKERS } from "@/lib/tickers";
-import TickerBadge from "@/components/TickerBadge";
+import heroCoins from "@/assets/hero-coins-bw.jpg";
 
 const Hero = () => {
-  // Two rows for the hero, opposite directions
-  const rowA = [...ALL_TICKERS.slice(0, 13), ...ALL_TICKERS.slice(0, 13), ...ALL_TICKERS.slice(0, 13)];
-  const rowB = [...ALL_TICKERS.slice(12), ...ALL_TICKERS.slice(12), ...ALL_TICKERS.slice(12)];
-
   return (
-    <section className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background pt-32 pb-16">
-      {/* soft radial */}
+    <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-background pt-28">
+      <img
+        src={heroCoins}
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full object-cover opacity-70"
+      />
+      {/* vignette + fade to page */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(0_0%_10%)_0%,hsl(0_0%_0%)_70%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_10%,hsl(0_0%_0%/0.7)_70%,hsl(0_0%_0%)_100%)]"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background"
       />
 
       <div className="relative z-10 mx-auto w-full max-w-5xl px-6 text-center">
@@ -19,39 +24,13 @@ const Hero = () => {
           FENUS · LITVM
         </p>
         <h1 className="font-display text-balance text-3xl font-semibold leading-[1.05] sm:text-5xl md:text-6xl">
-          Borrow, Invest, and Trade<br />
+          Borrow, Invest & Trade<br />
           <span className="text-muted-foreground">tokenized stocks, commodities & ETFs</span><br />
           on LitVM.
         </h1>
       </div>
-
-      {/* Two scrolling ticker rows — opposite directions */}
-      <div className="relative z-10 mt-16 w-full space-y-4 sm:mt-20 sm:space-y-5">
-        <TickerRow items={rowA} direction="left" />
-        <TickerRow items={rowB} direction="right" />
-      </div>
     </section>
   );
 };
-
-const TickerRow = ({
-  items,
-  direction,
-}: {
-  items: { symbol: string; name: string }[];
-  direction: "left" | "right";
-}) => (
-  <div className="group relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-    <div
-      className={`flex w-max gap-3 sm:gap-4 ${
-        direction === "left" ? "animate-marquee" : "animate-marquee-reverse"
-      } group-hover:[animation-play-state:paused]`}
-    >
-      {items.map((t, i) => (
-        <TickerBadge key={`${t.symbol}-${i}`} symbol={t.symbol} name={t.name} />
-      ))}
-    </div>
-  </div>
-);
 
 export default Hero;

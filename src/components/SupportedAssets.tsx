@@ -46,7 +46,13 @@ const SupportedAssets = () => {
                 className={`flex w-max gap-3 sm:gap-4 ${direction} ${speed} group-hover:[animation-play-state:paused]`}
               >
                 {loop.map((t, i) => (
-                  <TickerBadge key={`${idx}-${t.symbol}-${i}`} symbol={t.symbol} name={t.name} size="md" />
+                  <TickerBadge
+                    key={`${idx}-${t.symbol}-${i}`}
+                    symbol={t.symbol}
+                    name={t.name}
+                    logo={t.logo}
+                    size="md"
+                  />
                 ))}
               </div>
             </div>
