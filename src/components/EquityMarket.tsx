@@ -61,15 +61,15 @@ const AnimLine = ({
 );
 
 /* ── shining dots ── */
-const DOT_COUNT = 70;
+const DOT_COUNT = 220;
 
 const dots = Array.from({ length: DOT_COUNT }, (_, i) => ({
   id: i,
   top: Math.random() * 100,
   left: Math.random() * 100,
-  duration: 2 + Math.random() * 3,
-  delay: Math.random() * 4,
-  size: 1 + Math.random() * 2.5,
+  duration: 1.5 + Math.random() * 3,
+  delay: Math.random() * 5,
+  size: 0.8 + Math.random() * 2.8,
 }));
 
 /* ── component ── */
@@ -81,8 +81,8 @@ const EquityMarket = () => {
       id="market"
       className="relative isolate overflow-hidden border-y border-border bg-background py-28 sm:py-40"
     >
-      {/* shining dots */}
-      <div aria-hidden className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* shining dots — z-20 so they layer over text too, pointer-events off */}
+      <div aria-hidden className="absolute inset-0 overflow-hidden pointer-events-none z-20">
         {dots.map((d) => (
           <span
             key={d.id}
@@ -98,22 +98,13 @@ const EquityMarket = () => {
         ))}
       </div>
 
-      {/* dotted grid */}
-      <div
-        aria-hidden
-        className="absolute inset-0 opacity-[0.18]"
-        style={{
-          backgroundImage:
-            "radial-gradient(hsl(0 0% 100% / 0.6) 1px, transparent 1px)",
-          backgroundSize: "22px 22px",
-        }}
-      />
+      {/* dotted grid — removed, sparkle dots replace it */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
 
       {/* ── content ── */}
       <div
         ref={ref}
-        className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-6 text-center"
+        className="relative z-30 mx-auto flex max-w-5xl flex-col items-center px-6 text-center"
       >
         {/* badge */}
         <AnimLine visible={visible} delay={0} pulseDelay={0}>
