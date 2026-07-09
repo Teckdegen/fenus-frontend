@@ -20,13 +20,13 @@ const Hero = () => {
         src={heroCoins}
         alt=""
         aria-hidden
-        style={{ objectPosition: "center 40%" }}
+        style={{ objectPosition: "center 50%" }}
         className="
           absolute inset-0
           w-full h-full object-cover opacity-75
 
-          /* mobile scale-up — coins fill the screen */
-          scale-[2.2] origin-center
+          /* mobile — scale just enough to fill height, ~3 coins visible */
+          scale-[1.35] origin-center
 
           /* desktop — no scale, natural cover */
           sm:scale-100
