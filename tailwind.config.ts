@@ -76,6 +76,10 @@ export default {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-33.333%)" },
         },
+        "marquee-reverse": {
+          "0%": { transform: "translateX(-33.333%)" },
+          "100%": { transform: "translateX(0)" },
+        },
         "accordion-down": {
           from: {
             height: "0",
@@ -98,7 +102,8 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         float: "float 3.5s ease-in-out infinite",
         "pulse-soft": "pulse-soft 2.5s ease-in-out infinite",
-        marquee: "marquee 18s linear infinite",
+        marquee: "marquee 30s linear infinite",
+        "marquee-reverse": "marquee-reverse 34s linear infinite",
       },
     },
   },
