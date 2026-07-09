@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "@/assets/fenus-logo.png";
 
 const sections = [
   { id: "how", label: "How it works" },
@@ -35,7 +34,7 @@ const Navbar = () => {
     <header className="fixed top-8 left-1/2 z-50 w-[min(92%,580px)] -translate-x-1/2 sm:top-4">
       <nav className="nav-pill flex items-center justify-between rounded-full px-2.5 py-1.5 sm:px-5 sm:py-2">
         <a href="/" className="flex items-center gap-1.5 sm:gap-2">
-          <img src={logo} alt="FENUS" className="h-5 w-5 sm:h-7 sm:w-7" />
+          <img src="/favicon.png" alt="FENUS" className="h-5 w-5 sm:h-7 sm:w-7" />
           <span className="font-display text-xs font-semibold tracking-tight sm:text-base">
             FENUS
           </span>
