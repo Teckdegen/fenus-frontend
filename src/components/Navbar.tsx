@@ -69,12 +69,6 @@ const Navbar = () => {
         </ul>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <Link
-            to="/app"
-            className="hidden sm:inline-flex items-center justify-center rounded-full bg-foreground px-4 py-1.5 text-xs font-semibold text-background hover:opacity-90 transition"
-          >
-            Launch App
-          </Link>
           <button
             type="button"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -116,15 +110,6 @@ const Navbar = () => {
                 className="block rounded-lg px-3 py-2 transition hover:bg-foreground/5 hover:text-foreground"
               >
                 Blog
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/app"
-                onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2 transition hover:bg-foreground/5 hover:text-foreground font-medium"
-              >
-                Launch App →
               </Link>
             </li>
           </ul>

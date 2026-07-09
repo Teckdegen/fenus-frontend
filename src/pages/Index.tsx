@@ -1,18 +1,16 @@
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
-import HowItWorks from "@/components/HowItWorks";
 import Navbar from "@/components/Navbar";
-import Stats from "@/components/Stats";
-import BlogPreview from "@/components/BlogPreview";
+import EquityMarket from "@/components/EquityMarket";
+import SupportedAssets from "@/components/SupportedAssets";
 
 const Index = () => {
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
       <Hero />
-      <Stats />
-      <HowItWorks />
-      <BlogPreview />
+      <EquityMarket />
+      <SupportedAssets />
       <Footer />
     </main>
   );
