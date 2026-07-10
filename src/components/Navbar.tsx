@@ -56,14 +56,6 @@ const Navbar = () => {
               </li>
             );
           })}
-          <li>
-            <Link
-              to="/blog"
-              className="transition hover:text-foreground"
-            >
-              Blog
-            </Link>
-          </li>
         </ul>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
