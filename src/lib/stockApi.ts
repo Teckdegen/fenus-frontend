@@ -35,12 +35,24 @@ type ChartResp = {
   };
 };
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// One retry after a short delay — the upstream chart API occasionally drops
+// a request under the burst of ~20+ concurrent lookups a page load fires.
 async function fetchChart(symbol: string, range: string, interval: string): Promise<ChartResp> {
   const y = yahooSym(symbol);
   const url = `/api/stock-chart?symbol=${encodeURIComponent(y)}&range=${range}&interval=${interval}`;
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } catch (e) {
+      if (attempt === 1) throw e;
+      await sleep(400);
+    }
+  }
+  throw new Error("unreachable");
 }
 
 // tiny in-memory cache to avoid hammering the proxy while scrolling

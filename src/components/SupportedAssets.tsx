@@ -8,11 +8,6 @@ const SupportedAssets = () => {
   const [selected, setSelected] = useState<Ticker | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
 
-  const total = ALL_TICKERS.length;
-  const stocks = ALL_TICKERS.filter((t) => t.kind === "stock").length;
-  const etfs = ALL_TICKERS.filter((t) => t.kind === "etf").length;
-  const commodities = ALL_TICKERS.filter((t) => t.kind === "commodity").length;
-
   const scrollBy = (dir: 1 | -1) => {
     const el = scrollerRef.current;
     if (!el) return;
@@ -36,27 +31,8 @@ const SupportedAssets = () => {
           </h2>
         </div>
 
-        <div className="mt-14 text-center sm:mt-20">
-          <div className="font-display text-[80px] leading-none tracking-tighter sm:text-[140px] md:text-[160px]">
-            {total}+
-          </div>
-          <div className="mt-4 text-[10px] font-semibold uppercase tracking-[0.5em] text-muted-foreground sm:text-xs">
-            Assets Live at Launch
-          </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground sm:text-xs">
-            <span><span className="font-semibold text-foreground">{stocks}</span> stocks</span>
-            <span className="opacity-30">·</span>
-            <span><span className="font-semibold text-foreground">{etfs}</span> ETFs</span>
-            <span className="opacity-30">·</span>
-            <span><span className="font-semibold text-foreground">{commodities}</span> commodities</span>
-          </div>
-          <p className="mx-auto mt-8 max-w-lg text-sm text-muted-foreground">
-            Swipe to browse. Tap any asset for live price and chart.
-          </p>
-        </div>
-
         {/* Horizontal swipe carousel: 2 per view on mobile, 4 on desktop. */}
-        <div className="relative mt-12 sm:mt-16">
+        <div className="relative mt-14 sm:mt-20">
           <button
             type="button"
             aria-label="Previous"

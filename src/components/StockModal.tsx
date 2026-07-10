@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { X } from "lucide-react";
 import {
   Area,
@@ -49,6 +49,19 @@ const StockModal = ({ ticker, onClose }: Props) => {
   }, [onClose]);
 
   const up = (quote?.changePct ?? 0) >= 0;
+
+  // Evenly-spaced Y-axis ticks — Recharts' default "nice" ticks clamp the
+  // first/last tick to the exact dataMin/dataMax, which reads as uneven
+  // (e.g. $267, $287, $316) instead of a consistent price scale.
+  const yTicks = useMemo(() => {
+    if (!hist || hist.length === 0) return undefined;
+    const values = hist.map((h) => h.close);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    if (min === max) return [min];
+    const steps = 4;
+    return Array.from({ length: steps + 1 }, (_, i) => min + ((max - min) * i) / steps);
+  }, [hist]);
 
   return (
     <div
@@ -117,6 +130,7 @@ const StockModal = ({ ticker, onClose }: Props) => {
                 <XAxis dataKey="date" hide />
                 <YAxis
                   domain={["dataMin", "dataMax"]}
+                  ticks={yTicks}
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                   width={44}
                   tickFormatter={(v) => `$${Math.round(v)}`}
