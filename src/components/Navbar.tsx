@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const sections = [
   { id: "how", label: "How it works" },
@@ -57,14 +56,6 @@ const Navbar = () => {
               </li>
             );
           })}
-          <li>
-            <Link
-              to="/blog"
-              className="transition hover:text-foreground"
-            >
-              Blog
-            </Link>
-          </li>
         </ul>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
@@ -102,15 +93,6 @@ const Navbar = () => {
                 </li>
               );
             })}
-            <li>
-              <Link
-                to="/blog"
-                onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2 transition hover:bg-foreground/5 hover:text-foreground"
-              >
-                Blog
-              </Link>
-            </li>
           </ul>
         </div>
       )}

@@ -1,64 +1,61 @@
-import { ALL_TICKERS } from "@/lib/tickers";
-import TickerBadge from "@/components/TickerBadge";
-
-/**
- * 4 scrolling rows of supported assets, alternating direction.
- * Distribution is roughly balanced across rows.
- */
-const chunk = <T,>(arr: T[], n: number): T[][] => {
-  const out: T[][] = Array.from({ length: n }, () => []);
-  arr.forEach((item, i) => out[i % n].push(item));
-  return out;
-};
+import { useState } from "react";
+import { ALL_TICKERS, type Ticker } from "@/lib/tickers";
+import TickerCard from "@/components/TickerCard";
+import StockModal from "@/components/StockModal";
 
 const SupportedAssets = () => {
-  const rows = chunk(ALL_TICKERS, 4);
+  const [selected, setSelected] = useState<Ticker | null>(null);
+  const total = ALL_TICKERS.length;
+  const stocks = ALL_TICKERS.filter((t) => t.kind === "stock").length;
+  const etfs = ALL_TICKERS.filter((t) => t.kind === "etf").length;
+  const commodities = ALL_TICKERS.filter((t) => t.kind === "commodity").length;
 
   return (
     <section
       id="assets"
-      className="relative isolate overflow-hidden bg-background py-28 sm:py-36"
+      className="relative isolate overflow-hidden border-t border-border bg-background py-24 sm:py-32"
     >
-      <div className="relative z-10 mx-auto mb-14 max-w-4xl px-6 text-center sm:mb-20">
-        <span className="mb-5 inline-block rounded-full border border-foreground/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-foreground/70">
-          Supported Assets
-        </span>
-        <h2 className="font-display text-3xl font-semibold leading-tight sm:text-5xl">
-          Stocks, ETFs & commodities<br />
-          <span className="text-muted-foreground">tokenized on LitVM.</span>
-        </h2>
-        <p className="mx-auto mt-4 max-w-xl text-sm text-muted-foreground sm:text-base">
-          Tap any asset to reveal its name.
-        </p>
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
+        {/* header */}
+        <div className="mx-auto max-w-3xl text-center">
+          <span className="mb-5 inline-block rounded-full border border-foreground/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-foreground/70">
+            Supported Assets
+          </span>
+          <h2 className="font-display text-3xl font-semibold leading-tight sm:text-5xl">
+            Stocks, ETFs & commodities<br />
+            <span className="text-muted-foreground">tokenized on LitVM.</span>
+          </h2>
+        </div>
+
+        {/* count — mirrors the $110T treatment */}
+        <div className="mt-14 text-center sm:mt-20">
+          <div className="font-display text-[80px] leading-none tracking-tighter sm:text-[140px] md:text-[160px]">
+            {total}+
+          </div>
+          <div className="mt-4 text-[10px] font-semibold uppercase tracking-[0.5em] text-muted-foreground sm:text-xs">
+            Assets Live at Launch
+          </div>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.3em] text-muted-foreground sm:text-xs">
+            <span><span className="font-semibold text-foreground">{stocks}</span> stocks</span>
+            <span className="opacity-30">·</span>
+            <span><span className="font-semibold text-foreground">{etfs}</span> ETFs</span>
+            <span className="opacity-30">·</span>
+            <span><span className="font-semibold text-foreground">{commodities}</span> commodities</span>
+          </div>
+          <p className="mx-auto mt-8 max-w-lg text-sm text-muted-foreground">
+            Tap any asset to view its live price and chart.
+          </p>
+        </div>
+
+        {/* grid — swipeable on mobile via native scroll, responsive on desktop */}
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:mt-16 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
+          {ALL_TICKERS.map((t) => (
+            <TickerCard key={t.symbol} ticker={t} onSelect={setSelected} />
+          ))}
+        </div>
       </div>
 
-      <div className="relative z-10 space-y-5 sm:space-y-6">
-        {rows.map((row, idx) => {
-          const loop = [...row, ...row, ...row, ...row];
-          const direction = idx % 2 === 0 ? "animate-marquee" : "animate-marquee-reverse";
-          const speed = idx % 2 === 0 ? "[animation-duration:38s]" : "[animation-duration:44s]";
-          return (
-            <div
-              key={idx}
-              className="group relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]"
-            >
-              <div
-                className={`flex w-max gap-3 sm:gap-4 ${direction} ${speed} group-hover:[animation-play-state:paused]`}
-              >
-                {loop.map((t, i) => (
-                  <TickerBadge
-                    key={`${idx}-${t.symbol}-${i}`}
-                    symbol={t.symbol}
-                    name={t.name}
-                    logo={t.logo}
-                    size="md"
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {selected && <StockModal ticker={selected} onClose={() => setSelected(null)} />}
     </section>
   );
 };
