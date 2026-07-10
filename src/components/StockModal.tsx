@@ -8,7 +8,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { fetchHistory, fetchQuote, type HistPoint, type Quote } from "@/lib/stockApi";
+import { fetchHistory, fetchQuote, HISTORY_DAYS, type HistPoint, type Quote } from "@/lib/stockApi";
 import type { Ticker } from "@/lib/tickers";
 
 type Props = {
@@ -18,6 +18,9 @@ type Props = {
 
 const fmt = (n: number | null | undefined, d = 2) =>
   n == null || !isFinite(n) ? "—" : n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 
 const StockModal = ({ ticker, onClose }: Props) => {
   const [quote, setQuote] = useState<Quote | null>(null);
@@ -29,7 +32,7 @@ const StockModal = ({ ticker, onClose }: Props) => {
     setQuote(null);
     setHist(null);
     setErr(null);
-    Promise.all([fetchQuote(ticker.symbol), fetchHistory(ticker.symbol, 120)])
+    Promise.all([fetchQuote(ticker.symbol), fetchHistory(ticker.symbol, HISTORY_DAYS)])
       .then(([q, h]) => { if (alive) { setQuote(q); setHist(h); } })
       .catch(() => { if (alive) setErr("Live data unavailable for this asset."); });
     return () => { alive = false; };
@@ -126,6 +129,7 @@ const StockModal = ({ ticker, onClose }: Props) => {
                     fontSize: 12,
                   }}
                   labelStyle={{ color: "hsl(var(--muted-foreground))" }}
+                  labelFormatter={(label: string) => fmtDate(label)}
                   formatter={(v: number) => [`$${fmt(v)}`, "Close"]}
                 />
                 <Area
@@ -143,7 +147,7 @@ const StockModal = ({ ticker, onClose }: Props) => {
         <div className="grid grid-cols-3 gap-2 border-t border-border p-4 text-center sm:p-5">
           <Stat label="Type" value={ticker.kind.toUpperCase()} />
           <Stat label="Currency" value={quote?.currency ?? "USD"} />
-          <Stat label="Source" value="Stooq" />
+          <Stat label="Source" value="Yahoo Finance" />
         </div>
       </div>
     </div>

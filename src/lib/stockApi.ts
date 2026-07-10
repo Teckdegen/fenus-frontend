@@ -1,4 +1,6 @@
-// Live stock data via Yahoo Finance chart endpoint (fronted by a CORS proxy).
+// Live stock data via Yahoo Finance chart endpoint, proxied through our own
+// /api/stock-chart serverless function (Yahoo doesn't send CORS headers for
+// direct browser fetches, so this must go through a same-origin proxy).
 // Single endpoint returns both current quote + historical closes.
 
 export type Quote = {
@@ -11,7 +13,8 @@ export type Quote = {
 
 export type HistPoint = { date: string; close: number };
 
-const PROXY = "https://corsproxy.io/?url=";
+// Consistent lookback window used for every ticker's chart.
+export const HISTORY_DAYS = 180;
 
 // Map our display symbols to Yahoo symbols (most are 1:1 for US listings).
 const yahooSym = (s: string) => s.toUpperCase();
@@ -34,8 +37,7 @@ type ChartResp = {
 
 async function fetchChart(symbol: string, range: string, interval: string): Promise<ChartResp> {
   const y = yahooSym(symbol);
-  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${y}?range=${range}&interval=${interval}`;
-  const url = PROXY + encodeURIComponent(target);
+  const url = `/api/stock-chart?symbol=${encodeURIComponent(y)}&range=${range}&interval=${interval}`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
@@ -68,7 +70,7 @@ export async function fetchQuote(symbol: string): Promise<Quote> {
   return q;
 }
 
-export async function fetchHistory(symbol: string, days = 120): Promise<HistPoint[]> {
+export async function fetchHistory(symbol: string, days = HISTORY_DAYS): Promise<HistPoint[]> {
   const cached = histCache.get(symbol);
   if (cached && Date.now() - cached.at < TTL) return cached.h;
 
