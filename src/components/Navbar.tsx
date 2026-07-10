@@ -93,15 +93,6 @@ const Navbar = () => {
                 </li>
               );
             })}
-            <li>
-              <Link
-                to="/blog"
-                onClick={() => setOpen(false)}
-                className="block rounded-lg px-3 py-2 transition hover:bg-foreground/5 hover:text-foreground"
-              >
-                Blog
-              </Link>
-            </li>
           </ul>
         </div>
       )}
