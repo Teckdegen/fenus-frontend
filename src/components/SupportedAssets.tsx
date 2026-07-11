@@ -87,12 +87,35 @@ const SupportedAssets = () => {
                 key={t.symbol}
                 role="group"
                 aria-roledescription="slide"
-                aria-label={`${i + 1} of ${ALL_TICKERS.length}: ${t.symbol}`}
+                aria-label={`${i + 1} of ${ALL_TICKERS.length + 1}: ${t.symbol}`}
                 className="shrink-0 snap-start basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-2.25rem)/4)]"
               >
                 <TickerCard ticker={t} onSelect={setSelected} />
               </div>
             ))}
+            {/* “And more" teaser slide at the end of the carousel. */}
+            <div
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${ALL_TICKERS.length + 1} of ${ALL_TICKERS.length + 1}: and more assets`}
+              className="shrink-0 snap-start basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-2.25rem)/4)]"
+            >
+              <button
+                type="button"
+                aria-label="More assets coming soon"
+                className="group relative flex aspect-square w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-br from-neutral-950 via-neutral-900 to-black p-3 text-center transition-all duration-300 hover:-translate-y-1 hover:border-foreground/40 hover:shadow-[0_20px_50px_-20px_hsl(0_0%_100%/0.15)]"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/15 bg-foreground/10 text-lg font-semibold text-foreground">
+                  +
+                </span>
+                <span className="font-display text-sm font-semibold tracking-tight text-foreground sm:text-base">
+                  and more
+                </span>
+                <span className="text-[10px] text-muted-foreground sm:text-xs">
+                  More assets coming soon
+                </span>
+              </button>
+            </div>
           </div>
 
           {pageCount > 1 && (
