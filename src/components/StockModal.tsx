@@ -158,21 +158,11 @@ const StockModal = ({ ticker, onClose }: Props) => {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2 border-t border-border p-4 text-center sm:grid-cols-4 sm:p-5">
+        <div className="grid grid-cols-3 gap-2 border-t border-border p-4 text-center sm:p-5">
           <Stat label="Type" value={ticker.kind.toUpperCase()} />
-          {ticker.founded && <Stat label="Founded" value={String(ticker.founded)} />}
-          {ticker.hq && <Stat label="HQ" value={ticker.hq} />}
-          {ticker.sector && <Stat label="Sector" value={ticker.sector} />}
-          {ticker.ceo && <Stat label="CEO" value={ticker.ceo} />}
           <Stat label="Currency" value={quote?.currency ?? "USD"} />
+          <Stat label="Source" value="Yahoo Finance" />
         </div>
-
-        {ticker.about && (
-          <div className="border-t border-border px-5 py-4 sm:px-6">
-            <div className="text-[9px] font-semibold uppercase tracking-[0.35em] text-muted-foreground">About</div>
-            <p className="mt-2 text-sm leading-relaxed text-foreground/85">{ticker.about}</p>
-          </div>
-        )}
       </div>
     </div>
   );
