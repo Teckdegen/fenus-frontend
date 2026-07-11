@@ -35,17 +35,17 @@ const TickerCard = ({ ticker, onSelect }: Props) => {
       className="group relative flex aspect-square w-full flex-col justify-between overflow-hidden rounded-2xl border border-foreground/10 bg-gradient-to-br from-neutral-950 via-neutral-900 to-black p-3 text-left transition-all duration-300 hover:-translate-y-1 hover:border-foreground/40 hover:shadow-[0_20px_50px_-20px_hsl(0_0%_100%/0.15)] sm:p-4"
     >
       <div className="flex items-center justify-between">
-        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-foreground/15 bg-gradient-to-br from-neutral-100 via-white to-neutral-300 shadow-inner sm:h-10 sm:w-10">
+        <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-foreground/10 bg-neutral-900 sm:h-10 sm:w-10">
           {ticker.logo && !logoErr ? (
             <img
               src={ticker.logo}
               alt=""
               loading="lazy"
               onError={() => setLogoErr(true)}
-              className="h-5 w-5 object-contain sm:h-6 sm:w-6"
+              className="h-full w-full rounded-full object-cover"
             />
           ) : (
-            <span className="text-[8px] font-bold tracking-tight text-neutral-900">{ticker.symbol}</span>
+            <span className="text-[9px] font-bold tracking-tight text-foreground">{ticker.symbol.slice(0, 3)}</span>
           )}
         </div>
         <span className="rounded-full border border-foreground/15 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
