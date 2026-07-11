@@ -1,5 +1,4 @@
-import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { ALL_TICKERS, type Ticker } from "@/lib/tickers";
 import TickerCard from "@/components/TickerCard";
 import StockModal from "@/components/StockModal";
@@ -7,12 +6,52 @@ import StockModal from "@/components/StockModal";
 const SupportedAssets = () => {
   const [selected, setSelected] = useState<Ticker | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const [pageCount, setPageCount] = useState(1);
+  const [activePage, setActivePage] = useState(0);
 
-  const scrollBy = (dir: 1 | -1) => {
+  const recomputePages = () => {
     const el = scrollerRef.current;
     if (!el) return;
-    // Roughly one "page" — 4 cards on desktop, 2 on mobile.
-    el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
+    const pages = Math.max(1, Math.round(el.scrollWidth / el.clientWidth));
+    setPageCount(pages);
+    setActivePage(Math.round(el.scrollLeft / el.clientWidth));
+  };
+
+  useEffect(() => {
+    recomputePages();
+    const el = scrollerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      setActivePage(Math.round(el.scrollLeft / el.clientWidth));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", recomputePages);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", recomputePages);
+    };
+  }, []);
+
+  const goToPage = (i: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      goToPage(Math.min(pageCount - 1, activePage + 1));
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      goToPage(Math.max(0, activePage - 1));
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      goToPage(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      goToPage(pageCount - 1);
+    }
   };
 
   return (
@@ -31,39 +70,56 @@ const SupportedAssets = () => {
           </h2>
         </div>
 
-        {/* Horizontal swipe carousel: 2 per view on mobile, 4 on desktop. */}
+        {/* Horizontal swipe carousel with snap + keyboard nav. */}
         <div className="relative mt-14 sm:mt-20">
-          <button
-            type="button"
-            aria-label="Previous"
-            onClick={() => scrollBy(-1)}
-            className="absolute left-0 top-1/2 z-10 hidden h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-foreground/15 bg-background/90 text-foreground shadow-lg backdrop-blur transition hover:border-foreground md:flex"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            aria-label="Next"
-            onClick={() => scrollBy(1)}
-            className="absolute right-0 top-1/2 z-10 hidden h-10 w-10 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-foreground/15 bg-background/90 text-foreground shadow-lg backdrop-blur transition hover:border-foreground md:flex"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-
           <div
             ref={scrollerRef}
-            className="hide-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth px-1 pb-2 sm:gap-4"
-            style={{ scrollbarWidth: "none" }}
+            role="region"
+            aria-label="Supported assets carousel"
+            aria-roledescription="carousel"
+            tabIndex={0}
+            onKeyDown={onKeyDown}
+            className="hide-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-smooth px-1 pb-2 outline-none focus-visible:ring-2 focus-visible:ring-foreground/30 sm:gap-4"
+            style={{ scrollbarWidth: "none", touchAction: "pan-x" }}
           >
-            {ALL_TICKERS.map((t) => (
+            {ALL_TICKERS.map((t, i) => (
               <div
                 key={t.symbol}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${i + 1} of ${ALL_TICKERS.length}: ${t.symbol}`}
                 className="shrink-0 snap-start basis-[calc((100%-0.75rem)/2)] sm:basis-[calc((100%-2.25rem)/4)]"
               >
                 <TickerCard ticker={t} onSelect={setSelected} />
               </div>
             ))}
           </div>
+
+          {pageCount > 1 && (
+            <div
+              role="tablist"
+              aria-label="Carousel pages"
+              className="mt-6 flex items-center justify-center gap-2"
+            >
+              {Array.from({ length: pageCount }).map((_, i) => {
+                const active = i === activePage;
+                return (
+                  <button
+                    key={i}
+                    role="tab"
+                    aria-selected={active}
+                    aria-label={`Go to page ${i + 1}`}
+                    onClick={() => goToPage(i)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      active
+                        ? "w-8 bg-foreground"
+                        : "w-2 bg-foreground/25 hover:bg-foreground/50"
+                    }`}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
