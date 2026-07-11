@@ -33,5 +33,4 @@ export const ALL_TICKERS: Ticker[] = [
   { symbol: "SGOV",  name: "iShares 0-3M Treasury",    kind: "etf",       logo: logo("SGOV")  },
   { symbol: "SLV",   name: "iShares Silver Trust",     kind: "commodity", logo: logo("SLV")   },
   { symbol: "SPY",   name: "SPDR S&P 500 ETF",         kind: "etf",       logo: logo("SPY")   },
-  { symbol: "CUSO",  name: "Copper Miners ETF",        kind: "etf",       logo: logo("CUSO")  },
 ];
