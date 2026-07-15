@@ -3,8 +3,6 @@ import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
 import EquityMarket from "@/components/EquityMarket";
 import SupportedAssets from "@/components/SupportedAssets";
-import UseCases from "@/components/UseCases";
-import PoweredBy from "@/components/PoweredBy";
 
 const Index = () => {
   return (
@@ -13,8 +11,6 @@ const Index = () => {
       <Hero />
       <EquityMarket />
       <SupportedAssets />
-      <UseCases />
-      <PoweredBy />
       <Footer />
     </main>
   );
