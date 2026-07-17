@@ -110,6 +110,26 @@ const Navbar = () => {
               );
             })}
           </ul>
+
+          {/* Mobile buttons */}
+          <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border/50 pt-3">
+            <a
+              href="/app"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-black"
+            >
+              Launch App
+              <ArrowUpRight className="h-3 w-3" />
+            </a>
+            <a
+              href="/docs"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center gap-1.5 rounded-full border border-white/30 bg-white/5 px-3 py-2 text-xs font-semibold text-white"
+            >
+              <BookOpen className="h-3 w-3" />
+              Docs
+            </a>
+          </div>
         </div>
       )}
     </header>
