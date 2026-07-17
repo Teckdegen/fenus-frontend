@@ -1,4 +1,5 @@
 import heroCoins from "@/assets/hero-coins-bw.jpg";
+import { ArrowUpRight, BookOpen } from "lucide-react";
 
 const Hero = () => {
   return (
