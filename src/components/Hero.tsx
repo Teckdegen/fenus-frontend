@@ -1,5 +1,4 @@
 import heroCoins from "@/assets/hero-coins-bw.jpg";
-import { ArrowUpRight, BookOpen } from "lucide-react";
 
 const Hero = () => {
   return (
@@ -70,22 +69,6 @@ const Hero = () => {
           on LitVM.
         </h1>
 
-        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-          <a
-            href="/app"
-            className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/90"
-          >
-            Launch App
-            <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </a>
-          <a
-            href="/docs"
-            className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/10 hover:border-white/40"
-          >
-            <BookOpen className="h-4 w-4" />
-            Docs
-          </a>
-        </div>
       </div>
     </section>
   );
