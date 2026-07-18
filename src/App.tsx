@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Web3Provider } from "@/components/Web3Provider";
 import "@/lib/web3";
 import Index from "./pages/Index.tsx";
-import Docs from "./pages/Docs.tsx";
 
 const queryClient = new QueryClient();
 
@@ -19,8 +18,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/docs" element={<Docs />} />
-            {/* All other routes temporarily redirect to landing — pages preserved in repo */}
+            {/* All other routes temporarily redirect to landing */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
