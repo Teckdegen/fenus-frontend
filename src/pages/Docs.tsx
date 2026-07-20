@@ -1,0 +1,204 @@
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Check, Copy, Search } from "lucide-react";
+
+type Token = {
+  symbol: string;
+  name: string;
+  address: string;
+  kind: "stock" | "etf" | "commodity";
+};
+
+const TOKENS: Token[] = [
+  { symbol: "AAPL",  name: "Apple",                              address: "0x9bEb10a55eA6576F34BE6cEa9dAFdFEfa72aB84c", kind: "stock" },
+  { symbol: "MSFT",  name: "Microsoft",                          address: "0x857595bE1f8aD7599BAB7379ef4880c21c91DFad", kind: "stock" },
+  { symbol: "GOOGL", name: "Alphabet (Google)",                  address: "0x03631d2eEb6DD518731B2802a6d4f3D0De57CD66", kind: "stock" },
+  { symbol: "AMZN",  name: "Amazon",                             address: "0xB950B64DD89B56bF2B5FC43a2C6703fB46F3aa4e", kind: "stock" },
+  { symbol: "META",  name: "Meta Platforms",                     address: "0xcaaBCc7380936778D0A87E32fD8C8341aA248D87", kind: "stock" },
+  { symbol: "NVDA",  name: "NVIDIA",                             address: "0xbd297294820666b391AeDE51248880E31f908170", kind: "stock" },
+  { symbol: "TSLA",  name: "Tesla",                              address: "0x60Ef1aE026bE8C44e791B31aA0C3be67bE8B72E6", kind: "stock" },
+  { symbol: "AMD",   name: "Advanced Micro Devices",             address: "0x1aE03b0C8560c03C50e0d9d8Cfa6737Ab944836b", kind: "stock" },
+  { symbol: "INTC",  name: "Intel",                              address: "0x16FAc5F7A3be300986720409aDb8970eC7F975Ff", kind: "stock" },
+  { symbol: "MU",    name: "Micron Technology",                  address: "0x5CcB2Df49f8B4958de9884edA2dee3f35F59ce7B", kind: "stock" },
+  { symbol: "ORCL",  name: "Oracle",                             address: "0x3A114302c954ea5AF9819508db5d0Cf06c65d8Af", kind: "stock" },
+  { symbol: "CRWV",  name: "CoreWeave",                          address: "0xF2b4af32A41495eA593C65E0D5A00be93a862fA2", kind: "stock" },
+  { symbol: "SNDK",  name: "SanDisk",                            address: "0x5cC6A6388b1d129774eDd7412cD213e6C720717a", kind: "stock" },
+  { symbol: "PLTR",  name: "Palantir Technologies",              address: "0xee00fd606521950349568Cb69b849Ae592da3642", kind: "stock" },
+  { symbol: "COIN",  name: "Coinbase",                           address: "0x8e21dcE732A313a6460A1BAb630FB4a306Aa3915", kind: "stock" },
+  { symbol: "CRCL",  name: "Circle",                             address: "0x01E164937012DF0ce57DCcA70dC846ee85D66F97", kind: "stock" },
+  { symbol: "BABA",  name: "Alibaba",                            address: "0xb65D951C69a8CC55095749dDb05996D976055F51", kind: "stock" },
+  { symbol: "BE",    name: "Bloom Energy",                       address: "0xf8d15aB6aeC236511b8D8e704C56923452cb6f84", kind: "stock" },
+  { symbol: "SPCX",  name: "SpaceX",                             address: "0x06Ec44e313F36Bb814B8C10478BCcd6F61D40E02", kind: "stock" },
+  { symbol: "USAR",  name: "USA Rare Earth",                     address: "0xE096C716b00113397A78Ed35cDbF1FB4bDfEF91e", kind: "stock" },
+  { symbol: "QQQ",   name: "Invesco QQQ Trust",                  address: "0xD4C0A6E902158EE7F68b06962653c68283d88dDf", kind: "etf" },
+  { symbol: "SPY",   name: "SPDR S&P 500 ETF",                   address: "0x4DbEA5D8de706665c5997ef4a6C9033c9e1Fda3D", kind: "etf" },
+  { symbol: "SGOV",  name: "iShares 0-3 Month Treasury Bond ETF", address: "0x231ce1B7996846Ffd95981c6cB42cbD987D327B0", kind: "etf" },
+  { symbol: "SLV",   name: "iShares Silver Trust",               address: "0xd58c4f9800D272A1D4B6628C7275266dc226ea36", kind: "commodity" },
+];
+
+const shortAddr = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
+
+const Docs = () => {
+  const [query, setQuery] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return TOKENS;
+    return TOKENS.filter(
+      (t) =>
+        t.symbol.toLowerCase().includes(q) ||
+        t.name.toLowerCase().includes(q) ||
+        t.address.toLowerCase().includes(q) ||
+        t.kind.includes(q),
+    );
+  }, [query]);
+
+  const copy = async (addr: string) => {
+    try {
+      await navigator.clipboard.writeText(addr);
+      setCopied(addr);
+      setTimeout(() => setCopied((c) => (c === addr ? null : c)), 1400);
+    } catch {}
+  };
+
+  const groups: { label: string; kind: Token["kind"] }[] = [
+    { label: "Stocks", kind: "stock" },
+    { label: "ETFs", kind: "etf" },
+    { label: "Commodities", kind: "commodity" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Top bar */}
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Link to="/" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+            <img src="/favicon.png" alt="" className="h-5 w-5" />
+            <span className="font-display text-sm font-semibold tracking-tight">FENUS Docs</span>
+          </Link>
+          <a
+            href="https://app.fenus.xyz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-white px-3 py-1.5 text-[11px] font-semibold text-black transition hover:bg-white/90"
+          >
+            Launch App
+          </a>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="max-w-3xl">
+          <span className="inline-block rounded-full border border-foreground/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-foreground/70">
+            Token Registry
+          </span>
+          <h1 className="mt-5 font-display text-3xl font-semibold tracking-tight sm:text-5xl">
+            Tokenized Assets on LitVM
+          </h1>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Canonical contract addresses for every stock, ETF and commodity tokenized by
+            FENUS on the LitVM network. Verify the address before importing any token
+            into your wallet or interacting on-chain.
+          </p>
+        </div>
+
+        {/* Search */}
+        <div className="mt-10 flex items-center gap-2 rounded-full border border-border bg-foreground/[0.03] px-4 py-2.5 focus-within:border-foreground/40">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by ticker, company, or address…"
+            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="text-[11px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Groups */}
+        <div className="mt-10 space-y-12">
+          {groups.map((g) => {
+            const items = filtered.filter((t) => t.kind === g.kind);
+            if (!items.length) return null;
+            return (
+              <section key={g.kind}>
+                <div className="mb-4 flex items-baseline justify-between border-b border-border pb-3">
+                  <h2 className="font-display text-lg font-semibold tracking-tight sm:text-xl">
+                    {g.label}
+                  </h2>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                    {items.length} {items.length === 1 ? "asset" : "assets"}
+                  </span>
+                </div>
+
+                <div className="overflow-hidden rounded-xl border border-border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-foreground/[0.03] text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-semibold">Ticker</th>
+                        <th className="hidden px-4 py-3 text-left font-semibold sm:table-cell">Name</th>
+                        <th className="px-4 py-3 text-left font-semibold">Contract</th>
+                        <th className="px-4 py-3 text-right font-semibold">Copy</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {items.map((t) => (
+                        <tr key={t.address} className="border-t border-border/70 transition hover:bg-foreground/[0.02]">
+                          <td className="px-4 py-3">
+                            <div className="font-display font-semibold tracking-tight">{t.symbol}</div>
+                            <div className="text-xs text-muted-foreground sm:hidden">{t.name}</div>
+                          </td>
+                          <td className="hidden px-4 py-3 text-muted-foreground sm:table-cell">{t.name}</td>
+                          <td className="px-4 py-3 font-mono text-xs text-foreground/80">
+                            <span className="hidden md:inline">{t.address}</span>
+                            <span className="md:hidden">{shortAddr(t.address)}</span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => copy(t.address)}
+                              aria-label={`Copy ${t.symbol} address`}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:border-foreground hover:text-foreground"
+                            >
+                              {copied === t.address ? (
+                                <Check className="h-3.5 w-3.5 text-emerald-400" />
+                              ) : (
+                                <Copy className="h-3.5 w-3.5" />
+                              )}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            );
+          })}
+
+          {filtered.length === 0 && (
+            <div className="rounded-xl border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
+              No assets match “{query}”.
+            </div>
+          )}
+        </div>
+
+        <footer className="mt-16 border-t border-border pt-6 text-xs text-muted-foreground">
+          Network: <span className="text-foreground">LitVM</span> · Always verify addresses
+          on the official FENUS site before signing any transaction.
+        </footer>
+      </main>
+    </div>
+  );
+};
+
+export default Docs;
