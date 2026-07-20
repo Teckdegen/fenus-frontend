@@ -116,7 +116,9 @@ const Navbar = () => {
           {/* Mobile buttons */}
           <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border/50 pt-3">
             <a
-              href="/app"
+              href="https://app.fenus.xyz"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-semibold text-black"
             >
