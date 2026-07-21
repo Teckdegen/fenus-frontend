@@ -1,18 +1,6 @@
-import { useEffect, useState } from "react";
 import heroCoins from "@/assets/hero-coins-bw.jpg";
-import { fetchTVL, fmtUsdCompact } from "@/lib/tvl";
 
 const Hero = () => {
-  const [tvl, setTvl] = useState<number | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    fetchTVL()
-      .then((d) => { if (alive) setTvl(d.tvl); })
-      .catch(() => {});
-    return () => { alive = false; };
-  }, []);
-
   return (
     <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-background pt-20 sm:pt-28">
 
@@ -80,13 +68,6 @@ const Hero = () => {
           <br />
           on LitVM.
         </h1>
-
-        {tvl != null && tvl > 0 && (
-          <div className="mt-8 inline-flex items-center gap-2 rounded-full border border-foreground/20 bg-black/30 px-4 py-2 text-xs font-medium text-white/90 backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            {fmtUsdCompact(tvl)} Total Value Locked
-          </div>
-        )}
 
       </div>
     </section>
