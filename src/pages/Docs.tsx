@@ -211,15 +211,12 @@ const Docs = () => {
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         {/* Hero */}
         <div className="mb-14">
-          <span className="inline-block rounded-full border border-foreground/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-foreground/70">
-            Documentation · v1
-          </span>
-          <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
+          <h1 className="font-display text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
             Everything you need to build with FENUS.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
             FENUS lets you borrow, invest, and trade tokenized stocks, ETFs and commodities on
-            LitVM — using $wzkLTC as collateral to mint the FnUSD stablecoin. These docs walk you
+            LitVM, using $wzkLTC as collateral to mint the FnUSD stablecoin. These docs walk you
             through the protocol, the token registry and how to get started safely.
           </p>
         </div>
@@ -229,7 +226,7 @@ const Docs = () => {
           <Section id="introduction" eyebrow="Start Here" title="Introduction">
             <p>
               FENUS is a decentralized protocol on <strong>LitVM</strong> that turns real-world
-              assets — stocks, ETFs and commodities — into on-chain tokens you can trade, hold
+              assets (stocks, ETFs and commodities) into on-chain tokens you can trade, hold
               and use as collateral. It also issues <strong>FnUSD</strong>, a fully-collateralized
               stablecoin backed by wrapped Litecoin (wzkLTC).
             </p>
@@ -249,15 +246,15 @@ const Docs = () => {
             </p>
             <ul className="ml-5 list-disc space-y-2 marker:text-muted-foreground">
               <li>
-                <strong>Troves</strong> — collateralized debt positions where you lock wzkLTC
+                <strong>Troves</strong>: collateralized debt positions where you lock wzkLTC
                 and borrow FnUSD against it.
               </li>
               <li>
-                <strong>FnUSD</strong> — the protocol's over-collateralized USD stablecoin,
+                <strong>FnUSD</strong>: the protocol's over-collateralized USD stablecoin,
                 redeemable and censorship-resistant.
               </li>
               <li>
-                <strong>Tokenized Equities</strong> — 1:1 on-chain representations of stocks,
+                <strong>Tokenized Equities</strong>: 1:1 on-chain representations of stocks,
                 ETFs and commodities you can trade natively on LitVM.
               </li>
             </ul>
@@ -282,7 +279,7 @@ const Docs = () => {
             <ol className="ml-5 list-decimal space-y-2 marker:text-muted-foreground">
               <li>Open <a href="https://app.fenus.xyz" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-foreground">app.fenus.xyz</a> and connect your wallet on LitVM.</li>
               <li>Deposit wzkLTC as collateral in a new Trove.</li>
-              <li>Choose an amount of FnUSD to mint — keeping a healthy collateral ratio.</li>
+              <li>Choose an amount of FnUSD to mint, keeping a healthy collateral ratio.</li>
               <li>Repay FnUSD at any time to unlock collateral, or close the Trove entirely.</li>
             </ol>
             <Callout tone="warn" title="Mind your ratio">
@@ -427,10 +424,10 @@ const Docs = () => {
 
           <Section id="risks" eyebrow="Important" title="Risks">
             <ul className="ml-5 list-disc space-y-2 marker:text-muted-foreground">
-              <li><strong>Market risk</strong> — collateral value can move sharply against you.</li>
-              <li><strong>Liquidation risk</strong> — Troves below the minimum ratio can be liquidated.</li>
-              <li><strong>Smart-contract risk</strong> — DeFi protocols carry inherent code risk.</li>
-              <li><strong>Oracle risk</strong> — pricing depends on on-chain oracle feeds.</li>
+              <li><strong>Market risk</strong>: collateral value can move sharply against you.</li>
+              <li><strong>Liquidation risk</strong>: Troves below the minimum ratio can be liquidated.</li>
+              <li><strong>Smart-contract risk</strong>: DeFi protocols carry inherent code risk.</li>
+              <li><strong>Oracle risk</strong>: pricing depends on on-chain oracle feeds.</li>
             </ul>
           </Section>
 
@@ -443,7 +440,7 @@ const Docs = () => {
                 },
                 {
                   q: "Are tokenized stocks 1:1 backed?",
-                  a: "Yes — each tokenized equity represents a claim on the underlying asset, tracked and priced on-chain.",
+                  a: "Yes, each tokenized equity represents a claim on the underlying asset, tracked and priced on-chain.",
                 },
                 {
                   q: "How do I import a token into my wallet?",
