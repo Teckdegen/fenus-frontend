@@ -61,9 +61,6 @@ const SupportedAssets = () => {
     >
       <div className="relative z-10 mx-auto max-w-6xl px-6">
         <div className="mx-auto max-w-3xl text-center">
-          <span className="mb-5 inline-block rounded-full border border-foreground/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-foreground/70">
-            Supported Assets
-          </span>
           <h2 className="font-display text-3xl font-semibold leading-tight sm:text-5xl">
             Stocks, ETFs & commodities<br />
             <span className="text-muted-foreground">tokenized on LitVM.</span>
