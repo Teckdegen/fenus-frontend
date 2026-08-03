@@ -56,19 +56,12 @@ const EquityMarket = () => {
         ref={ref}
         className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-6 text-center"
       >
-        {/* badge */}
-        <AnimLine visible={visible} delay={0} pulseDelay={0}>
-          <span className="rounded-full border border-foreground/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.35em] text-foreground/70">
-            Why Now
-          </span>
-        </AnimLine>
-
         {/* headline */}
-        <h2 className="mt-6 font-display text-3xl font-semibold leading-tight sm:text-5xl md:text-6xl">
-          <AnimLine visible={visible} delay={150} pulseDelay={0}>
+        <h2 className="font-display text-3xl font-semibold leading-tight sm:text-5xl md:text-6xl">
+          <AnimLine visible={visible} delay={0} pulseDelay={0}>
             Trillions of Equity
           </AnimLine>
-          <AnimLine visible={visible} delay={350} pulseDelay={1.5}>
+          <AnimLine visible={visible} delay={200} pulseDelay={1.5}>
             are coming{" "}
             <span className="text-muted-foreground">on-chain.</span>
           </AnimLine>
