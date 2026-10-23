@@ -19,7 +19,7 @@ const tabs = [
   {
     id: "network",
     title: "Network",
-    body: "Everything settles on LitVM, the EVM chain secured by Litecoin. wzkLTC pays the gas.",
+    body: "Everything settles on LitVM, the EVM chain secured by Litecoin. Gas is paid in zkLTC.",
     link: "LitVM",
   },
 ] as const;
@@ -146,9 +146,10 @@ export function Ledger() {
           ) : null}
 
           {tab === "network" ? (
-            <div className="flex flex-col items-center gap-3 text-center">
-              <span className="text-[56px] leading-none font-bold tracking-[-0.05em] italic text-black">LitVM</span>
-              <span className="text-[13px] text-[#8a8a8a]">Chain id 4441 · gas in wzkLTC</span>
+            <div className="flex flex-col items-center gap-4 text-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logos/litvm.png" alt="LitVM" className="h-20 w-auto" />
+              <span className="text-[13px] text-[#8a8a8a]">LitVM · chain id 4441 · gas in zkLTC</span>
             </div>
           ) : null}
         </div>

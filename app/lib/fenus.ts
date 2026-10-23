@@ -2,7 +2,7 @@ import { TOKEN_REGISTRY } from "./tokenRegistry";
 
 export const APP_URL = "https://app.fenus.xyz";
 export const X_URL = "https://x.com/fenus_protocol";
-export const TVL_URL = "https://www.fenus.xyz/api/tvl";
+export const TVL_URL = "/api/tvl";
 export const EXPLORER = "https://liteforge.explorer.caldera.xyz";
 
 // Free CDN for stock and ETF logos, keyed by ticker.

@@ -367,7 +367,7 @@ export function Docs() {
 
             <section id="fees" className="docs-prose scroll-mt-24 pt-12">
               <h2>Fees</h2>
-              <p>Borrowing on FENUS has no ongoing interest. Network gas on LitVM is separate and paid in wzkLTC.</p>
+              <p>Borrowing on FENUS has no ongoing interest. Network gas on LitVM is separate and paid in zkLTC.</p>
               <div className="docs-table">
                 <table>
                   <thead>
@@ -500,7 +500,7 @@ export function Docs() {
                 <li>Chain id: 4441</li>
                 <li>RPC: https://liteforge.rpc.caldera.xyz/http</li>
                 <li>Explorer: liteforge.explorer.caldera.xyz</li>
-                <li>Gas token: wzkLTC</li>
+                <li>Gas token: zkLTC</li>
                 <li>Stablecoin: FnUSD</li>
               </ul>
             </section>
