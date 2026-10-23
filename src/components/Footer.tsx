@@ -1,45 +1,48 @@
 import logo from "@/assets/fenus-logo.png";
+import { ArrowUpRight } from "lucide-react";
 
 const XIcon = () => (
-  <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
+  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-  </svg>
-);
-
-const TelegramIcon = () => (
-  <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
   </svg>
 );
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border bg-background py-5">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6">
-        <div className="flex items-center gap-2">
-          <img src={logo} alt="FENUS" className="h-5 w-5" />
-          <span className="font-display text-xs font-semibold tracking-tight">FENUS</span>
+    <footer className="bg-background px-4 pb-4 pt-8 sm:px-6 sm:pb-6">
+      <div className="mx-auto max-w-6xl rounded-[2rem] bg-card px-7 py-10 shadow-[0_1px_2px_hsl(0_0%_9%/0.05)] ring-1 ring-black/[0.06] sm:px-10 sm:py-12">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <a href="/" className="flex items-center gap-2">
+            <img src={logo} alt="FENUS" className="h-6 w-6" />
+            <span className="font-display text-base font-bold tracking-tight">FENUS</span>
+          </a>
+
+          <div className="flex items-center gap-2.5">
+            <a
+              href="https://app.fenus.xyz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition hover:opacity-90"
+            >
+              <img src={logo} alt="" aria-hidden className="h-3.5 w-3.5 rounded-full grayscale" />
+              Launch App
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
+            <a
+              href="https://x.com/fenus_protocol"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="FENUS on X"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-foreground transition hover:bg-secondary"
+            >
+              <XIcon />
+            </a>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <a
-            href="https://x.com/fenus_protocol"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="FENUS on X"
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:border-foreground hover:text-foreground"
-          >
-            <XIcon />
-          </a>
-          <a
-            href="https://t.me/Fenusprotocol"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="FENUS on Telegram"
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:border-foreground hover:text-foreground"
-          >
-            <TelegramIcon />
-          </a>
+        <div className="mt-10 flex flex-col gap-2 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} FENUS · Built on LitVM</span>
+          <span>Tokenized stocks, commodities &amp; ETFs · FnUSD stablecoin</span>
         </div>
       </div>
     </footer>
