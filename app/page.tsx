@@ -64,7 +64,7 @@ export default function Home() {
             Onchain 24/7
           </h1>
           <p className="mt-4 max-w-xl text-[15px] leading-6 font-normal text-[#8a8a8a]">
-            FENUS brings {COUNTS.stock} real-world stocks, {COUNTS.etf} ETFs and {COUNTS.commodity} commodities on chain. Borrow FnUSD against wzkLTC and trade them on LitVM, any hour of any day.
+            Borrow, Invest, and Trade tokenized stocks, commodities, and ETFs on LitecoinVM.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
