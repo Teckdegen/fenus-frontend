@@ -100,15 +100,50 @@ function NavIcon({ kind }: { kind: "play" | "book" | "list" }) {
 }
 
 function Addr({ address }: { address: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    } catch {
+      setCopied(false);
+    }
+  }
+
   return (
-    <a
-      href={`${EXPLORER}/address/${address}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="break-all font-mono text-[12px] text-[#111] underline decoration-[#d5d0c8] underline-offset-2 hover:decoration-black"
-    >
-      {address}
-    </a>
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+      <a
+        href={`${EXPLORER}/address/${address}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={address}
+        className="font-mono text-[12px] text-[#111] underline decoration-[#d6d6d6] underline-offset-2 hover:decoration-black"
+      >
+        <span className="lg:hidden">
+          {address.slice(0, 6)}…{address.slice(-4)}
+        </span>
+        <span className="hidden lg:inline">{address}</span>
+      </a>
+      <button
+        type="button"
+        onClick={() => void copy()}
+        aria-label={`Copy ${address}`}
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[#9a9a9a] hover:bg-[#f1f1f1] hover:text-black"
+      >
+        {copied ? (
+          <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="#1f9d62" strokeWidth="1.8" aria-hidden="true">
+            <path d="M3.5 8.5l3 3 6-7" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+            <rect x="5.5" y="5.5" width="8" height="8" rx="1.8" />
+            <path d="M10.5 3.5V3a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5" />
+          </svg>
+        )}
+      </button>
+    </span>
   );
 }
 
@@ -178,8 +213,8 @@ export function Docs() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfcf9] text-[#111]">
-      <header className="sticky top-0 z-40 border-b border-[#ebe7e0] bg-[#fdfcf9]/92 backdrop-blur-md">
+    <div className="min-h-screen bg-[#f4f4f4] text-[#111]">
+      <header className="sticky top-0 z-40 border-b border-[#e6e6e6] bg-[#f4f4f4]/90 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between gap-4 px-4 sm:px-6">
           <Link href="/" className="text-[15px] font-semibold tracking-[-0.03em]">
             FENUS
@@ -188,7 +223,7 @@ export function Docs() {
             <button
               type="button"
               onClick={() => setOpen((value) => !value)}
-              className="rounded-full border border-[#ddd8cf] px-3 py-1.5 text-[12px] font-medium xl:hidden"
+              className="rounded-full bg-[#e6e6e6] px-3 py-1.5 text-[12px] font-medium xl:hidden"
             >
               {open ? "Close" : "Menu"}
             </button>
@@ -212,7 +247,7 @@ export function Docs() {
 
       <div className="mx-auto grid max-w-[1280px] xl:grid-cols-[220px_minmax(0,1fr)_200px]">
         <aside
-          className={`border-[#ebe7e0] xl:sticky xl:top-14 xl:h-[calc(100vh-56px)] xl:overflow-y-auto xl:border-r ${
+          className={`border-[#e6e6e6] xl:sticky xl:top-14 xl:h-[calc(100vh-56px)] xl:overflow-y-auto xl:border-r ${
             open ? "block border-b px-4 py-5" : "hidden xl:block"
           }`}
         >
@@ -235,7 +270,7 @@ export function Docs() {
                             setOpen(false);
                           }}
                           className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-[13px] ${
-                            activeItem ? "font-semibold text-black" : "text-[#6d6d6d] hover:bg-[#f3f0ea] hover:text-black"
+                            activeItem ? "font-semibold text-black" : "text-[#6d6d6d] hover:bg-[#ececec] hover:text-black"
                           }`}
                         >
                           {activeItem ? <span className="text-[#999]">›</span> : <span className="w-2" />}
@@ -255,14 +290,14 @@ export function Docs() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] font-medium tracking-[0.14em] text-[#a3a3a3] uppercase">Get started</p>
-                <h1 className="mt-3 font-[family-name:var(--font-instrument-serif)] text-[2.6rem] leading-[1.05] font-normal tracking-[-0.02em] sm:text-[3rem]">
+                <h1 className="mt-3 text-[2.5rem] leading-[0.95] font-medium tracking-[-0.04em] text-black sm:text-[3.2rem]">
                   Introduction
                 </h1>
               </div>
               <button
                 type="button"
                 onClick={() => void copyPage()}
-                className="mt-8 flex shrink-0 items-center gap-1.5 rounded-lg border border-[#e5e0d8] bg-white px-2.5 py-1.5 text-[12px] text-[#555] hover:bg-[#f7f4ef]"
+                className="mt-8 flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-[#555] hover:bg-[#ececec]"
               >
                 {copied ? "Copied" : "Copy page"}
               </button>
@@ -271,7 +306,7 @@ export function Docs() {
               Borrow, invest and trade tokenized stocks, ETFs and commodities on LitVM. Lock wzkLTC, mint FnUSD, and trade real markets 24/7. This page is the full product and protocol guide, including every contract address you can verify on the explorer.
             </p>
 
-            <section id="start" className="docs-prose scroll-mt-24 pt-12">
+            <section id="start" className="docs-prose scroll-mt-24 pt-10">
               <h2>Start here</h2>
               <p>
                 FENUS is a decentralized protocol on LitVM. It turns real-world assets into on-chain tokens you can trade, hold and use, and it issues FnUSD, an over-collateralized stablecoin backed by wrapped Litecoin.
@@ -291,7 +326,7 @@ export function Docs() {
               </p>
             </section>
 
-            <section id="fenus" className="docs-prose scroll-mt-24 pt-12">
+            <section id="fenus" className="docs-prose scroll-mt-24 pt-10">
               <h2>What is FENUS</h2>
               <p>FENUS is built around three pieces:</p>
               <ul>
@@ -301,7 +336,7 @@ export function Docs() {
               </ul>
             </section>
 
-            <section id="trove" className="docs-prose scroll-mt-24 pt-12">
+            <section id="trove" className="docs-prose scroll-mt-24 pt-10">
               <h2>Troves</h2>
               <p>
                 A Trove is your position. It holds the wzkLTC you deposit and records the FnUSD you owe. Every Trove is minted as an NFT, so you can transfer the whole position to another wallet in one step.
@@ -314,7 +349,7 @@ export function Docs() {
               </ul>
             </section>
 
-            <section id="fnusd" className="docs-prose scroll-mt-24 pt-12">
+            <section id="fnusd" className="docs-prose scroll-mt-24 pt-10">
               <h2>FnUSD</h2>
               <p>
                 FnUSD is the FENUS stablecoin. It is minted only when someone borrows against a Trove, so every FnUSD in circulation is backed by more than a dollar of wzkLTC. It uses 6 decimals, like USDC.
@@ -324,7 +359,7 @@ export function Docs() {
               </p>
             </section>
 
-            <section id="ratio" className="docs-prose scroll-mt-24 pt-12">
+            <section id="ratio" className="docs-prose scroll-mt-24 pt-10">
               <h2>Collateral ratio</h2>
               <p>Your collateral ratio is the value of your wzkLTC in USD divided by your FnUSD debt. It is the main safety dial for a Trove.</p>
               <div className="docs-table">
@@ -365,7 +400,7 @@ export function Docs() {
               </p>
             </section>
 
-            <section id="fees" className="docs-prose scroll-mt-24 pt-12">
+            <section id="fees" className="docs-prose scroll-mt-24 pt-10">
               <h2>Fees</h2>
               <p>Borrowing on FENUS has no ongoing interest. Network gas on LitVM is separate and paid in zkLTC.</p>
               <div className="docs-table">
@@ -399,7 +434,7 @@ export function Docs() {
               <p>Your total debt at open is the amount you borrow plus the origination fee.</p>
             </section>
 
-            <section id="borrow" className="docs-prose scroll-mt-24 pt-12">
+            <section id="borrow" className="docs-prose scroll-mt-24 pt-10">
               <h2>Borrowing FnUSD</h2>
               <ol>
                 <li>
@@ -419,14 +454,14 @@ export function Docs() {
               </div>
             </section>
 
-            <section id="trade" className="docs-prose scroll-mt-24 pt-12">
+            <section id="trade" className="docs-prose scroll-mt-24 pt-10">
               <h2>Trading stocks</h2>
               <p>
                 FENUS lists {COUNTS.stock} stocks, {COUNTS.etf} ETFs and {COUNTS.commodity} commodities as tokens on LitVM. Each token tracks the price of its underlying asset. You buy and sell them with FnUSD, and the market stays open around the clock.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 {["AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "SPY", "QQQ", "GLD"].map((symbol) => (
-                  <span key={symbol} className="inline-flex items-center gap-2 rounded-full border border-[#ebe7e0] bg-white px-3 py-1.5 text-[13px]">
+                  <span key={symbol} className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[13px] font-medium">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={stockLogo(symbol)} alt="" className="h-5 w-5 object-contain" />
                     {symbol}
@@ -440,7 +475,7 @@ export function Docs() {
               </ul>
             </section>
 
-            <section id="assets" className="docs-prose scroll-mt-24 pt-12">
+            <section id="assets" className="docs-prose scroll-mt-24 pt-10">
               <h2>Tokenized assets</h2>
               <p>
                 These are the canonical addresses for all {COUNTS.all} assets FENUS tokenizes. Always check the address before importing a token or signing a transaction.
@@ -449,35 +484,37 @@ export function Docs() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by ticker, company, or address"
-                className="mt-4 w-full rounded-lg border border-[#e5e0d8] bg-white px-3 py-2 text-[13px] outline-none placeholder:text-[#a3a3a3] focus:border-[#111]"
+                className="mt-5 w-full rounded-full border border-transparent bg-white px-4 py-2.5 text-[14px] outline-none placeholder:text-[#a3a3a3] focus:border-[#111]"
               />
               {kinds.map(({ kind, label }) => {
                 const rows = filtered.filter((t) => t.kind === kind);
                 if (!rows.length) return null;
                 return (
                   <div key={kind}>
-                    <h3 className="mt-8 font-[family-name:var(--font-instrument-serif)] text-[1.35rem] font-normal text-black">
-                      {label} <span className="text-[14px] text-[#a3a3a3]">{rows.length}</span>
+                    <h3>
+                      {label} <span className="text-[13px] font-medium text-[#a3a3a3]">{rows.length}</span>
                     </h3>
                     <div className="docs-table mt-3 max-h-[520px] overflow-y-auto">
                       <table>
                         <thead>
                           <tr>
-                            <th></th>
-                            <th>Ticker</th>
-                            <th>Name</th>
-                            <th>Address</th>
+                            <th>Asset</th>
+                            <th className="text-right">Address</th>
                           </tr>
                         </thead>
                         <tbody>
                           {rows.map((row) => (
                             <tr key={row.address}>
                               <td>
-                                <Mark src={stockLogo(row.symbol)} label={row.symbol} />
+                                <span className="flex items-center gap-3">
+                                  <Mark src={stockLogo(row.symbol)} label={row.symbol} />
+                                  <span className="min-w-0">
+                                    <span className="block font-semibold text-black">{row.symbol}</span>
+                                    <span className="block text-[12px] text-[#8a8a8a]">{row.name}</span>
+                                  </span>
+                                </span>
                               </td>
-                              <td>{row.symbol}</td>
-                              <td>{row.name}</td>
-                              <td>
+                              <td className="text-right">
                                 <Addr address={row.address} />
                               </td>
                             </tr>
@@ -491,7 +528,7 @@ export function Docs() {
               {filtered.length === 0 ? <p>No assets match &ldquo;{query}&rdquo;.</p> : null}
             </section>
 
-            <section id="litvm" className="docs-prose scroll-mt-24 pt-12">
+            <section id="litvm" className="docs-prose scroll-mt-24 pt-10">
               <h2>LitVM</h2>
               <p>
                 FENUS runs on LitVM LiteForge, an EVM-compatible chain secured by Litecoin. Any wallet that supports custom EVM networks can connect.
@@ -505,30 +542,31 @@ export function Docs() {
               </ul>
             </section>
 
-            <section id="contracts" className="docs-prose scroll-mt-24 pt-12">
+            <section id="contracts" className="docs-prose scroll-mt-24 pt-10">
               <h2>Contracts</h2>
               <p>
                 Verify these on the explorer before you trust a frontend. The AddressesRegistry is frozen, so none of these addresses can be swapped out later.
               </p>
 
-              <h3 className="mt-8 font-[family-name:var(--font-instrument-serif)] text-[1.35rem] font-normal text-black">FENUS protocol</h3>
+              <h3>FENUS protocol</h3>
               <div className="docs-table mt-3">
                 <table>
                   <thead>
                     <tr>
                       <th>Contract</th>
-                      <th>Address</th>
-                      <th>Role</th>
+                      <th className="text-right">Address</th>
                     </tr>
                   </thead>
                   <tbody>
                     {fenusContracts.map((row) => (
                       <tr key={row.address}>
-                        <td>{row.name}</td>
                         <td>
+                          <span className="block font-semibold text-black">{row.name}</span>
+                          <span className="block text-[12px] text-[#8a8a8a]">{row.note}</span>
+                        </td>
+                        <td className="text-right">
                           <Addr address={row.address} />
                         </td>
-                        <td>{row.note}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -540,14 +578,14 @@ export function Docs() {
                   href={EXPLORER}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-black underline decoration-[#d5d0c8] underline-offset-4 hover:decoration-black"
+                  className="font-medium text-black underline decoration-[#cfcfcf] underline-offset-4 hover:decoration-black"
                 >
                   {EXPLORER}
                 </a>
               </p>
             </section>
 
-            <section id="liquidations" className="docs-prose scroll-mt-24 pt-12">
+            <section id="liquidations" className="docs-prose scroll-mt-24 pt-10">
               <h2>Liquidations</h2>
               <p>
                 A Trove that falls below the 135% minimum can be liquidated. Its collateral and debt move to the Default Pool and are redistributed across the Troves that are still open.
@@ -557,7 +595,7 @@ export function Docs() {
               </p>
             </section>
 
-            <section id="safety" className="docs-prose scroll-mt-24 pt-12">
+            <section id="safety" className="docs-prose scroll-mt-24 pt-10">
               <h2>Risks</h2>
               <ul>
                 <li>Market risk: the value of your collateral can move sharply against you.</li>
@@ -568,7 +606,7 @@ export function Docs() {
               </ul>
             </section>
 
-            <section id="faq" className="docs-prose scroll-mt-24 pt-12 pb-24">
+            <section id="faq" className="docs-prose scroll-mt-24 pt-10 pb-24">
               <h2>FAQ</h2>
               <p>
                 <strong>What is FnUSD?</strong> FENUS&apos;s over-collateralized USD stablecoin, minted by locking wzkLTC in a Trove.
@@ -591,12 +629,12 @@ export function Docs() {
                   href={APP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-black underline decoration-[#d5d0c8] underline-offset-4 hover:decoration-black"
+                  className="font-medium text-black underline decoration-[#cfcfcf] underline-offset-4 hover:decoration-black"
                 >
                   Launch the app
                 </a>
                 {" · "}
-                <Link href="/" className="font-medium text-black underline decoration-[#d5d0c8] underline-offset-4 hover:decoration-black">
+                <Link href="/" className="font-medium text-black underline decoration-[#cfcfcf] underline-offset-4 hover:decoration-black">
                   Back to the website
                 </Link>
               </p>
@@ -604,7 +642,7 @@ export function Docs() {
           </article>
         </main>
 
-        <aside className="hidden border-l border-[#ebe7e0] xl:block">
+        <aside className="hidden border-l border-[#e6e6e6] xl:block">
           <div className="sticky top-14 px-5 py-8">
             <p className="mb-3 flex items-center gap-2 text-[12px] font-medium text-[#8a8a8a]">
               <NavIcon kind="list" />

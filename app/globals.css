@@ -146,13 +146,28 @@ body {
   }
 }
 
+.docs-prose {
+  border-top: 1px solid #e6e6e6;
+  margin-top: 2.5rem;
+}
+
 .docs-prose h2 {
   margin-bottom: 0.85rem;
-  font-family: var(--font-instrument-serif), "Instrument Serif", Georgia, serif;
-  font-size: 1.7rem;
-  font-weight: 400;
-  letter-spacing: -0.02em;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.035em;
   line-height: 1.15;
+  color: #111;
+}
+
+.docs-prose h3 {
+  margin-top: 2rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: #111;
 }
 
@@ -160,7 +175,23 @@ body {
 .docs-prose li {
   font-size: 15px;
   line-height: 1.75;
-  color: #5a5a5a;
+  color: #5f5f5f;
+}
+
+.docs-prose strong {
+  font-weight: 600;
+  color: #111;
+}
+
+.docs-prose a:not([class]) {
+  color: #111;
+  text-decoration: underline;
+  text-decoration-color: #cfcfcf;
+  text-underline-offset: 3px;
+}
+
+.docs-prose a:not([class]):hover {
+  text-decoration-color: #111;
 }
 
 .docs-prose p + p,
@@ -185,35 +216,38 @@ body {
   list-style: decimal;
 }
 
+.docs-prose li::marker {
+  color: #b0b0b0;
+}
+
 .docs-prose li + li {
   margin-top: 0.45rem;
 }
 
 .docs-callout {
   margin-top: 1.25rem;
-  border-radius: 14px;
+  border-radius: 20px;
   background: #fff;
-  padding: 1.1rem 1.2rem;
-  border: 1px solid #ebe7e0;
+  padding: 1.15rem 1.3rem;
   font-size: 15px;
   line-height: 1.65;
-  color: #5a5a5a;
+  color: #5f5f5f;
 }
 
 .docs-note {
   margin-top: 1.25rem;
-  border-left: 2px solid #111;
-  padding: 0.35rem 0 0.35rem 1rem;
+  border-radius: 16px;
+  background: #ececec;
+  padding: 0.9rem 1.1rem;
   font-size: 14px;
   line-height: 1.65;
-  color: #6d6d6d;
+  color: #5f5f5f;
 }
 
 .docs-table {
   margin-top: 1.15rem;
   overflow-x: auto;
-  border-radius: 14px;
-  border: 1px solid #ebe7e0;
+  border-radius: 20px;
   background: #fff;
 }
 
@@ -225,21 +259,40 @@ body {
 }
 
 .docs-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   text-align: left;
-  padding: 0.85rem 1rem;
-  color: #8a8a8a;
+  padding: 0.8rem 1.1rem;
+  color: #9a9a9a;
+  font-size: 11px;
   font-weight: 500;
-  border-bottom: 1px solid #ebe7e0;
-  background: #f7f4ef;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #efefef;
+  background: #fafafa;
 }
 
 .docs-table td {
-  padding: 0.85rem 1rem;
+  padding: 0.8rem 1.1rem;
   color: #3a3a3a;
-  border-bottom: 1px solid #f1ece4;
-  vertical-align: top;
+  border-bottom: 1px solid #f3f3f3;
+  vertical-align: middle;
+}
+
+.docs-table tbody tr:hover td {
+  background: #fafafa;
 }
 
 .docs-table tr:last-child td {
   border-bottom: none;
+}
+
+.docs-table th.text-right {
+  text-align: right;
+}
+
+.docs-table + p,
+.docs-table + div + p {
+  margin-top: 1rem;
 }
