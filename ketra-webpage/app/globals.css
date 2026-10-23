@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f4f4;
+  --foreground: #111111;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-instrument);
+  --font-serif: var(--font-instrument-serif);
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-instrument), "Instrument Sans", Helvetica, Arial, sans-serif;
+}
+
+@keyframes fenus-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.logo-marquee {
+  animation: fenus-marquee 110s linear infinite;
+}
+
+@keyframes fenus-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fenus-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 22px 33px;
+  }
+}
+
+@keyframes fenus-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.55);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.7);
+    opacity: 0;
+  }
+}
+
+@keyframes fenus-draw {
+  0% {
+    stroke-dashoffset: 320;
+  }
+  70%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fenus-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.orbit-spin {
+  animation: fenus-spin 36s linear infinite;
+}
+
+.orbit-spin-reverse {
+  animation: fenus-spin 36s linear infinite reverse;
+}
+
+.dot-drift {
+  animation: fenus-drift 8s linear infinite;
+}
+
+.pulse-ring {
+  animation: fenus-pulse 2.8s ease-out infinite;
+}
+
+.sig-draw {
+  stroke-dasharray: 320;
+  stroke-dashoffset: 320;
+  animation: fenus-draw 3.6s ease-in-out infinite;
+}
+
+.sheet-float {
+  animation: fenus-float 4.5s ease-in-out infinite;
+}
+
+@keyframes hero-line-forward {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes hero-line-back {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}
+
+.hero-line-a,
+.hero-line-b {
+  stroke-dasharray: 90 910;
+}
+
+.hero-line-a {
+  animation: hero-line-forward 16s linear infinite;
+}
+
+.hero-line-b {
+  animation: hero-line-back 16s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-marquee,
+  .orbit-spin,
+  .orbit-spin-reverse,
+  .dot-drift,
+  .pulse-ring,
+  .sig-draw,
+  .sheet-float,
+  .hero-line-a,
+  .hero-line-b {
+    animation: none;
+  }
+}
+
+.docs-prose h2 {
+  margin-bottom: 0.85rem;
+  font-family: var(--font-instrument-serif), "Instrument Serif", Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: #111;
+}
+
+.docs-prose p,
+.docs-prose li {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #5a5a5a;
+}
+
+.docs-prose p + p,
+.docs-prose p + ul,
+.docs-prose p + ol,
+.docs-prose ul + p,
+.docs-prose ol + p {
+  margin-top: 1rem;
+}
+
+.docs-prose ul,
+.docs-prose ol {
+  margin-top: 0.85rem;
+  padding-left: 1.15rem;
+}
+
+.docs-prose ul {
+  list-style: disc;
+}
+
+.docs-prose ol {
+  list-style: decimal;
+}
+
+.docs-prose li + li {
+  margin-top: 0.45rem;
+}
+
+.docs-callout {
+  margin-top: 1.25rem;
+  border-radius: 14px;
+  background: #fff;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid #ebe7e0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #5a5a5a;
+}
+
+.docs-note {
+  margin-top: 1.25rem;
+  border-left: 2px solid #111;
+  padding: 0.35rem 0 0.35rem 1rem;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #6d6d6d;
+}
+
+.docs-table {
+  margin-top: 1.15rem;
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid #ebe7e0;
+  background: #fff;
+}
+
+.docs-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.docs-table th {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  color: #8a8a8a;
+  font-weight: 500;
+  border-bottom: 1px solid #ebe7e0;
+  background: #f7f4ef;
+}
+
+.docs-table td {
+  padding: 0.85rem 1rem;
+  color: #3a3a3a;
+  border-bottom: 1px solid #f1ece4;
+  vertical-align: top;
+}
+
+.docs-table tr:last-child td {
+  border-bottom: none;
+}
